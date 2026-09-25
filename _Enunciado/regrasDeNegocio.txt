@@ -1,0 +1,10 @@
+Regras de Negócio
+==================
+
+Cada vaga só pode conter um veículo por vez.
+Tarifas variam por tipo de veículo:
+Carro: R$ 10/hora
+Moto: R$ 5/hora
+Caminhão: R$ 20/hora
+Se tentar estacionar em vaga ocupada, lançar exceção.
+Histórico deve registrar placa, tipo de veículo, horário de entrada e saída, valor pago.

@@ -1,0 +1,13 @@
+Casos de Uso
+=============
+
+Cadastrar veículo: Usuário informa placa e modelo, sistema cria objeto 
+    Carro, Moto ou Caminhao.
+Estacionar veículo: Usuário informa placa e vaga, sistema ocupa a vaga 
+    se disponível.
+Retirar veículo: Usuário informa placa, sistema libera a vaga e 
+    calcula tarifa.
+Gerar relatório: Sistema mostra vagas ocupadas, vagas livres e 
+    faturamento total.
+
+

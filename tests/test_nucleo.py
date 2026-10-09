@@ -122,9 +122,9 @@ class NucleoTests(unittest.TestCase):
         self.assertIn('Não foi possível salvar', saida.getvalue())
 
     def test_controller_salva_no_destino_padrao(self):
-        with patch.object(self.est, 'salvar_historico') as salvar:
+        with patch.object(self.ctrl.repository, 'salvar') as salvar:
             self.ctrl.salvar()
-        salvar.assert_called_once_with()
+        salvar.assert_called_once_with(self.est)
 
 
 if __name__ == '__main__':

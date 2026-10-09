@@ -11,8 +11,9 @@ class Estacionamento:
         self._vagas = [Vaga(num+1) for num in range(10)]
         self._historico = []
         self._veiculos = {}
-        self._arquivo = arquivo
-        self._conteudo_arquivo = None
+        # Somente os adaptadores antigos usam este destino.
+        self._arquivo_legado = arquivo
+        self._repository_legado = None
 
     @property
     def vagas(self):
@@ -114,16 +115,77 @@ class Estacionamento:
         }
 
     @classmethod
+    def reconstruir(cls, dados):
+        """Reconstrói um agregado validado em memória, sem acessar arquivos."""
+        from model.carro import Carro
+        from model.moto import Moto
+        from model.caminhao import Caminhao
+
+        est = cls()
+        try:
+            if not isinstance(dados, list):
+                raise ValueError("O histórico deve ser uma lista.")
+            classes = {"carro": Carro, "moto": Moto, "caminhao": Caminhao}
+            for evento in dados:
+                if not isinstance(evento, dict):
+                    raise ValueError("Evento deve ser um objeto.")
+                acao = evento["acao"]
+                classe = classes[evento["tipo"]]
+                # Arquivos da versão anterior não registravam o modelo.
+                veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"))
+                if evento['placa'] != veiculo.placa:
+                    raise ValueError("Placa do histórico não normalizada.")
+                if acao == "cadastro":
+                    est.cadastrar_veiculo(veiculo)
+                elif acao == "entrada":
+                    datetime.fromisoformat(evento["horario_entrada"])
+                    est.estacionar(veiculo, evento["vaga"])
+                elif acao == "saida":
+                    entrada = next((e for e in reversed(est._historico)
+                                    if e['acao'] == 'entrada' and e['placa'] == veiculo.placa), None)
+                    if entrada is None or evento['horario_entrada'] != entrada['horario_entrada']:
+                        raise ValueError("Saída sem entrada correspondente.")
+                    inicio = datetime.fromisoformat(evento['horario_entrada'])
+                    fim = datetime.fromisoformat(evento['horario_saida'])
+                    if fim < inicio:
+                        raise ValueError("Saída anterior à entrada.")
+                    vaga = est._buscar_vaga(evento['vaga'])
+                    if not vaga.ocupada or vaga.veiculo.placa != veiculo.placa:
+                        raise ValueError("Saída incompatível com a ocupação.")
+                    if type(vaga.veiculo) is not classe or vaga.veiculo.modelo != veiculo.modelo:
+                        raise ValueError("Tipo ou modelo da saída incompatível.")
+                    valor = evento['valor']
+                    if isinstance(valor, bool) or not isinstance(valor, (int, float)) or not math.isfinite(valor):
+                        raise ValueError("Valor inválido.")
+                    tarifa = est.retirar(evento['vaga'], evento['horas'])
+                    if valor != tarifa:
+                        raise ValueError("Valor incompatível com a tarifa.")
+                else:
+                    raise ValueError("Ação desconhecida.")
+                # Mantém horários e campos originais, sem substituir pela hora da leitura.
+                est._historico[-1] = deepcopy(evento)
+        except (KeyError, TypeError, ValueError, OverflowError) as erro:
+            raise ValueError(f"Histórico JSON inconsistente; arquivo preservado: {erro}") from erro
+        return est
+
+    @classmethod
     def carregar_historico(cls, arquivo="historico.json"):
-        from persistence.historico_json import carregar
-        return carregar(arquivo)
+        """Adaptador da API v2; novos consumidores devem usar Repository."""
+        from repository.estacionamento_repository import EstacionamentoRepository
+        repository = EstacionamentoRepository(arquivo)
+        est = repository.carregar()
+        est._repository_legado = repository
+        est._arquivo_legado = arquivo
+        return est
 
     def salvar_historico(self, arquivo=None):
-        from persistence.historico_json import salvar
+        """Adaptador da API v2, sem leitura ou escrita implementada no Model."""
         from pathlib import Path
-        destino = self._arquivo if arquivo is None else arquivo
-        mesmo_arquivo = Path(destino).resolve() == Path(self._arquivo).resolve()
-        esperado = self._conteudo_arquivo if mesmo_arquivo else None
-        conteudo = salvar(destino, self._historico, esperado)
-        self._arquivo = destino
-        self._conteudo_arquivo = conteudo
+        from repository.estacionamento_repository import EstacionamentoRepository
+        repository = self._repository_legado
+        destino = self._arquivo_legado if arquivo is None else arquivo
+        if repository is None or Path(destino).resolve() != repository.arquivo.resolve():
+            repository = EstacionamentoRepository(destino)
+        repository.salvar(self)
+        self._repository_legado = repository
+        self._arquivo_legado = destino

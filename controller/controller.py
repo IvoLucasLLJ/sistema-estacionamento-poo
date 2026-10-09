@@ -1,12 +1,13 @@
 from model.caminhao import Caminhao
 from model.carro import Carro
-from model.estacionamento import Estacionamento
+from repository.estacionamento_repository import EstacionamentoRepository
 from model.moto import Moto
 
 
 class Controller:
-    def __init__(self, arquivo="historico.json"):
-        self._estacionamento = Estacionamento.carregar_historico(arquivo)
+    def __init__(self, arquivo="historico.json", repository=None):
+        self.repository = repository if repository is not None else EstacionamentoRepository(arquivo)
+        self._estacionamento = self.repository.carregar()
 
     @property
     def estacionamento(self):
@@ -49,4 +50,4 @@ class Controller:
         return self.estacionamento.relatorio()
 
     def salvar(self):
-        self.estacionamento.salvar_historico()
+        self.repository.salvar(self.estacionamento)

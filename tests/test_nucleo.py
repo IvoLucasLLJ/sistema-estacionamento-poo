@@ -2,7 +2,7 @@ import io
 import json
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import chdir, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,6 +16,9 @@ from view.ui_texto import menu
 
 class NucleoTests(unittest.TestCase):
     def setUp(self):
+        # O menu e o Controller usam o caminho padrão relativo à pasta da sessão.
+        pasta = self.enterContext(tempfile.TemporaryDirectory())
+        self.enterContext(chdir(pasta))
         self.ctrl = Controller()
         self.est = self.ctrl.estacionamento
 

@@ -61,6 +61,49 @@ class RepositoryTests(unittest.TestCase):
             outra.salvar(antigo)
         self.assertEqual(self.arquivo.read_bytes(), bytes_originais)
 
+    def test_entrada_rapida_sem_cadastro_recupera_vaga_e_veiculo(self):
+        eventos = [{
+            'acao': 'entrada', 'tipo': 'moto', 'placa': 'ABC1234', 'modelo': 'Biz',
+            'vaga': 3, 'horario_entrada': '2025-03-10T08:00:00-03:00',
+        }]
+        self.arquivo.write_text(json.dumps(eventos), encoding='utf-8')
+
+        est = self.repo.carregar()
+        moto = est.buscar_veiculo('ABC1234')
+        self.assertIsInstance(moto, Moto)
+        self.assertEqual(moto.modelo, 'Biz')
+        self.assertIs(est.vagas[2].veiculo, moto)
+        self.assertEqual(est.historico, eventos)
+        self.assertEqual(est.relatorio(), {'ocupadas': 1, 'livres': 9, 'faturamento': 0})
+
+    def test_entrada_e_saida_sem_modelo_recuperam_cadastro_e_faturamento(self):
+        inicio = '2025-03-10T08:00:00-03:00'
+        eventos = [
+            {'acao': 'entrada', 'tipo': 'carro', 'placa': 'ABC1234', 'vaga': 1,
+             'horario_entrada': inicio},
+            {'acao': 'saida', 'tipo': 'carro', 'placa': 'ABC1234', 'vaga': 1,
+             'horario_entrada': inicio, 'horario_saida': '2025-03-10T09:30:00-03:00',
+             'horas': 1.5, 'valor': 15},
+        ]
+        self.arquivo.write_text(json.dumps(eventos), encoding='utf-8')
+
+        est = self.repo.carregar()
+        carro = est.buscar_veiculo('ABC1234')
+        self.assertIsInstance(carro, Carro)
+        self.assertEqual(carro.modelo, 'Modelo não registrado')
+        self.assertEqual(est.relatorio(), {'ocupadas': 0, 'livres': 10, 'faturamento': 15})
+        self.repo.salvar(est)
+        self.assertEqual(json.loads(self.arquivo.read_text(encoding='utf-8')), eventos)
+        est.estacionar_cadastrado('ABC1234', 2)
+        self.assertIs(est.vagas[1].veiculo, carro)
+
+    def test_historico_incompleto_sem_tipo_ou_vaga_e_preservado(self):
+        conteudo = b'[{"acao": "entrada", "placa": "ABC1234"}]'
+        self.arquivo.write_bytes(conteudo)
+        with self.assertRaises(ValueError):
+            self.repo.carregar()
+        self.assertEqual(self.arquivo.read_bytes(), conteudo)
+
     def test_falha_permite_repetir_gravacao(self):
         self.arquivo.write_text('[]', encoding='utf-8')
         est = self.repo.carregar()

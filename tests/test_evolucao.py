@@ -9,6 +9,14 @@ from model.vaga import Vaga
 
 
 class EvolucaoTests(unittest.TestCase):
+    def criar_controller_temporario(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from controller.controller import Controller
+
+        pasta = self.enterContext(TemporaryDirectory())
+        return Controller(Path(pasta) / 'historico.json')
+
     def test_contrato_e_encapsulamento(self):
         with self.assertRaises(TypeError):
             Veiculo('ABC1234', 'Modelo')
@@ -33,8 +41,7 @@ class EvolucaoTests(unittest.TestCase):
         self.assertIsInstance(est.vagas, tuple)
 
     def test_cadastro_busca_entrada_retirada(self):
-        from controller.controller import Controller
-        ctrl = Controller()
+        ctrl = self.criar_controller_temporario()
         veiculo = ctrl.cadastrar_veiculo(' Carro ', ' abc-1234 ', 'Modelo')
         self.assertIs(ctrl.buscar_veiculo('ABC-1234'), veiculo)
         with self.assertRaises(ValueError):
@@ -142,9 +149,8 @@ class EvolucaoTests(unittest.TestCase):
         import io
         from contextlib import redirect_stdout
         from unittest.mock import patch
-        from controller.controller import Controller
         from view.ui_texto import menu
-        ctrl = Controller()
+        ctrl = self.criar_controller_temporario()
         respostas = ['5', 'carro', 'abc-1234', 'Modelo', '6', 'ABC1234', '1',
                      '3', '7', 'ABC1234', '2', '3', '4']
         with patch('builtins.input', side_effect=respostas), \

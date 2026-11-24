@@ -1,11 +1,13 @@
 from copy import deepcopy
 import math
 from datetime import datetime
+from decimal import Context, Decimal, DecimalException, localcontext
 
 from model.caminhao import Caminhao
 from model.carro import Carro
 from model.categorias_cliente import classe_da_categoria
 from model.cliente import Cliente
+from model.estadia import Cobranca, Estadia, reais_de_centavos
 from model.moto import Moto
 from model.vaga import Vaga
 from model.veiculo import Veiculo
@@ -20,6 +22,8 @@ class Estacionamento:
         self._historico = []
         self._veiculos = {}
         self._clientes = {}
+        self._vinculos = {}
+        self._estadias = {}
         # Somente os adaptadores antigos usam este destino.
         self._arquivo_legado = arquivo
         self._repository_legado = None
@@ -58,6 +62,30 @@ class Estacionamento:
     def listar_clientes(self):
         return tuple(self._clientes.values())
 
+    def vincular_veiculo(self, placa, cliente_id):
+        veiculo = self.buscar_veiculo(placa)
+        cliente = self.buscar_cliente(cliente_id)
+        if veiculo.placa in self._vinculos:
+            raise ValueError("Veículo já vinculado a um cliente.")
+        if any(vaga.veiculo is veiculo for vaga in self._vagas):
+            raise ValueError("Não é possível vincular um veículo estacionado.")
+        self._vinculos[veiculo.placa] = cliente
+        self._historico.append({"acao": "vinculo", "placa": veiculo.placa,
+                                "cliente_id": cliente.identificador})
+
+    def cliente_do_veiculo(self, placa):
+        return self._vinculos.get(self.buscar_veiculo(placa).placa)
+
+    def veiculos_do_cliente(self, cliente_id):
+        cliente = self.buscar_cliente(cliente_id)
+        return tuple(self._veiculos[p] for p, dono in self._vinculos.items() if dono is cliente)
+
+    def iniciar_estadia(self, placa, vaga, cliente_id):
+        cliente = self.buscar_cliente(cliente_id)
+        if self.cliente_do_veiculo(placa) is not cliente:
+            raise ValueError("O veículo não está vinculado ao cliente informado.")
+        self.estacionar_cadastrado(placa, vaga)
+
     def cadastrar_veiculo(self, veiculo):
         if not isinstance(veiculo, Veiculo):
             raise ValueError("Informe um veículo válido.")
@@ -92,6 +120,9 @@ class Estacionamento:
         return self.vagas[numero - 1]
 
     def estacionar(self, veiculo, num_vaga):
+        self._estacionar(veiculo, num_vaga, datetime.now().astimezone().isoformat())
+
+    def _estacionar(self, veiculo, num_vaga, horario):
         if not isinstance(veiculo, Veiculo):
             raise ValueError("Informe um veículo válido.")
         existente = self._veiculos.get(veiculo.placa)
@@ -102,17 +133,75 @@ class Estacionamento:
         vaga = self._buscar_vaga(num_vaga)
         if any(v.ocupada and v.veiculo.placa == veiculo.placa for v in self.vagas):
             raise ValueError(f"O veículo {veiculo.placa} já está estacionado.")
-        vaga.ocupar(veiculo)
-        self._veiculos[veiculo.placa] = veiculo
-        self._historico.append({
+        evento = {
             "acao": "entrada", "placa": veiculo.placa,
             "tipo": type(veiculo).__name__.lower(), "modelo": veiculo.modelo,
-            "vaga": vaga.numero,
-            "horario_entrada": datetime.now().astimezone().isoformat(),
-        })
+            "vaga": vaga.numero, "horario_entrada": horario,
+        }
+        cliente = self._vinculos.get(veiculo.placa)
+        estadia = None
+        if cliente is not None:
+            # O identificador é a posição da entrada no histórico, contando a partir de 1.
+            estadia = Estadia(len(self._historico) + 1, veiculo, cliente, vaga, horario)
+            evento.update(acao="entrada_cliente", cliente_id=cliente.identificador,
+                          categoria=estadia.categoria, estadia_id=estadia.identificador)
+        vaga.ocupar(veiculo, estadia=estadia)
+        self._veiculos[veiculo.placa] = veiculo
+        if estadia is not None:
+            self._estadias[veiculo.placa] = estadia
+        self._historico.append(evento)
+
+    def _estadia_ativa(self, placa):
+        veiculo = self.buscar_veiculo(placa)
+        estadia = self._estadias.get(veiculo.placa)
+        if estadia is None:
+            raise ValueError("Não há estadia vinculada ativa para o veículo.")
+        return estadia
+
+    def consultar_cobranca(self, placa, horas):
+        return self._estadia_ativa(placa).consultar_cobranca(horas)
+
+    def consultar_pagamento(self, placa):
+        return self._estadia_ativa(placa).pagamento
+
+    def _validar_consulta(self, cobranca):
+        if not isinstance(cobranca, Cobranca):
+            raise ValueError("Informe uma consulta de cobrança da estadia.")
+        estadia = self._estadia_ativa(cobranca.placa)
+        atual = estadia.consultar_cobranca(cobranca.horas)
+        if atual != cobranca:
+            raise ValueError("Cobrança incompatível com a estadia ativa.")
+        return estadia, atual
+
+    def confirmar_pagamento(self, cobranca, *, confirmado):
+        estadia, atual = self._validar_consulta(cobranca)
+        estadia.confirmar_pagamento(atual, confirmado)
+        self._historico.append({"acao": "pagamento_confirmado", **atual.dados_do_pagamento()})
+
+    def concluir_saida(self, cobranca):
+        return self._concluir_saida(cobranca, datetime.now().astimezone().isoformat())
+
+    def _concluir_saida(self, cobranca, horario):
+        estadia, atual = self._validar_consulta(cobranca)
+        situacao = estadia.situacao_para_saida(atual)
+        if datetime.fromisoformat(horario) < datetime.fromisoformat(estadia.horario_entrada):
+            raise ValueError("Saída anterior à entrada.")
+        evento = {
+            "acao": "saida_cliente", **atual.dados_do_pagamento(),
+            "cliente_id": estadia.cliente.identificador, "categoria": estadia.categoria,
+            "vaga": estadia.vaga.numero, "horario_entrada": estadia.horario_entrada,
+            "horario_saida": horario, "tarifa_base": str(atual.tarifa_base),
+            "desconto": str(atual.desconto), "pagamento": situacao,
+        }
+        estadia.vaga.liberar(estadia=estadia)
+        del self._estadias[atual.placa]
+        self._historico.append(evento)
+        return atual.valor_devido
 
     def retirar(self, num_vaga, num_horas):
         vaga = self._buscar_vaga(num_vaga)
+        if vaga.ocupada and vaga.veiculo.placa in self._vinculos:
+            raise ValueError("Use a consulta de cobrança e a conclusão da estadia vinculada.")
         if (isinstance(num_horas, bool) or not isinstance(num_horas, (int, float))
                 or not math.isfinite(num_horas) or num_horas < 0):
             raise ValueError("Horas devem ser um número finito maior ou igual a zero.")
@@ -137,12 +226,27 @@ class Estacionamento:
         })
         return tarifa
 
+    def _faturamento(self):
+        total_legado = sum(e["valor"] for e in self._historico if e["acao"] == "saida")
+        valores_centavos = [e["valor_centavos"] for e in self._historico if e["acao"] == "saida_cliente"]
+        if not valores_centavos:
+            return total_legado
+        legado = Decimal(str(total_legado))
+        if not legado.is_finite():
+            return legado
+        novo = reais_de_centavos(sum(valores_centavos))
+        # Inclui as casas fracionárias do legado sem arredondá-las a centavos.
+        casas = min(legado.as_tuple().exponent, -2)
+        precisao = max(legado.adjusted(), novo.adjusted()) - casas + 2
+        with localcontext(Context(prec=precisao)):
+            return legado + novo
+
     def relatorio(self):
         ocupadas = sum(1 for vaga in self.vagas if vaga.ocupada)
         return {
             "ocupadas": ocupadas,
             "livres": len(self.vagas) - ocupadas,
-            "faturamento": sum(e["valor"] for e in self._historico if e["acao"] == "saida"),
+            "faturamento": self._faturamento(),
         }
 
     def _reproduzir_evento_veiculo(self, acao, evento):
@@ -151,6 +255,8 @@ class Estacionamento:
         veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"))
         if evento['placa'] != veiculo.placa:
             raise ValueError("Placa do histórico não normalizada.")
+        if acao in ("entrada", "saida") and veiculo.placa in self._vinculos:
+            raise ValueError("Evento legado incompatível com veículo vinculado.")
         if acao == "cadastro":
             self.cadastrar_veiculo(veiculo)
         elif acao == "entrada":
@@ -173,9 +279,40 @@ class Estacionamento:
             valor = evento['valor']
             if isinstance(valor, bool) or not isinstance(valor, (int, float)) or not math.isfinite(valor):
                 raise ValueError("Valor inválido.")
+            if "valor_centavos" in evento:
+                centavos = evento["valor_centavos"]
+                if type(centavos) is not int or reais_de_centavos(centavos) != Decimal(str(valor)):
+                    raise ValueError("Centavos incompatíveis com o valor legado.")
             tarifa = self.retirar(evento['vaga'], evento['horas'])
             if valor != tarifa:
                 raise ValueError("Valor incompatível com a tarifa.")
+
+    def _reproduzir_evento_estadia(self, acao, evento):
+        placa = evento["placa"]
+        if acao == "vinculo":
+            self.vincular_veiculo(placa, evento["cliente_id"])
+        elif acao == "entrada_cliente":
+            horario = evento["horario_entrada"]
+            if datetime.fromisoformat(horario).tzinfo is None:
+                raise ValueError("Entrada vinculada exige horário com fuso.")
+            if self.cliente_do_veiculo(placa) is None:
+                raise ValueError("Entrada sem vínculo cadastrado.")
+            self._estacionar(self.buscar_veiculo(placa), evento["vaga"], horario)
+        else:
+            if not isinstance(evento["horas"], str):
+                raise ValueError("As horas da estadia devem estar em texto decimal.")
+            consulta = self.consultar_cobranca(placa, Decimal(evento["horas"]))
+            if acao == "pagamento_confirmado":
+                self.confirmar_pagamento(consulta, confirmado=True)
+            else:
+                self._concluir_saida(consulta, evento["horario_saida"])
+
+        # A regra de negócio gera o evento esperado, inclusive os centavos e o estado de pagamento.
+        esperado = self._historico[-1]
+        if evento.keys() != esperado.keys() or any(
+            type(evento[k]) is not type(v) or evento[k] != v for k, v in esperado.items()
+        ):
+            raise ValueError("Evento incompatível com o vínculo, a estadia ou a cobrança.")
 
     @classmethod
     def reconstruir(cls, dados):
@@ -197,11 +334,13 @@ class Estacionamento:
                     est.cadastrar_cliente(cliente)
                 elif acao in ("cadastro", "entrada", "saida"):
                     est._reproduzir_evento_veiculo(acao, evento)
+                elif acao in ("vinculo", "entrada_cliente", "pagamento_confirmado", "saida_cliente"):
+                    est._reproduzir_evento_estadia(acao, evento)
                 else:
                     raise ValueError("Ação desconhecida.")
                 # Mantém horários e campos originais, sem substituir pela hora da leitura.
                 est._historico[-1] = deepcopy(evento)
-        except (KeyError, TypeError, ValueError, OverflowError) as erro:
+        except (KeyError, TypeError, ValueError, OverflowError, DecimalException) as erro:
             raise ValueError(f"Histórico JSON inconsistente; arquivo preservado: {erro}") from erro
         return est
 

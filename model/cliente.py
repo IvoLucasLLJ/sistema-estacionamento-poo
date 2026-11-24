@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from decimal import Decimal
 from sys import float_info
 from uuid import UUID, uuid4
 
@@ -45,7 +46,11 @@ class Cliente(ABC):
 
     @staticmethod
     def _validar_tarifa_base(tarifa_base):
-        """Aceita int ou float não negativo dentro do intervalo finito de float."""
+        """Preserva o limite anterior também para a cobrança decimal."""
+        if isinstance(tarifa_base, Decimal):
+            if not tarifa_base.is_finite() or not 0 <= tarifa_base <= Decimal.from_float(float_info.max):
+                raise ValueError("Informe uma tarifa-base decimal finita e não negativa no intervalo válido.")
+            return
         if (isinstance(tarifa_base, bool) or not isinstance(tarifa_base, (int, float))
                 or not 0 <= tarifa_base <= float_info.max):
             raise ValueError("Informe uma tarifa-base numérica, finita e maior ou igual a zero.")

@@ -24,6 +24,30 @@ class Controller:
     def listar_clientes(self):
         return self.estacionamento.listar_clientes()
 
+    def vincular_veiculo(self, placa, cliente_id):
+        self.estacionamento.vincular_veiculo(placa, cliente_id)
+
+    def cliente_do_veiculo(self, placa):
+        return self.estacionamento.cliente_do_veiculo(placa)
+
+    def veiculos_do_cliente(self, cliente_id):
+        return self.estacionamento.veiculos_do_cliente(cliente_id)
+
+    def iniciar_estadia(self, placa, vaga, cliente_id):
+        self.estacionamento.iniciar_estadia(placa, vaga, cliente_id)
+
+    def consultar_cobranca(self, placa, horas):
+        return self.estacionamento.consultar_cobranca(placa, horas)
+
+    def confirmar_pagamento(self, cobranca, *, confirmado):
+        self.estacionamento.confirmar_pagamento(cobranca, confirmado=confirmado)
+
+    def consultar_pagamento(self, placa):
+        return self.estacionamento.consultar_pagamento(placa)
+
+    def concluir_saida(self, cobranca):
+        return self.estacionamento.concluir_saida(cobranca)
+
     @staticmethod
     def _criar_veiculo(tipo, placa, modelo):
         if not isinstance(tipo, str):

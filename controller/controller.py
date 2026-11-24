@@ -69,6 +69,15 @@ class Controller:
     def buscar_veiculo(self, placa):
         return self.estacionamento.buscar_veiculo(placa)
 
+    def listar_veiculos(self):
+        return self.estacionamento.veiculos
+
+    def listar_vagas(self):
+        return self.estacionamento.vagas
+
+    def consultar_historico(self):
+        return self.estacionamento.historico
+
     def estacionar_cadastrado(self, placa, vaga):
         self.estacionamento.estacionar_cadastrado(placa, vaga)
 

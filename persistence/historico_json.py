@@ -4,6 +4,15 @@ import os
 import tempfile
 from pathlib import Path
 
+
+class FalhaAntesDaSubstituicao(OSError):
+    """Falha de E/S enquanto o destino ainda não havia sido substituído."""
+
+
+class HistoricoAlterado(FalhaAntesDaSubstituicao):
+    """O destino já divergia da versão carregada antes da substituição."""
+
+
 def _rejeitar_constante(valor):
     raise ValueError(f"Número não finito no JSON: {valor}")
 
@@ -36,11 +45,12 @@ def salvar(arquivo, historico, esperado=None):
         except FileNotFoundError:
             atual = None
         if atual != esperado:
-            raise OSError("Histórico alterado por outra execução; arquivo preservado. Reinicie o programa.")
+            raise HistoricoAlterado("Histórico alterado por outra execução; arquivo preservado. Reinicie o programa.")
 
-    verificar_destino()
     temporario = None
+    substituicao_iniciada = False
     try:
+        verificar_destino()
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=destino.parent,
                                          prefix=destino.name + ".", suffix=".tmp", delete=False) as saida:
             temporario = Path(saida.name)
@@ -48,8 +58,15 @@ def salvar(arquivo, historico, esperado=None):
             saida.flush()
             os.fsync(saida.fileno())
         verificar_destino()
+        substituicao_iniciada = True
         os.replace(temporario, destino)
         return conteudo
+    except HistoricoAlterado:
+        raise
+    except OSError as erro:
+        if substituicao_iniciada:
+            raise
+        raise FalhaAntesDaSubstituicao(str(erro)) from erro
     finally:
         if temporario is not None and temporario.exists():
             temporario.unlink()

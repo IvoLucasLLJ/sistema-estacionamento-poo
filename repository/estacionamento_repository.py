@@ -10,6 +10,11 @@ class EstacionamentoRepository:
         self.arquivo = Path(arquivo)
         self._conteudo_esperado = None
 
+    @property
+    def versao_carregada(self):
+        """Bytes imutáveis da última leitura/gravação confirmada, ou None se ausente."""
+        return self._conteudo_esperado
+
     def carregar(self):
         """Publica o agregado somente depois de validar todos os eventos."""
         dados, conteudo = historico_json.ler(self.arquivo)

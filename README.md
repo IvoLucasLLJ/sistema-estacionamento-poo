@@ -2,6 +2,82 @@
 
 Projeto acadêmico de POO em Python, sem dependências externas.
 
+## Serviço de aplicação — Etapa 05
+
+`service.estacionamento_service.EstacionamentoService(arquivo)` é a entrada Python
+para os casos de uso de MOVE Cliente e MOVE Gestão. A arquitetura é
+`serviço → Controller → domínio`, com `Controller → Repository → arquivo JSON`
+para carga e gravação. O menu textual mantém seu ciclo de salvamento da versão 3.
+
+| Operações do serviço | Contrato |
+|---|---|
+| `cadastrar_cliente(categoria, nome)`, `buscar_cliente(identificador)`, `listar_clientes()` | Cadastro ou consulta por UUID. Cada registro contém identificador, nome e categoria. |
+| `cadastrar_veiculo(tipo, placa, modelo)`, `buscar_veiculo(placa)`, `listar_veiculos()` | Veículos com placa normalizada, tipo e modelo. |
+| `vincular_veiculo(placa, cliente_id)`, `veiculos_do_cliente(cliente_id)`, `cliente_do_veiculo(placa)` | O vínculo retorna as duas chaves. A consulta do responsável retorna `None` para um veículo cadastrado sem vínculo. |
+| `consultar_vagas()`, `consultar_ocupacao()` | Dez vagas em ordem numérica, com ocupação e placa, e contagens de vagas livres, ocupadas e totais. |
+| `iniciar_estadia(placa, vaga, cliente_id)`, `listar_estadias_ativas()`, `consultar_estadia(estadia_id)` | Entrada identificada, ocupações atuais e detalhe de uma estadia identificada, inclusive após a saída. A ocupação legada aparece com suas chaves de cliente e estadia nulas. |
+| `consultar_cobranca(placa, horas)` | Cotação sem gravação, com identificador da estadia, placa, horas, tarifa-base, desconto e valor final em centavos. |
+| `confirmar_pagamento(placa, horas, expectativa, confirmado=True)`, `consultar_pagamento(placa)` | Confirmação simulada explícita. A consulta retorna a cobrança confirmada da estadia vinculada ativa, ou `None` enquanto aguarda confirmação. |
+| `concluir_saida(placa, horas, expectativa)` | Retorna a estadia concluída e libera a vaga após pagamento confirmado ou por isenção. |
+| `listar_pagamentos_abertos()`, `consultar_faturamento()`, `consultar_historico()` | Cobranças confirmadas de estadias ainda abertas, total das saídas concluídas e cópia dos eventos em ordem. |
+
+O chamador pode enviar as horas em texto decimal com ponto. A permanência segue
+informada pelo usuário. Em `expectativa`, devolva o dicionário recebido de
+`consultar_cobranca`. O serviço recalcula a cotação para a placa e a duração
+solicitadas, confere seus seis campos e encaminha a cobrança calculada pelo
+domínio. Uma nova entrada da mesma placa recebe outro identificador. Uma
+resposta antiga é rejeitada mesmo quando as horas e os centavos coincidem.
+
+```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from service.estacionamento_service import EstacionamentoService
+
+with TemporaryDirectory() as pasta:
+    arquivo = Path(pasta) / "exemplo.json"
+    s = EstacionamentoService(arquivo)
+    cliente = s.cadastrar_cliente("vip", "Cliente fictício")
+    s.cadastrar_veiculo("carro", "DEMO1", "Modelo")
+    s.vincular_veiculo("DEMO1", cliente["identificador"])
+    entrada = s.iniciar_estadia("DEMO1", 1, cliente["identificador"])
+    cotacao = s.consultar_cobranca("DEMO1", "1.225")
+    s.confirmar_pagamento("DEMO1", "1.225", cotacao, confirmado=True)
+    s.concluir_saida("DEMO1", "1.225", cotacao)
+    assert EstacionamentoService(arquivo).consultar_faturamento()["centavos"] == 613
+```
+
+As respostas são listas, dicionários e valores simples. Os horários preservam o
+formato ISO dos eventos. Horas, tarifa-base e desconto das cobranças são textos
+decimais. O valor definitivo das novas cobranças é um inteiro em centavos.
+No histórico de consulta, o campo `valor` de uma saída legada é a representação
+textual do número recuperado pelo domínio. O faturamento expõe `reais` em texto
+e `centavos` inteiro quando a conversão é exata. Por exemplo, um total misto de
+R$ 10,005 produz `{"reais": "10.005", "centavos": null}`. Se a soma de valores
+legados exceder o intervalo de ponto flutuante do relatório antigo, a resposta
+expõe `"Infinity"` e centavos nulos. O arquivo continua usando o formato anterior.
+
+### Concorrência e recuperação
+
+Cada chamada adquire o bloqueio do caminho absoluto resolvido do arquivo,
+carrega e valida o histórico em um Controller exclusivo e produz uma resposta
+independente dos objetos do domínio. Nas escritas, a resposta só é entregue
+depois do salvamento atômico. As consultas usam o mesmo bloqueio. Instâncias
+que apontam para o mesmo caminho compartilham o bloqueio dentro de **um único
+processo servidor**. Caminhos distintos podem avançar em paralelo.
+**A interface textual e o servidor web não deverão escrever simultaneamente no
+mesmo histórico.** Processos independentes ficam fora da proteção de threads.
+O Repository continua comparando os bytes do destino antes da substituição.
+
+- `ErroDeNegocio` indica que a solicitação foi recusada, como placa em uso ou cotação antiga.
+- `ErroDeInfraestrutura` cobre histórico inválido, falha de leitura e falha de gravação. Se a escrita falhar no temporário, o estado de trabalho é descartado. Uma nova chamada válida pode ser feita após resolver a causa.
+- `ConflitoDeHistorico` indica que a versão em disco mudou desde a leitura. O arquivo externo é preservado.
+- `ResultadoIncerto` indica perda da confirmação da gravação. O serviço relê e valida o arquivo sob o bloqueio. Se os bytes anteriores estão intactos, informa falha de gravação. Caso contrário, o atributo `verificacao` registra `operacao_presente`, `historico_divergente` ou `releitura_indisponivel`. Após uma confirmação incerta ou a perda de uma resposta, consulte a estadia pelo identificador e o histórico antes de decidir como prosseguir. O serviço nunca repete o pagamento ou a saída automaticamente.
+
+UUID, placa e identificador da estadia identificam registros. A autenticação e
+a autorização das interfaces pertencem a uma etapa posterior. A carga e a
+validação do histórico completo a cada chamada priorizam consistência e têm
+custo crescente com o número de eventos.
+
 ## Critérios da versão 3 — Aula 09
 
 - Dez vagas comuns: todas aceitam carro, moto e caminhão. Não há vagas especiais.

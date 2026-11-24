@@ -2,8 +2,16 @@ from copy import deepcopy
 import math
 from datetime import datetime
 
+from model.caminhao import Caminhao
+from model.carro import Carro
+from model.categorias_cliente import classe_da_categoria
+from model.cliente import Cliente
+from model.moto import Moto
 from model.vaga import Vaga
 from model.veiculo import Veiculo
+
+
+_CLASSES_DE_VEICULOS = {"carro": Carro, "moto": Moto, "caminhao": Caminhao}
 
 
 class Estacionamento:
@@ -11,6 +19,7 @@ class Estacionamento:
         self._vagas = [Vaga(num+1) for num in range(10)]
         self._historico = []
         self._veiculos = {}
+        self._clientes = {}
         # Somente os adaptadores antigos usam este destino.
         self._arquivo_legado = arquivo
         self._repository_legado = None
@@ -26,6 +35,28 @@ class Estacionamento:
     @property
     def veiculos(self):
         return tuple(self._veiculos.values())
+
+    def cadastrar_cliente(self, cliente):
+        if (not isinstance(cliente, Cliente)
+                or type(cliente) is not classe_da_categoria(cliente.categoria)):
+            raise ValueError("Informe um cliente de uma categoria reconhecida.")
+        if cliente.identificador in self._clientes:
+            raise ValueError(f"Cliente {cliente.identificador} já cadastrado.")
+        self._clientes[cliente.identificador] = cliente
+        self._historico.append({
+            "acao": "cadastro_cliente", "identificador": cliente.identificador,
+            "nome": cliente.nome, "categoria": cliente.categoria,
+        })
+        return cliente
+
+    def buscar_cliente(self, identificador):
+        chave = Cliente.normalizar_identificador(identificador)
+        if chave not in self._clientes:
+            raise ValueError(f"Cliente {chave} não cadastrado.")
+        return self._clientes[chave]
+
+    def listar_clientes(self):
+        return tuple(self._clientes.values())
 
     def cadastrar_veiculo(self, veiculo):
         if not isinstance(veiculo, Veiculo):
@@ -114,52 +145,58 @@ class Estacionamento:
             "faturamento": sum(e["valor"] for e in self._historico if e["acao"] == "saida"),
         }
 
+    def _reproduzir_evento_veiculo(self, acao, evento):
+        classe = _CLASSES_DE_VEICULOS[evento["tipo"]]
+        # Arquivos da versão anterior não registravam o modelo.
+        veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"))
+        if evento['placa'] != veiculo.placa:
+            raise ValueError("Placa do histórico não normalizada.")
+        if acao == "cadastro":
+            self.cadastrar_veiculo(veiculo)
+        elif acao == "entrada":
+            datetime.fromisoformat(evento["horario_entrada"])
+            self.estacionar(veiculo, evento["vaga"])
+        elif acao == "saida":
+            entrada = next((e for e in reversed(self._historico)
+                            if e['acao'] == 'entrada' and e['placa'] == veiculo.placa), None)
+            if entrada is None or evento['horario_entrada'] != entrada['horario_entrada']:
+                raise ValueError("Saída sem entrada correspondente.")
+            inicio = datetime.fromisoformat(evento['horario_entrada'])
+            fim = datetime.fromisoformat(evento['horario_saida'])
+            if fim < inicio:
+                raise ValueError("Saída anterior à entrada.")
+            vaga = self._buscar_vaga(evento['vaga'])
+            if not vaga.ocupada or vaga.veiculo.placa != veiculo.placa:
+                raise ValueError("Saída incompatível com a ocupação.")
+            if type(vaga.veiculo) is not classe or vaga.veiculo.modelo != veiculo.modelo:
+                raise ValueError("Tipo ou modelo da saída incompatível.")
+            valor = evento['valor']
+            if isinstance(valor, bool) or not isinstance(valor, (int, float)) or not math.isfinite(valor):
+                raise ValueError("Valor inválido.")
+            tarifa = self.retirar(evento['vaga'], evento['horas'])
+            if valor != tarifa:
+                raise ValueError("Valor incompatível com a tarifa.")
+
     @classmethod
     def reconstruir(cls, dados):
         """Reconstrói um agregado validado em memória, sem acessar arquivos."""
-        from model.carro import Carro
-        from model.moto import Moto
-        from model.caminhao import Caminhao
-
         est = cls()
         try:
             if not isinstance(dados, list):
                 raise ValueError("O histórico deve ser uma lista.")
-            classes = {"carro": Carro, "moto": Moto, "caminhao": Caminhao}
             for evento in dados:
                 if not isinstance(evento, dict):
                     raise ValueError("Evento deve ser um objeto.")
                 acao = evento["acao"]
-                classe = classes[evento["tipo"]]
-                # Arquivos da versão anterior não registravam o modelo.
-                veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"))
-                if evento['placa'] != veiculo.placa:
-                    raise ValueError("Placa do histórico não normalizada.")
-                if acao == "cadastro":
-                    est.cadastrar_veiculo(veiculo)
-                elif acao == "entrada":
-                    datetime.fromisoformat(evento["horario_entrada"])
-                    est.estacionar(veiculo, evento["vaga"])
-                elif acao == "saida":
-                    entrada = next((e for e in reversed(est._historico)
-                                    if e['acao'] == 'entrada' and e['placa'] == veiculo.placa), None)
-                    if entrada is None or evento['horario_entrada'] != entrada['horario_entrada']:
-                        raise ValueError("Saída sem entrada correspondente.")
-                    inicio = datetime.fromisoformat(evento['horario_entrada'])
-                    fim = datetime.fromisoformat(evento['horario_saida'])
-                    if fim < inicio:
-                        raise ValueError("Saída anterior à entrada.")
-                    vaga = est._buscar_vaga(evento['vaga'])
-                    if not vaga.ocupada or vaga.veiculo.placa != veiculo.placa:
-                        raise ValueError("Saída incompatível com a ocupação.")
-                    if type(vaga.veiculo) is not classe or vaga.veiculo.modelo != veiculo.modelo:
-                        raise ValueError("Tipo ou modelo da saída incompatível.")
-                    valor = evento['valor']
-                    if isinstance(valor, bool) or not isinstance(valor, (int, float)) or not math.isfinite(valor):
-                        raise ValueError("Valor inválido.")
-                    tarifa = est.retirar(evento['vaga'], evento['horas'])
-                    if valor != tarifa:
-                        raise ValueError("Valor incompatível com a tarifa.")
+                if acao == "cadastro_cliente":
+                    classe = classe_da_categoria(evento["categoria"])
+                    nome, identificador = evento["nome"], evento["identificador"]
+                    cliente = classe(nome, identificador=identificador)
+                    if cliente.nome != nome or cliente.identificador != identificador:
+                        raise ValueError("Cadastro de cliente não normalizado.")
+                    est.cadastrar_cliente(cliente)
+                elif acao in ("cadastro", "entrada", "saida"):
+                    est._reproduzir_evento_veiculo(acao, evento)
                 else:
                     raise ValueError("Ação desconhecida.")
                 # Mantém horários e campos originais, sem substituir pela hora da leitura.

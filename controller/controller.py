@@ -1,5 +1,6 @@
 from model.caminhao import Caminhao
 from model.carro import Carro
+from model.categorias_cliente import classe_da_categoria
 from repository.estacionamento_repository import EstacionamentoRepository
 from model.moto import Moto
 
@@ -12,6 +13,16 @@ class Controller:
     @property
     def estacionamento(self):
         return self._estacionamento
+
+    def cadastrar_cliente(self, categoria, nome):
+        classe = classe_da_categoria(categoria)
+        return self.estacionamento.cadastrar_cliente(classe(nome))
+
+    def buscar_cliente(self, identificador):
+        return self.estacionamento.buscar_cliente(identificador)
+
+    def listar_clientes(self):
+        return self.estacionamento.listar_clientes()
 
     @staticmethod
     def _criar_veiculo(tipo, placa, modelo):

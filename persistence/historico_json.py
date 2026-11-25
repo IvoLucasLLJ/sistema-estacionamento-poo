@@ -3,7 +3,7 @@ import json
 import os
 from pathlib import Path
 
-from persistence.privacidade import abrir_leitura, temporario_privado
+from persistence.privacidade import abrir_leitura, substituir_arquivo, temporario_privado
 
 
 class FalhaAntesDaSubstituicao(OSError):
@@ -60,7 +60,7 @@ def salvar(arquivo, historico, esperado=None):
             os.fsync(saida.fileno())
         verificar_destino()
         substituicao_iniciada = True
-        os.replace(temporario, destino)
+        substituir_arquivo(temporario, destino)
         return conteudo
     except HistoricoAlterado:
         raise

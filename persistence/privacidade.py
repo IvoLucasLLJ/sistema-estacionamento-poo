@@ -6,7 +6,9 @@ from tempfile import NamedTemporaryFile
 
 
 if os.name == 'nt':
+    import ctypes
     import msvcrt
+    from ctypes import wintypes
     from uuid import uuid4
 
     import pywintypes
@@ -14,6 +16,30 @@ if os.name == 'nt':
     import win32con
     import win32file
     import win32security as seguranca
+
+    class _FileRenameInfo(ctypes.Structure):
+        _fields_ = [('Flags', wintypes.DWORD), ('RootDirectory', wintypes.HANDLE),
+                    ('FileNameLength', wintypes.DWORD), ('FileName', wintypes.WCHAR * 1)]
+
+    def _substituir_com_leitores(origem, destino):
+        # FileRenameInfoEx permite que handles já abertos continuem lendo a versão anterior.
+        nome = os.path.abspath(destino).encode('utf-16-le')
+        tamanho = max(ctypes.sizeof(_FileRenameInfo), _FileRenameInfo.FileName.offset + len(nome))
+        buffer = ctypes.create_string_buffer(tamanho)
+        info = _FileRenameInfo.from_buffer(buffer)
+        info.Flags = 0x1 | 0x2  # REPLACE_IF_EXISTS | POSIX_SEMANTICS
+        info.FileNameLength = len(nome)
+        ctypes.memmove(ctypes.addressof(buffer) + _FileRenameInfo.FileName.offset, nome, len(nome))
+        renomear = ctypes.WinDLL('kernel32', use_last_error=True).SetFileInformationByHandle
+        renomear.argtypes = (wintypes.HANDLE, ctypes.c_int, ctypes.c_void_p, wintypes.DWORD)
+        renomear.restype = wintypes.BOOL
+        handle = win32file.CreateFile(str(origem), win32con.DELETE, 0, None,
+                                      win32con.OPEN_EXISTING, win32con.FILE_ATTRIBUTE_NORMAL, None)
+        try:
+            if not renomear(int(handle), 22, buffer, tamanho):  # FileRenameInfoEx
+                raise ctypes.WinError(ctypes.get_last_error())
+        finally:
+            handle.Close()
 
     def _fluxo(handle, escrita):
         flags = os.O_WRONLY if escrita else os.O_RDONLY
@@ -90,6 +116,15 @@ def temporario_privado(destino):
         raise OSError(f'Não foi possível criar um arquivo privado em {destino.parent}.') from erro
     with _fluxo(handle, escrita=True) as saida:
         yield caminho, saida
+
+
+def substituir_arquivo(origem, destino):
+    try:
+        os.replace(origem, destino)
+    except PermissionError as erro:
+        if os.name != 'nt' or getattr(erro, 'winerror', None) != 5:
+            raise
+        _substituir_com_leitores(origem, destino)
 
 
 def abrir_leitura(caminho):

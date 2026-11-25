@@ -24,6 +24,16 @@ O telefone ou tablet executa o servidor, o terminal, a Gestão e o Cliente. O na
 
 Para escolher outra porta ou abrir o navegador manualmente, use `sh INICIAR_MOVE_ANDROID.sh --porta 5001 --sem-navegador`. Para encerrar, retorne ao Termux e pressione Ctrl+C. Na próxima abertura, repita o comando inicial. O modo local dispensa rede Wi-Fi, outro computador e conexão externa depois da instalação.
 
+Se recebeu o ZIP do GitHub, ele contém uma pasta de topo com o nome do projeto e a revisão. Com o ZIP importado para `$HOME/MOVE.zip`, a primeira extração pode ser feita no próprio Termux. O comando exige que a pasta de destino seja nova, para preservar instalações anteriores.
+
+```sh
+pkg install unzip
+mkdir "$HOME/MOVE" && unzip -q "$HOME/MOVE.zip" -d "$HOME/MOVE" &&
+  cd "$HOME/MOVE"/sistema-estacionamento-poo-*/ && sh INICIAR_MOVE_ANDROID.sh
+```
+
+Nas próximas execuções, entre na mesma pasta extraída e abra somente o inicializador. O teste no tablet pode ocorrer depois da publicação. Registre a API do Android e o resultado da execução no aparelho seguindo o roteiro no fim deste guia.
+
 ## Base técnica e recuperação
 
 O inicializador verifica o nível de API pelo `getprop` do sistema, a origem do Python, `venv`, scrypt e a capacidade de obter uma trava local. A versão de correção do Python pode variar dentro das famílias admitidas pelo preparador. A receita do Termux fornece OpenSSL e distribui separadamente as wheels para `ensurepip`. Use os pacotes do próprio ambiente ao reparar uma venv. [Receita do Python](https://github.com/termux/termux-packages/blob/master/packages/python/build.sh) · [Pacote de ensurepip](https://github.com/termux/termux-packages/blob/master/packages/python/python-ensurepip-wheels.subpackage.sh)

@@ -23,12 +23,11 @@ if os.name == 'nt':
 
     def _substituir_com_leitores(origem, destino):
         # FileRenameInfoEx permite que handles já abertos continuem lendo a versão anterior.
-        # O temporário é sempre irmão do destino. Com RootDirectory nulo, use
-        # o nome relativo ao diretório do handle de origem.
-        if origem.parent != destino.parent:
-            raise ValueError('A substituição com leitores exige um temporário na pasta de destino.')
-        nome = destino.name.encode('utf-16-le')
-        tamanho = ctypes.sizeof(_FileRenameInfo) + len(nome)
+        # Com RootDirectory nulo, um nome relativo usaria o diretório de trabalho.
+        # FileName inclui o NUL final, enquanto FileNameLength conta só os bytes do nome.
+        nome = os.path.abspath(destino).encode('utf-16-le')
+        tamanho = max(ctypes.sizeof(_FileRenameInfo),
+                      _FileRenameInfo.FileName.offset + len(nome) + ctypes.sizeof(wintypes.WCHAR))
         buffer = ctypes.create_string_buffer(tamanho)
         info = _FileRenameInfo.from_buffer(buffer)
         info.Flags = 0x1 | 0x2  # REPLACE_IF_EXISTS | POSIX_SEMANTICS

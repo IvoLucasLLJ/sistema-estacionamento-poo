@@ -57,6 +57,7 @@ jobs:
           python = raiz / '.venv' / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
           subprocess.run([python, '-m', 'pip', 'check'], check=True)
           subprocess.run([python, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-v'], cwd=raiz, check=True)
+          subprocess.run([python, '-B', '-m', 'tests.ensaio_pacote', str(raiz / entrada)], cwd=raiz, check=True)
       - name: Testar os portais no Chrome e perfis móveis no WebKit do macOS
         if: runner.os == 'macOS' && matrix.python == '3.12'
         shell: bash

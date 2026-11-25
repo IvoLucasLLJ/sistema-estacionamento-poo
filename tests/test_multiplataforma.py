@@ -1,26 +1,18 @@
 """Contratos de processo, disco e inicialização, com os mecanismos reais do SO hospedeiro."""
 import multiprocessing
 import os
-import re
 import shutil
-import socket
-import subprocess
 import sys
-import time
 from hashlib import sha256
-from http.cookiejar import CookieJar
 from pathlib import Path
 from secrets import token_urlsafe
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch
-from urllib.parse import urlencode
-from urllib.request import HTTPCookieProcessor, ProxyHandler, build_opener
 
 from persistence import historico_json, privacidade
 from persistence.exclusividade import EscritorLocal, HistoricoEmUso
+from tests.ensaio_pacote import conferir_reaberturas
 from web import create_app
-from web.demonstracao import preparar_demonstracao
 
 
 def segurar_historico(arquivo, canal):
@@ -148,41 +140,4 @@ class MultiplataformaTests(TestCase):
         origem = Path(__file__).resolve().parents[1]
         for nome in ('web', 'service', 'persistence', 'controller', 'repository', 'model', 'view'):
             shutil.copytree(origem / nome, self.raiz / nome, ignore=shutil.ignore_patterns('__pycache__'))
-        env = dict(os.environ, MOVE_HISTORICO=str(self.raiz / 'operacao.json'),
-                   MOVE_DADOS=str(self.raiz / 'operacao'), PYTHONIOENCODING='utf-8')
-        with patch('web.demonstracao.RAIZ_MOVE', self.raiz), patch.dict(os.environ, env):
-            config, lia = preparar_demonstracao()
-        app = create_app(config)
-        auth = app.extensions['autenticacao']
-        senha = token_urlsafe(32)
-        auth.provisionar('gestao.demo', senha, 'gestao')
-        auth.provisionar('cliente.demo', senha, 'cliente', lia)
-        antes = [p.read_bytes() for p in (config['HISTORICO'], config['CONTAS'])]
-        for abertura in range(2):
-            with socket.create_server(('127.0.0.1', 0)) as reserva:
-                porta = reserva.getsockname()[1]
-            url = f'http://127.0.0.1:{porta}'
-            log = self.raiz / f'inicio-{abertura}.log'
-            with log.open('wb') as saida:
-                proc = subprocess.Popen([sys.executable, '-B', '-m', 'web', '--demonstracao',
-                                         '--sem-navegador', '--porta', str(porta)], cwd=self.raiz,
-                                        env=env, stdout=saida, stderr=subprocess.STDOUT)
-                try:
-                    limite = time.monotonic() + 20
-                    while proc.poll() is None and time.monotonic() < limite:
-                        if b'MOVE dispon' in log.read_bytes():
-                            break
-                        time.sleep(0.05)
-                    self.assertIn(f'{url}/entrar'.encode(), log.read_bytes(), log.read_bytes())
-                    for usuario, destino in [('gestao.demo', '/gestao/'), ('cliente.demo', '/cliente/')]:
-                        navegador = build_opener(ProxyHandler({}), HTTPCookieProcessor(CookieJar()))
-                        with navegador.open(url + '/entrar', timeout=5) as login:
-                            csrf = re.search(rb'name="csrf_token" value="([^"]+)"', login.read())[1].decode()
-                        dados = urlencode(dict(usuario=usuario, senha=senha, csrf_token=csrf)).encode()
-                        with navegador.open(url + '/entrar', dados, timeout=5) as portal:
-                            self.assertEqual((portal.status, portal.url), (200, url + destino))
-                finally:
-                    if proc.poll() is None:
-                        proc.kill()
-                    proc.wait(10)
-            self.assertEqual([p.read_bytes() for p in (config['HISTORICO'], config['CONTAS'])], antes)
+        conferir_reaberturas(self.raiz, [sys.executable, '-B', '-m', 'web', '--demonstracao'])

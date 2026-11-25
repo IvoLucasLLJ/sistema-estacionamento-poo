@@ -78,6 +78,11 @@ def conferir_pacotes():
             raise ValueError('A instalação falhou. Confira a conexão ou a fonte dos pacotes e tente novamente.')
     if subprocess.run([*comando, 'check'], env=env).returncode:
         raise ValueError('Há dependências incompatíveis. ' + RECUPERAR)
+    # O pywin32 instala um .pth que o Python carrega ao iniciar o interpretador.
+    subprocess.run([sys.executable, '-X', 'utf8', '-IB', __file__, '--conferir-importacoes'], check=True)
+
+
+def conferir_importacoes():
     try:
         import flask
         import werkzeug.security
@@ -88,7 +93,7 @@ def conferir_pacotes():
         if any(p.name.startswith('_speedups.') and p.suffix in ('.so', '.pyd') for p in arquivos):
             import markupsafe._speedups
     except (ImportError, OSError) as erro:
-        raise ValueError('Os pacotes estão incompletos ou incompatíveis com este Python. ' + RECUPERAR) from erro
+        raise ValueError(f'Falha ao carregar uma dependência: {erro}. {RECUPERAR}') from erro
 
 
 def preparar():
@@ -123,6 +128,9 @@ def main():
     verificar_python()
     if sys.argv[1:] == ['--conferir-venv']:
         conferir_pacotes()
+        return
+    if sys.argv[1:] == ['--conferir-importacoes']:
+        conferir_importacoes()
         return
     os.chdir(RAIZ)
     preparar()

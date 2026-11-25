@@ -112,7 +112,7 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
     assert pagina.locator('html').get_attribute('data-tema') == 'claro'
     modo('Sistema')
     pagina.emulate_media(color_scheme='dark')
-    pagina.wait_for_function("document.documentElement.dataset.tema === 'escuro'")
+    pagina.locator('html[data-tema="escuro"]').wait_for()
     pagina.reload()
     assert pagina.locator('html').get_attribute('data-tema') == 'escuro'
     assert pagina.evaluate('Object.keys(localStorage)') == ['move.tema']
@@ -159,7 +159,8 @@ def conferir_consulta_pessoal(browser, perfil, descricao, url, senha):
             ativar(nav.get_by_role('button', name='Mais', exact=True))
         ativar(consulta)
         pagina.wait_for_url(url + '/cliente/disponibilidade')
-        ativar(pagina.get_by_role('link', name='Atualizar'))
+        with pagina.expect_navigation(url=url + '/cliente/disponibilidade', wait_until='load'):
+            ativar(pagina.get_by_role('link', name='Atualizar'))
         assert pagina.locator('.medida strong').inner_text() == '7'
         assert pagina.locator('html').get_attribute('data-tema') == 'escuro'
         assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')

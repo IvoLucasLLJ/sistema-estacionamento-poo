@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP, localcontext
 
 
 CATEGORIAS = {'comum': 'Comum', 'vip': 'VIP', 'mensalista': 'Mensalista'}
@@ -15,16 +15,13 @@ def horario(iso):
 
 
 def dinheiro(reais):
-    """Mantém a precisão legada e apresenta pelo menos duas casas decimais."""
-    valor = Decimal(reais)
+    """Formata reais em pt-BR com duas casas, arredondando somente a exibição."""
+    valor = Decimal(str(reais))
     if not valor.is_finite():
         return 'Valor fora da faixa de representação'
-    if valor.is_zero():
-        return 'R$ 0,00'
-    if valor.adjusted() < -300:
-        return 'R$ ' + format(valor, 'E').replace('.', ',')
-    inteiro, _, fracao = format(valor, ',f').partition('.')
-    return 'R$ ' + inteiro.replace(',', '.') + ',' + fracao.rstrip('0').ljust(2, '0')
+    with localcontext(rounding=ROUND_HALF_UP):
+        inteiro, fracao = format(valor, 'z,.2f').split('.')
+    return 'R$ ' + inteiro.replace(',', '.') + ',' + fracao
 
 
 def centavos(valor):

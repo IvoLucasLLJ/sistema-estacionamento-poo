@@ -172,8 +172,12 @@ class WebTests(TestCase):
         self.assertEqual(vm.percentual, 30)
         with self.assertRaises(FrozenInstanceError):
             vm.livres = 0
-        self.assertEqual(dinheiro('40.005'), 'R$ 40,005')
+        self.assertEqual(dinheiro('40.005'), 'R$ 40,01')
         self.assertEqual(dinheiro('6.1'), 'R$ 6,10')
+        for original, exibido in [('6.125', '6,13'), ('0.0001', '0,00'), ('0.005', '0,01'),
+                                  ('1e-1000', '0,00'), ('9999.995', '10.000,00')]:
+            with self.subTest(original=original):
+                self.assertEqual(dinheiro(original), 'R$ ' + exibido)
         self.assertEqual(centavos(613), 'R$ 6,13')
         self.assertEqual(horario('2026-11-20T13:15:00-03:00'), '20/11/2026 às 13:15 (-03:00)')
 

@@ -42,17 +42,17 @@ A View compõe o template-base, o layout do portal e os templates de cada modelo
 
 O ensaio de navegador utiliza dois contextos independentes, um servidor em loopback e um histórico temporário por largura. A Gestão registra as entradas de AV1 e AM2 no navegador e realiza as operações financeiras sobre a estadia 22. A cliente observa cada mudança por nova consulta. O teste HTTP também reabre o serviço e confere a gravação de 613 centavos. [Percurso Chromium](../tests/navegador_08c.py) · [Teste HTTP integrado](../tests/test_portal_cliente.py#L170)
 
-| Momento | Consulta da titular | Disponibilidade exibida ao Cliente | Faturamento exclusivo da Gestão |
+| Momento | Consulta da titular | Disponibilidade exibida ao Cliente | Faturamento exibido exclusivamente na Gestão |
 |---|---|---|---|
-| P0 | AV1 e AM2 ativos, sem valor confirmado | 3 ocupadas, 7 livres | R$ 40,005 |
-| P1 | AV1 na vaga 2 com R$ 6,13 confirmados. AM2 continua sem confirmação | 3 ocupadas, 7 livres | R$ 40,005 |
-| P2 | AV1 concluído, com comprovante. AM2 continua ativo | 2 ocupadas, 8 livres | R$ 46,135 |
+| P0 | AV1 e AM2 ativos, sem valor confirmado | 3 ocupadas, 7 livres | R$ 40,01 |
+| P1 | AV1 na vaga 2 com R$ 6,13 confirmados. AM2 continua sem confirmação | 3 ocupadas, 7 livres | R$ 40,01 |
+| P2 | AV1 concluído, com comprovante. AM2 continua ativo | 2 ocupadas, 8 livres | R$ 46,14 |
 
-O comprovante usa a duração de 1,225 h, a base de R$ 12,25, o desconto exato de R$ 6,125 e o total persistido de R$ 6,13. O portal também permite imprimir saída isenta do próprio titular. O período filtrado e a impressão são consultas. Cada consulta do serviço lê um estado validado. Requisições simultâneas podem produzir instantes de leitura distintos entre blocos de uma página.
+O comprovante usa a duração de 1,225 h, a base de R$ 12,25, o desconto exibido de R$ 6,13 e o total de R$ 6,13. A apresentação monetária da Etapa 09 utiliza duas casas. O desconto exato no domínio é `6.125`, o total persistido é 613 centavos e o faturamento do serviço conserva `40.005` e `46.135` reais. O portal também permite imprimir saída isenta do próprio titular. O período filtrado e a impressão são consultas. Cada consulta do serviço lê um estado validado. Requisições simultâneas podem produzir instantes de leitura distintos entre blocos de uma página.
 
 ### Limitação observada no histórico legado
 
-Em uma cópia temporária, a retirada pelo terminal de um veículo com entrada legada sem fuso produziu uma saída com fuso. Ao reabrir esse histórico, a reconstrução falhou ao comparar os dois horários. A ocorrência envolve a retirada legada pelo terminal. As consultas pessoais são somente de leitura e o cenário P0–P2 usa estadias identificadas. [Gravação da saída legada](../model/estacionamento.py#L224) · [Comparação na reconstrução](../model/estacionamento.py#L270)
+No checkpoint da 08C, a retirada pelo terminal de um veículo com entrada legada sem fuso produziu uma saída com fuso. A reabertura de uma cópia temporária falhou ao comparar os dois horários. A Etapa 09 corrigiu a leitura dos arquivos já afetados e validou o percurso completo do terminal à consulta web. [Política temporal e regressões da Etapa 09](qualidade-09.md#horários-legados)
 
 ## Reprodução local
 

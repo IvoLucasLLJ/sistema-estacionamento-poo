@@ -50,7 +50,7 @@ class PortalClienteTests(TestCase):
             html = self.pagina(caminho, cliente_id=str(UUID(int=2)))
             for texto in ('AV1', 'AM2', '/cliente/estadias/22', '/cliente/estadias/23'):
                 self.assertIn(texto, html)
-            for texto in ('CB3', 'LEG9', 'NM4', 'R$ 40,005', 'R$ 0,00', '/gestao/'):
+            for texto in ('CB3', 'LEG9', 'NM4', 'R$ 40,01', 'R$ 0,00', '/gestao/'):
                 self.assertNotIn(texto, html)
         self.entrar(4)
         self.assertIn('Nenhum veículo vinculado', self.pagina('veiculos'))
@@ -70,7 +70,7 @@ class PortalClienteTests(TestCase):
         html = self.pagina('historico')
         self.assertIn('Estadia 22', html)
         self.assertIn('Estadia 23', html)
-        for dado in ['LEG9', 'CB3', 'Lia Demo', 'NM4', 'R$ 40,005', str(UUID(int=2))]:
+        for dado in ['LEG9', 'CB3', 'Lia Demo', 'NM4', 'R$ 40,01', str(UUID(int=2))]:
             self.assertNotIn(dado, html)
         self.assertNotIn('Estadia 23', self.pagina('historico', placa='AV1'))
         self.assertIn('Nenhuma utilização corresponde', self.pagina('historico', estado='paga'))
@@ -182,7 +182,7 @@ class PortalClienteTests(TestCase):
         p0 = self.pagina('estadias')
         self.assertNotIn('R$ ', p0)
         self.assertIn('Estadia 23', p0)
-        self.assertIn('R$ 40,005', admin.get('/gestao/').text)
+        self.assertIn('R$ 40,01', admin.get('/gestao/').text)
         consulta = admin.get(url + '/saida?horas=1,225')
         confirmar = re.search(r'href="([^"]+/pagamento\?revisao=[^"]+)"', consulta.text)[1]
         r = admin.post(url + '/pagamento', data=dict(csrf_token=csrf, revisao=revisao(admin.get(confirmar)),
@@ -191,7 +191,7 @@ class PortalClienteTests(TestCase):
         self.assertIn('R$ 6,13', self.pagina('estadias'))
         self.assertIn('ainda estacionado na vaga 2', self.pagina('estadias/22'))
         self.assertIn('30% de ocupação', self.pagina('disponibilidade'))
-        self.assertIn('R$ 40,005', admin.get('/gestao/').text)
+        self.assertIn('R$ 40,01', admin.get('/gestao/').text)
         self.assertEqual(admin.post(url + '/concluir', data=dict(
             csrf_token=csrf, revisao=revisao(admin.get(url)))).status_code, 303)
         p2 = self.pagina('estadias')
@@ -200,10 +200,12 @@ class PortalClienteTests(TestCase):
         self.assertIn('Estadia 22', self.pagina('historico', estado='paga'))
         self.assertIn('20% de ocupação', self.pagina('disponibilidade'))
         comprovante = self.pagina('estadias/22/comprovante')
-        for texto in ('R$ 6,125', 'R$ 6,13', 'R$ 12,25', '1,225 h'):
+        for texto in ('<dt>Desconto</dt>', 'R$ 6,13', 'R$ 12,25', '1,225 h'):
             self.assertIn(texto, comprovante)
-        self.assertNotIn('R$ 46,135', comprovante)
-        self.assertIn('R$ 46,135', admin.get('/gestao/').text)
+        self.assertEqual(comprovante.count('<dd>R$ 6,13</dd>'), 2)
+        self.assertNotRegex(comprovante, r'R\$ [\d.]+,\d{3}')
+        self.assertNotIn('R$ 46,14', comprovante)
+        self.assertIn('R$ 46,14', admin.get('/gestao/').text)
         leitor = EstacionamentoService(self.arquivo)
         self.assertEqual(leitor.consultar_estadia(22)['cobranca']['valor_centavos'], 613)
 

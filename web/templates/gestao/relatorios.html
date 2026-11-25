@@ -26,7 +26,7 @@
       {{ adm.dado('Saídas isentas identificadas',rel.isentas) }}
       {{ adm.dado('Saídas legadas',rel.legadas) }}
     </dl>
-    <p>As saídas legadas conservam a precisão registrada e aparecem sem categoria histórica.</p>
+    <p>Os totais são arredondados para centavos após a soma. Saídas legadas conservam a precisão registrada e aparecem sem categoria histórica.</p>
   </section>
   <div class="gestao-divisao">
     {% for titulo,linhas,rotulos in [('Tipo de veículo',rel.por_tipo,tipos),('Categoria na entrada',rel.por_categoria,categorias)] %}

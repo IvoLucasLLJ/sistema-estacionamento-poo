@@ -145,11 +145,11 @@ class GestaoTests(TestCase):
         preparar_p0(self.config['HISTORICO'])
         eventos = self.http.get('/gestao/historico?acao=saida&evento=2')
         self.assertIn('Evento 2 · Saída legada', eventos.text)
-        self.assertIn('R$ 0,005', eventos.text)
+        self.assertIn('R$ 0,01', eventos.text)
         self.assertNotIn('Lia Vale', eventos.text)
         rel = self.http.get('/gestao/relatorios?fim=2026-11-19')
-        self.assertIn('R$ 40,005', rel.text)
-        self.assertIn('R$ 0,005', rel.text)
+        self.assertIn('R$ 40,01', rel.text)
+        self.assertIn('R$ 0,01', rel.text)
         self.assertEqual(self.http.get('/gestao/relatorios?inicio=2026-12-01&fim=2026-11-01').status_code,422)
 
     def test_relatorio_e_projecao_historica(self):

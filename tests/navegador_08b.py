@@ -67,7 +67,7 @@ def percorrer(browser, raiz, largura, capturas):
             assert p.locator(':focus').get_attribute('href') == '#principal'
             login('gestor.demo')
             titulo('Visão geral')
-            assert 'R$ 40,005' in p.locator('#financeiro').inner_text()
+            assert 'R$ 40,01' in p.locator('#financeiro').inner_text()
             foto('dashboard')
             navegar('Mapa de vagas')
             seguir('Vaga 2 · ocupada')
@@ -75,7 +75,7 @@ def percorrer(browser, raiz, largura, capturas):
             seguir('Preparar saída')
             p.get_by_label('Duração em horas').fill('1,225')
             clicar('Consultar cobrança')
-            assert all(v in p.locator('.conta').inner_text() for v in ('R$ 12,25','R$ 6,125','R$ 6,13'))
+            assert p.locator('.conta dd').all_inner_texts() == ['1,225 h', 'R$ 12,25', 'R$ 6,13', 'R$ 6,13']
             seguir('Revisar pagamento')
             titulo('Confirmar pagamento')
             cabe()
@@ -113,7 +113,7 @@ def percorrer(browser, raiz, largura, capturas):
             seguir('Estadia 22')
             titulo('Comprovante acadêmico')
             navegar('Relatórios')
-            assert 'R$ 46,135' in p.locator('main').inner_text()
+            assert 'R$ 46,14' in p.locator('main').inner_text()
             foto('relatorios')
             navegar('Clientes')
             p.get_by_label('Nome', exact=True).fill('Dora Nuvem')

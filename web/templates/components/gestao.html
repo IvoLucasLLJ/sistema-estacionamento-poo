@@ -105,9 +105,10 @@
   <dl class="conta" data-componente="P01">
     {{ dado('Duração informada', c.horas|replace('.',',') ~ ' h') }}
     {{ dado('Tarifa-base',c.tarifa_base|dinheiro) }}
-    {{ dado('Desconto exato',c.desconto|dinheiro) }}
+    {{ dado('Desconto',c.desconto|dinheiro) }}
     {{ dado('Total definitivo',c.valor_centavos|centavos) }}
   </dl>
+  <small>O total usa a tarifa e o desconto antes do arredondamento para centavos.</small>
 {% endmacro %}
 {% macro concluir(e,chave,rotulo) %}
   <form method="post" action="{{ url_for('gestao.concluir',numero=e.estadia_id) }}" data-submissao>

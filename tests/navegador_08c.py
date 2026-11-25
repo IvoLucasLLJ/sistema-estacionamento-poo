@@ -82,7 +82,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
 
         def sem_terceiros():
             html = cliente.content()
-            for texto in ('LEG9', 'CB3', 'NM4', 'R$ 40,005', 'R$ 46,135', '/gestao/', str(UUID(int=2))):
+            for texto in ('LEG9', 'CB3', 'NM4', 'R$ 40,01', 'R$ 46,14', '/gestao/', str(UUID(int=2))):
                 assert texto not in html, (cliente.url, texto)
 
         gestao.goto(url)
@@ -115,7 +115,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
         gestao.get_by_role('link', name='Revisar pagamento').click()
         gestao.get_by_role('button', name='Confirmar pagamento simulado').click()
         gestao.goto(url + '/gestao/')
-        assert 'R$ 40,005' in gestao.locator('#financeiro').inner_text()
+        assert 'R$ 40,01' in gestao.locator('#financeiro').inner_text()
         cliente.reload()
         assert '30% de ocupação' in conteudo()
         destino(cliente, 'Estadias')
@@ -123,12 +123,12 @@ def jornadas(browser, app, url, senha, largura, capturas):
         foto('estadias-p1')
         abrir_estadia()
         assert 'ainda estacionado na vaga 2' in conteudo()
-        assert 'R$ 6,125' in conteudo()
+        assert cliente.locator('.conta dd').all_inner_texts() == ['1,225 h', 'R$ 12,25', 'R$ 6,13', 'R$ 6,13']
 
         gestao.goto(url + '/gestao/estadias/22')
         gestao.get_by_role('button', name='Concluir saída paga').click()
         gestao.goto(url + '/gestao/')
-        assert 'R$ 46,135' in gestao.locator('#financeiro').inner_text()
+        assert 'R$ 46,14' in gestao.locator('#financeiro').inner_text()
         destino(cliente, 'Disponibilidade')
         assert '20% de ocupação' in conteudo()
         destino(cliente, 'Estadias')
@@ -140,7 +140,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
         cliente.get_by_role('link', name='Estadia 22 · AV1').click()
         cliente.get_by_role('link', name='Ver comprovante').click()
         assert 'Saída paga' in conteudo()
-        for texto in ('1,225 h', 'R$ 12,25', 'R$ 6,125', 'R$ 6,13', 'Sem valor fiscal'):
+        for texto in ('1,225 h', 'R$ 12,25', 'Desconto', 'R$ 6,13', 'Sem valor fiscal'):
             assert texto in conteudo()
         sem_terceiros()
         # A prévia nativa e Page.printToPDF são operações de impressão distintas no Chromium.

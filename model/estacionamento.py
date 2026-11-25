@@ -1,6 +1,6 @@
 from copy import deepcopy
 import math
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Context, Decimal, DecimalException, localcontext
 
 from model.caminhao import Caminhao
@@ -14,6 +14,21 @@ from model.veiculo import Veiculo
 
 
 _CLASSES_DE_VEICULOS = {"carro": Carro, "moto": Moto, "caminhao": Caminhao}
+_ORIGEM_CIVIL = datetime(1970, 1, 1)
+_ORIGEM_UTC = datetime(1970, 1, 1, tzinfo=UTC)
+
+
+def _saida_legada_anterior(entrada, saida):
+    inicio = datetime.fromisoformat(entrada)
+    fim = datetime.fromisoformat(saida)
+    if (inicio.tzinfo is None) == (fim.tzinfo is None):
+        return fim < inicio
+
+    # Um relógio civil sem fuso admite deslocamentos estritamente entre -24 e +24 h.
+    # Só há inversão certa quando nenhum desses deslocamentos permite a sequência.
+    inicio_relativo = inicio - (_ORIGEM_CIVIL if inicio.tzinfo is None else _ORIGEM_UTC)
+    fim_relativo = fim - (_ORIGEM_CIVIL if fim.tzinfo is None else _ORIGEM_UTC)
+    return inicio_relativo - fim_relativo >= timedelta(days=1)
 
 
 class Estacionamento:
@@ -199,6 +214,9 @@ class Estacionamento:
         return atual.valor_devido
 
     def retirar(self, num_vaga, num_horas):
+        return self._retirar_legado(num_vaga, num_horas, datetime.now().astimezone().isoformat())
+
+    def _retirar_legado(self, num_vaga, num_horas, horario_saida):
         vaga = self._buscar_vaga(num_vaga)
         if vaga.ocupada and vaga.veiculo.placa in self._vinculos:
             raise ValueError("Use a consulta de cobrança e a conclusão da estadia vinculada.")
@@ -215,13 +233,17 @@ class Estacionamento:
                         if evento["acao"] == "entrada"
                         and evento["placa"] == veiculo.placa
                         and evento["vaga"] == vaga.numero), None)
+        if entrada is None:
+            raise ValueError("Saída sem entrada correspondente.")
+        if _saida_legada_anterior(entrada["horario_entrada"], horario_saida):
+            raise ValueError("Saída anterior à entrada.")
         vaga.liberar()
         self._historico.append({
             "acao": "saida", "placa": veiculo.placa,
             "tipo": type(veiculo).__name__.lower(), "modelo": veiculo.modelo,
             "vaga": vaga.numero,
-            "horario_entrada": entrada["horario_entrada"] if entrada else None,
-            "horario_saida": datetime.now().astimezone().isoformat(),
+            "horario_entrada": entrada["horario_entrada"],
+            "horario_saida": horario_saida,
             "horas": num_horas, "valor": tarifa,
         })
         return tarifa
@@ -267,10 +289,6 @@ class Estacionamento:
                             if e['acao'] == 'entrada' and e['placa'] == veiculo.placa), None)
             if entrada is None or evento['horario_entrada'] != entrada['horario_entrada']:
                 raise ValueError("Saída sem entrada correspondente.")
-            inicio = datetime.fromisoformat(evento['horario_entrada'])
-            fim = datetime.fromisoformat(evento['horario_saida'])
-            if fim < inicio:
-                raise ValueError("Saída anterior à entrada.")
             vaga = self._buscar_vaga(evento['vaga'])
             if not vaga.ocupada or vaga.veiculo.placa != veiculo.placa:
                 raise ValueError("Saída incompatível com a ocupação.")
@@ -283,7 +301,7 @@ class Estacionamento:
                 centavos = evento["valor_centavos"]
                 if type(centavos) is not int or reais_de_centavos(centavos) != Decimal(str(valor)):
                     raise ValueError("Centavos incompatíveis com o valor legado.")
-            tarifa = self.retirar(evento['vaga'], evento['horas'])
+            tarifa = self._retirar_legado(evento['vaga'], evento['horas'], evento['horario_saida'])
             if valor != tarifa:
                 raise ValueError("Valor incompatível com a tarifa.")
 

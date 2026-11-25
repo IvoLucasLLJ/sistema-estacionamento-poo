@@ -18,7 +18,7 @@
       {{ ui.aviso('Dados financeiros indisponíveis. Atualize a consulta.', 'M09') }}
       {% else %}
       <div class="medida"><strong>{{ financeiro.reais|dinheiro }}</strong></div>
-      <p>Faturamento das estadias concluídas</p>
+      <p>Faturamento das estadias concluídas, arredondado para duas casas decimais.</p>
       <div class="linha"><a href="{{ url_for('gestao.fila') }}">Pagamentos aguardando saída</a><strong>{{ pendentes }}</strong></div>
       {% endif %}
     </section>

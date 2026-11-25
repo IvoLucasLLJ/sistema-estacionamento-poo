@@ -11,6 +11,7 @@ from uuid import UUID
 from werkzeug.serving import make_server
 
 from tests.cenario_gestao import preparar_p0
+from tests.navegador_08a import escolher_tema
 from web import create_app
 
 
@@ -158,7 +159,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
         destino(cliente, 'Tarifas e benefícios')
         assert '50% de desconto' in conteudo()
         cliente.get_by_role('link', name='Ver meu perfil').click()
-        cliente.locator('.tema label').filter(has_text='Escuro').click()
+        escolher_tema(cliente, 'Escuro')
         destino(cliente, 'Meu histórico')
         assert cliente.locator('html').get_attribute('data-tema') == 'escuro'
         foto('historico-escuro')
@@ -178,7 +179,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
                 assert cliente.locator('[data-mais]').evaluate("el => el === document.activeElement")
         cliente.set_viewport_size(config['viewport'])
         destino(cliente, 'Meu perfil')
-        cliente.locator('.tema label').filter(has_text='Sistema').click()
+        escolher_tema(cliente, 'Sistema')
         cliente.emulate_media(color_scheme='dark')
         cliente.locator('html[data-tema="escuro"]').wait_for()
         cliente.get_by_role('button', name='Encerrar sessão').click()

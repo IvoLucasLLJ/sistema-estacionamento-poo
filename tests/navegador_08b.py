@@ -10,6 +10,7 @@ from werkzeug.serving import make_server
 
 from controller.controller import Controller
 from tests.cenario_gestao import preparar_p0
+from tests.navegador_08a import escolher_tema
 from web import create_app
 
 
@@ -155,19 +156,19 @@ def percorrer(browser, raiz, largura, capturas):
             titulo('Comprovante acadêmico')
             assert 'Isento' in p.locator('main').inner_text()
             assert s.consultar_faturamento()['reais'] == '66.135'
-            p.locator('.tema label').filter(has_text='Escuro').click()
+            escolher_tema(p, 'Escuro')
             navegar('Relatórios')
             assert p.locator('html').get_attribute('data-tema')=='escuro'
             foto('relatorios-escuro')
             for w in (320,390,768,1440):
                 p.set_viewport_size(dict(width=w,height=900))
                 cabe()
-            p.locator('.tema label').filter(has_text='Sistema').click()
+            escolher_tema(p, 'Sistema')
             p.emulate_media(color_scheme='dark')
             p.wait_for_function("document.documentElement.dataset.tema === 'escuro'")
             p.reload()
             assert p.locator('html').get_attribute('data-tema')=='escuro'
-            p.locator('summary').click()
+            p.locator('.perfil > summary').click()
             clicar('Sair')
             login('lia.demo')
             titulo('Olá, Lia Vale')

@@ -15,10 +15,11 @@ from persistence.caminhos import RAIZ_MOVE, caminho_local, historico_local
 from persistence.exclusividade import EscritorLocal
 from service.estacionamento_service import EstacionamentoService
 from web import create_app
+from web.contas import MASTER_DEMO
 
 
 def configuracao(pasta):
-    return dict(DADOS=pasta, HISTORICO=pasta / 'historico.json', CONTAS=pasta / 'contas.json',
+    return dict(DEMONSTRACAO=True, DADOS=pasta, HISTORICO=pasta / 'historico.json', CONTAS=pasta / 'contas.json',
                 SECRET_KEY=None, SESSION_COOKIE_SECURE=False, SESSION_COOKIE_NAME='move_demo_session')
 
 
@@ -105,9 +106,12 @@ def preparar_demonstracao():
 
 
 def provisionar_demonstracao(app, titular):
+    if not app.config['DEMONSTRACAO']:
+        raise ValueError('O provisionamento demonstrativo exige o ambiente isolado.')
     app.extensions['estacionamento'].buscar_cliente(titular)
     contas = app.extensions['autenticacao'].contas
-    for usuario, papel, cliente_id in [('gestao.demo', 'gestao', None), ('cliente.demo', 'cliente', titular)]:
+    for usuario, papel, cliente_id in [('gestao.demo', 'gestao', None), ('cliente.demo', 'cliente', titular),
+                                       (MASTER_DEMO, 'gestao', None)]:
         conta = contas.por_usuario(usuario)
         if conta is not None:
             if conta.identidade.papel != papel or conta.identidade.cliente_id != cliente_id:
@@ -125,3 +129,8 @@ def provisionar_demonstracao(app, titular):
                 app.cli.main(args=argumentos, standalone_mode=False)
             except GetPassWarning as erro:
                 raise ValueError('Este terminal não consegue ocultar a senha. Use um terminal interativo.') from erro
+    gestor = contas.por_usuario('gestao.demo').identidade
+    master = contas.por_usuario(MASTER_DEMO).identidade
+    pessoal = contas.por_usuario('cliente.demo').identidade
+    app.config['TITULAR_DEMO'] = titular
+    app.config['VINCULOS_PORTAIS'] = {gestor.id: pessoal.id, master.id: pessoal.id}

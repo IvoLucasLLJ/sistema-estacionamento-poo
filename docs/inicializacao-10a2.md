@@ -11,10 +11,35 @@
 
 | Conta fictícia | O que demonstrar |
 |---|---|
+| `master.demo` | Apresentação completa com um único login. Começa na Gestão e alterna para o portal pessoal de Lia Vale. |
 | `gestao.demo` | Mapa de vagas, entrada e saída, confirmação simulada, faturamento, histórico e comprovante. |
 | `cliente.demo` | Portal consultivo de Lia Vale, com os próprios veículos e estadias, histórico, perfil e disponibilidade agregada. |
 
 Na próxima abertura, execute o mesmo inicializador. Ele verifica a venv e as versões instaladas. Se estiverem consistentes, passa diretamente à verificação local e ao início do servidor. As mesmas contas, senhas, estadias e movimentações continuam disponíveis.
+
+### UI-001 — Simplificação do controle de aparência
+
+No login e nas mensagens de acesso, o botão de aparência fica no canto superior direito. Nos portais, fica no cabeçalho, junto à conta. O monitor indica **Sistema**, o sol indica **Claro** e a lua indica **Escuro**. Abra o botão para ver os nomes. Com teclado, use Enter ou Espaço para abrir, Tab para chegar à opção selecionada, as setas para mudar a preferência e Esc para fechar.
+
+Na primeira visita, o MOVE acompanha a aparência do dispositivo, inclusive quando ela muda com a página aberta. A escolha manual vale para os portais e para o próximo login no mesmo endereço e perfil de navegador. A classe `ControleTema` aplica a preferência antes das folhas de estilo e usa a chave já existente `move.tema`. [Controle de aparência](../web/static/js/controles.js)
+
+### UI-002 — Integração da navegação entre Gestão e Cliente
+
+Para demonstrar os dois portais, entre como **master.demo**. Ao lado da marca MOVE, abra **Gestão** e escolha **MOVE Cliente**. A área pessoal apresenta os veículos e as estadias de Lia Vale. Use o mesmo seletor para voltar à Gestão. A conta **gestao.demo** conserva a alternância prevista na 10A.4.1. A entrada direta com **cliente.demo** continua exclusivamente pessoal. **Sair** encerra a sessão atual dos dois ambientes.
+
+O provisionamento confere os papéis das contas e o UUID de Lia registrado na criação do cenário. O servidor vincula os IDs de Gestão autorizados ao ID de `cliente.demo`. Uma instalação existente conserva suas contas, senhas e histórico e usa o mesmo formato JSON. Na configuração operacional, o mapa `VINCULOS_PORTAIS` começa vazio e o nome `master.demo` é reservado. O serviço recusa seu provisionamento, login e uso por uma sessão anterior mesmo que um registro demonstrativo tenha sido copiado. [Provisionamento da demonstração](../web/demonstracao.py) · [Serviço de autenticação](../web/contas.py)
+
+`AutenticacaoService` compõe o objeto imutável `ContextoAcesso` com a identidade autenticada e, quando autorizada, a identidade pessoal. A sessão assinada mantém o ID de quem entrou e o prazo original. A troca usa `POST /ambiente` com CSRF e grava o ID pessoal efetivo ao entrar nesse ambiente. O servidor verifica as contas a cada requisição, aplica as guardas do ambiente ativo e consulta as estadias pelo titular da entrada. Uma troca de ambiente renova o token dos formulários. Reabra os formulários de abas antigas antes de enviá-los. Se o vínculo pessoal ativo for removido ou substituído, o próximo acesso exige autenticação. [Contexto e identidades](../web/contas.py) · [Guardas de acesso](../web/seguranca.py) · [Regressões HTTP](../tests/test_contexto_acesso.py) · [Ensaio no navegador](../tests/navegador_ui_10a4_1.py)
+
+### 10A.4.3 — Roteiro de apresentação com a Master Demo
+
+1. Encerre o servidor anterior e abra o inicializador demonstrativo da sua plataforma. Se as duas contas anteriores já existem, o terminal pede somente a nova senha de `master.demo` e sua confirmação. Escolha uma senha exclusiva, de 12 a 256 caracteres. Nas próximas aberturas, use a mesma senha.
+2. Entre como `master.demo`. No cenário inicial, AV1 e AM2 já estão estacionados. Para mostrar uma nova entrada, cadastre um carro fictício com uma placa disponível, vincule-o a Lia Vale e selecione **Registrar entrada**. Revise uma vaga livre e confirme.
+3. Abra o seletor junto à marca MOVE e escolha **MOVE Cliente**. Consulte a nova estadia de Lia. Volte à **Gestão**, abra **Estadias ativas**, escolha **Preparar saída** e informe, por exemplo, `1,225` hora.
+4. Consulte a cobrança, revise e confirme o pagamento simulado. Troque para **Cliente** e confira o pagamento de **R$ 6,13** e a ocupação da vaga. Volte à **Gestão**, abra **Pagamentos** e conclua a saída.
+5. Em **Cliente**, abra **Meu histórico**, selecione a estadia da placa utilizada e abra **Ver comprovante**. No celular, o histórico fica em **Mais**.
+
+O cabeçalho identifica a conta que fez login. No portal pessoal, a guarda aplica o UUID de Lia às consultas. A cada troca, o servidor elimina as revisões pendentes daquela sessão e renova o token CSRF. Retome uma confirmação pela consulta à estadia original. [Revisões de formulários](../web/revisoes.py) · [Ensaio integrado em uma aba](../tests/navegador_master_demo.py)
 
 ### Se a porta 5000 estiver ocupada
 

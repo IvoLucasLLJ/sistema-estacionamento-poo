@@ -1,17 +1,21 @@
 {% extends 'layouts/base.html' %}
 {% block estrutura %}
 <header class="cabecalho" data-componente="N01">
-  <a class="assinatura" href="{{ destino() }}">{{ ui.marca(area) }}</a>
-  <details class="perfil" data-componente="N06">
-    <summary>{{ ui.icone('user-round') }}<span>{{ g.identidade.usuario }}</span></summary>
+  <div class="grupo-ambiente">
+    <a class="assinatura" href="{{ destino() }}" aria-label="Início do MOVE {{ area }}">{{ ui.marca('' if g.contexto.pessoal_vinculada else area) }}</a>
+    {% if g.contexto.pessoal_vinculada %}{{ ui.ambiente(area) }}{% endif %}
+  </div>
+  <div class="ferramentas-portal">{{ ui.tema() }}
+  <details class="perfil" data-componente="N06" data-menu-cabecalho>
+    <summary aria-label="Conta de acesso: {{ g.contexto.principal.usuario }}">{{ ui.icone('user-round') }}<span>{{ g.contexto.principal.usuario }}</span></summary>
     <div class="menu-perfil">
-      <span>{{ area }}</span>
+      <span>{{ g.contexto.principal.usuario }}</span>
       <form method="post" action="{{ url_for('acesso.sair') }}" data-submissao>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {{ ui.botao('Sair', 'log-out', true) }}
       </form>
     </div>
-  </details>
+  </details></div>
 </header>
 <div class="portal">
   <nav class="navegacao {{ 'nav-gestao' if area == 'Gestão' else 'nav-cliente' }}" aria-label="Navegação {{ area }}" data-componentes="N02 N03">
@@ -22,7 +26,6 @@
       {% endfor %}
       {% block mais_destinos %}{% endblock %}
     </div>
-    {% block aparencia %}<div class="preferencia"><span>Aparência</span>{{ ui.tema() }}</div>{% endblock %}
   </nav>
   <main id="principal" class="principal">{% block conteudo %}{% endblock %}</main>
 </div>

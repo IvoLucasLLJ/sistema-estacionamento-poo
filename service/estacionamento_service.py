@@ -6,6 +6,7 @@ from weakref import WeakValueDictionary
 from controller.controller import Controller
 from model.caminhao import Caminhao
 from model.carro import Carro
+from model.cliente_comum import ClienteComum
 from model.moto import Moto
 from persistence.historico_json import FalhaAntesDaSubstituicao, HistoricoAlterado
 from service import representacoes as dto
@@ -80,6 +81,22 @@ class EstacionamentoService:
 
     def cadastrar_cliente(self, categoria, nome):
         return self._executar(lambda c: dto.cliente(c.cadastrar_cliente(categoria, nome)), gravar=True)
+
+    def confirmar_cadastro_pessoal(self, cliente: ClienteComum):
+        """Conclui uma reserva de UUID do servidor e reconhece sua eventual gravação anterior."""
+        if type(cliente) is not ClienteComum:
+            raise ErroDeNegocio("O cadastro pessoal exige um cliente comum.")
+
+        def confirmar(ctrl):
+            for existente in ctrl.listar_clientes():
+                if existente.identificador == cliente.identificador:
+                    if existente.nome != cliente.nome or existente.categoria != cliente.categoria:
+                        raise ErroDeInfraestrutura("O histórico diverge do cadastro pessoal pendente.")
+                    return
+            ctrl.estacionamento.cadastrar_cliente(cliente)
+            self._persistir(ctrl)
+
+        self._executar(confirmar)
 
     def buscar_cliente(self, identificador):
         return self._executar(lambda c: dto.cliente(c.buscar_cliente(identificador)))

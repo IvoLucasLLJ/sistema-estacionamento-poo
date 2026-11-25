@@ -8,15 +8,41 @@
 <button type="submit" class="botao {{ 'secundario' if secundario else 'primario' }}" data-componente="{{ 'A02' if secundario else 'A01' }}">{{ texto }}{% if simbolo %}{{ icone(simbolo) }}{% endif %}</button>
 {%- endmacro %}
 {% macro tema() -%}
-<fieldset class="tema" data-componente="N07"><legend class="sr">Preferência de tema</legend>
+<details class="menu-aparencia" data-componente="N07" data-menu-cabecalho>
+<summary aria-label="Aparência: Sistema" title="Aparência">{{ icone('monitor') }}</summary>
+<div class="painel-menu"><span class="titulo-menu" aria-hidden="true">Aparência</span>
+<fieldset class="tema"><legend class="sr">Preferência de tema</legend>
 {% for valor,rotulo,s in [('sistema','Sistema','monitor'),('claro','Claro','sun'),('escuro','Escuro','moon')] %}
 <label><input type="radio" name="tema" value="{{ valor }}" {% if loop.first %}checked{% endif %}>{{ icone(s) }}<span>{{ rotulo }}</span></label>
-{% endfor %}</fieldset>
+{% endfor %}</fieldset></div></details>
 {%- endmacro %}
-{% macro campo(nome, rotulo, senha=false) -%}
+{% macro ambiente(area) -%}
+<details class="menu-ambiente" data-menu-cabecalho>
+  <summary aria-label="Alternar ambiente. Atual: MOVE {{ area }}">{{ area }}<span class="seta-menu" aria-hidden="true"></span></summary>
+  <div class="painel-menu"><span class="titulo-menu">Ambiente</span>
+  {% for valor, rotulo, simbolo in [('gestao','Gestão','layout-dashboard'), ('cliente','Cliente','user-round')] %}
+    {% if rotulo == area %}
+    <span class="opcao-ambiente atual" aria-current="true">{{ icone(simbolo) }}MOVE {{ rotulo }}</span>
+    {% else %}
+    <form action="{{ url_for('acesso.alternar_ambiente') }}" method="post" data-submissao>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="ambiente" value="{{ valor }}">
+      <button class="opcao-ambiente" type="submit">{{ icone(simbolo) }}MOVE {{ rotulo }}</button>
+    </form>
+    {% endif %}
+  {% endfor %}
+  </div>
+</details>
+{%- endmacro %}
+{% macro campo(nome, rotulo, senha=false, preenchimento='', limite=none, valor='', ajuda='') -%}
 <div class="campo" data-componente="{{ 'F03' if senha else 'F01' }}"><label for="{{ nome }}">{{ rotulo }}</label>
-<div class="controle"><input id="{{ nome }}" name="{{ nome }}" type="{{ 'password' if senha else 'text' }}" autocomplete="{{ 'current-password' if senha else 'username' }}" maxlength="{{ 256 if senha else 64 }}" required {% if not senha %}autocapitalize="none" spellcheck="false"{% endif %}>
-{% if senha %}<button type="button" data-senha aria-label="Mostrar senha" aria-pressed="false">{{ icone('eye') }}</button>{% endif %}</div></div>
+<div class="controle"><input id="{{ nome }}" name="{{ nome }}" type="{{ 'password' if senha else 'text' }}" autocomplete="{{ preenchimento or ('current-password' if senha else 'username') }}" maxlength="{{ limite or (256 if senha else 64) }}" required
+{% if nome == 'usuario' %}autocapitalize="none" spellcheck="false"{% endif %}
+{% if not senha and valor %}value="{{ valor }}"{% endif %}
+{% if preenchimento == 'new-password' %}minlength="12"{% endif %}
+{% if ajuda %}aria-describedby="ajuda-{{ nome }}"{% endif %}>
+{% if senha %}<button type="button" data-senha aria-controls="{{ nome }}" aria-label="Mostrar {{ rotulo|lower }}" aria-pressed="false">{{ icone('eye') }}</button>{% endif %}</div>
+{% if ajuda %}<small id="ajuda-{{ nome }}">{{ ajuda }}</small>{% endif %}</div>
 {%- endmacro %}
 {% macro aviso(texto, tipo='M04') -%}
 <div class="aviso" role="alert" data-componente="{{ tipo }}">{{ icone('circle-alert') }}<span>{{ texto }}</span></div>

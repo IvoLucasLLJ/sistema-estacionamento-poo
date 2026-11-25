@@ -33,6 +33,13 @@ def cenario(app, senha):
     return servico.iniciar_estadia('CB3', 8, caio)['estadia_id']
 
 
+def escolher_tema(pagina, preferencia):
+    menu = pagina.locator('.menu-aparencia')
+    menu.locator('summary').click()
+    menu.locator('label').filter(has_text=preferencia).click()
+    pagina.keyboard.press('Escape')
+
+
 def percorrer(pagina, url, senha, terceiro, historico, capturas):
     erros, externos = [], []
     pagina.on('pageerror', lambda erro: erros.append(str(erro)))
@@ -49,12 +56,9 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
         pagina.get_by_role('button', name='Entrar', exact=True).click()
 
     def sair():
-        pagina.locator('summary').click()
+        pagina.locator('.perfil > summary').click()
         pagina.get_by_role('button', name='Sair', exact=True).click()
         assert pagina.url == url + '/entrar'
-
-    def modo(preferencia):
-        pagina.locator('.tema label').filter(has_text=preferencia).click()
 
     def sem_transbordamento():
         for largura in (320, 390, 768, 1440):
@@ -86,7 +90,7 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
     assert 'R$ 20,00' in pagina.locator('#financeiro').inner_text()
     foto('gestao')
     sem_transbordamento()
-    modo('Escuro')
+    escolher_tema(pagina, 'Escuro')
     sair()
     assert pagina.locator('html').get_attribute('data-tema') == 'escuro'
 
@@ -108,9 +112,9 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
     foto('acesso-negado')
     pagina.get_by_role('link', name='Voltar ao início').click()
     assert pagina.url == url + '/cliente/'
-    modo('Claro')
+    escolher_tema(pagina, 'Claro')
     assert pagina.locator('html').get_attribute('data-tema') == 'claro'
-    modo('Sistema')
+    escolher_tema(pagina, 'Sistema')
     pagina.emulate_media(color_scheme='dark')
     pagina.locator('html[data-tema="escuro"]').wait_for()
     pagina.reload()

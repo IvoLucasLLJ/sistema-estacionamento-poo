@@ -12,7 +12,8 @@ Projeto acadêmico de POO em Python com aplicação web Flask, interface de term
 | Android 15+ com Termux | Na pasta interna `$HOME/MOVE`, executar `sh INICIAR_MOVE_ANDROID.sh` |
 
 Use Python 3 com venv e pip. No Android, use o Python dos pacotes do Termux.
-Na primeira abertura, escolha as senhas de `gestao.demo` e `cliente.demo`.
+Na primeira abertura, escolha no terminal senhas distintas para `gestao.demo`, `cliente.demo` e `master.demo`.
+Para a apresentação, entre como **master.demo** e use o seletor junto à marca MOVE para alternar da Gestão para o portal pessoal de Lia Vale. Em uma demonstração já instalada, o inicializador solicita apenas as senhas das contas que faltam.
 O endereço padrão é `http://127.0.0.1:5000/entrar`. Encerre com Ctrl+C.
 O guia distingue as plataformas em preparação das efetivamente testadas.
 [Inicialização](docs/inicializacao-10a2.md) · [Matriz de compatibilidade](docs/compatibilidade-10a1.md) · [Instalação e aceite no Android](docs/android-termux.md)

@@ -31,6 +31,7 @@ def destino():
 
 def preparar_requisicao():
     g.identidade = None
+    g.contexto = None
     if isinstance(request.routing_exception, SecurityError):
         # O Flask recusou o host antes de criar o adaptador usado pelos templates.
         return 'Endereço de acesso inválido.', 400, {'Content-Type': 'text/plain; charset=utf-8'}
@@ -44,7 +45,11 @@ def preparar_requisicao():
         if agora() >= session.get('expira', 0):
             session.clear()
             abort(401)
-        g.identidade = current_app.extensions['autenticacao'].contas.por_id(session['conta'])
+        g.contexto = current_app.extensions['autenticacao'].contexto(
+            session['conta'], current_app.config['VINCULOS_PORTAIS'],
+            titular_demo=current_app.config.get('TITULAR_DEMO'))
+        if g.contexto:
+            g.identidade = g.contexto.identidade_ativa(session.get('conta_pessoal_ativa'))
         if g.identidade is None:
             session.clear()
             abort(401)
@@ -53,6 +58,30 @@ def preparar_requisicao():
         esperado = session.get('csrf')
         if not esperado or not hmac.compare_digest(recebido.encode(), esperado.encode()):
             abort(400)
+
+
+def cliente_vinculado(identidade):
+    try:
+        return current_app.extensions['estacionamento'].buscar_cliente(identidade.cliente_id)
+    except ErroDeNegocio:
+        abort(404)
+
+
+def selecionar_ambiente(ambiente):
+    if ambiente not in {papel.value for papel in PapelAcesso}:
+        abort(400)
+    identidade = g.contexto.identidade_para(ambiente)
+    if identidade is None:
+        abort(403)
+    if identidade != g.identidade:
+        if identidade.papel == PapelAcesso.CLIENTE:
+            cliente_vinculado(identidade)
+            session['conta_pessoal_ativa'] = identidade.id
+        else:
+            session.pop('conta_pessoal_ativa', None)
+        current_app.extensions['revisoes'].invalidar_sessao(session.pop('csrf'))
+        csrf_token()
+        g.identidade = identidade
 
 
 def acesso_restrito(papel=None):
@@ -64,10 +93,7 @@ def acesso_restrito(papel=None):
             if papel is not None and g.identidade.papel != papel:
                 abort(403)
             if papel == PapelAcesso.CLIENTE:
-                try:
-                    g.cliente = current_app.extensions['estacionamento'].buscar_cliente(g.identidade.cliente_id)
-                except ErroDeNegocio:
-                    abort(404)
+                g.cliente = cliente_vinculado(g.identidade)
             return view(*args, **kwargs)
         return protegida
     return decorar

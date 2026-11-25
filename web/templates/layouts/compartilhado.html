@@ -1,2 +1,8 @@
 {% extends 'layouts/base.html' %}
-{% block estrutura %}<main id="principal" class="acesso"><div class="cartao-acesso">{{ ui.marca() }}{% block conteudo %}{% endblock %}<div class="preferencia"><span>Aparência</span>{{ ui.tema() }}</div></div></main>{% endblock %}
+{% block estrutura %}
+<div class="ferramentas-acesso">{{ ui.tema() }}</div>
+<main id="principal" class="acesso{% block classe_acesso %}{% endblock %}">
+  <div class="cartao-acesso">{{ ui.marca() }}{% block conteudo %}{% endblock %}</div>
+  {% block apresentacao %}{% endblock %}
+</main>
+{% endblock %}

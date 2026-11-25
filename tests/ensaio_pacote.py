@@ -19,7 +19,7 @@ from web.demonstracao import preparar_demonstracao
 
 
 def conferir_logins(url, senha):
-    for usuario, destino in [('gestao.demo', '/gestao/'), ('cliente.demo', '/cliente/')]:
+    for usuario, destino in [('gestao.demo', '/gestao/'), ('cliente.demo', '/cliente/'), ('master.demo', '/gestao/')]:
         navegador = build_opener(ProxyHandler({}), HTTPCookieProcessor(CookieJar()))
         with navegador.open(url + '/entrar', timeout=5) as login:
             csrf = re.search(rb'name="csrf_token" value="([^"]+)"', login.read())[1].decode()
@@ -37,8 +37,9 @@ def conferir_reaberturas(raiz, comando):
         config, lia = preparar_demonstracao()
     app = create_app(config)
     senha = token_urlsafe(32)
-    for papel, vinculo in [('gestao', []), ('cliente', ['--cliente-id', lia])]:
-        resultado = app.test_cli_runner().invoke(args=['criar-conta', '--usuario', papel + '.demo',
+    for usuario, papel, vinculo in [('gestao.demo', 'gestao', []), ('cliente.demo', 'cliente', ['--cliente-id', lia]),
+                                    ('master.demo', 'gestao', [])]:
+        resultado = app.test_cli_runner().invoke(args=['criar-conta', '--usuario', usuario,
                                                        '--papel', papel, *vinculo], input=f'{senha}\n{senha}\n')
         assert resultado.exit_code == 0, resultado.exception
     arquivos = [config['HISTORICO'], config['CONTAS'], config['DADOS'] / 'sessao.key']
@@ -80,4 +81,4 @@ if __name__ == '__main__':
             or len(sys.argv) != 2 or Path(sys.argv[1]).resolve().parent != raiz):
         sys.exit('Execute o ensaio na cópia descartável extraída pelo workflow.')
     conferir_reaberturas(raiz, [sys.argv[1]])
-    print('Inicializador do pacote: duas aberturas, dois logins em cada e persistência preservada.')
+    print('Inicializador do pacote: duas aberturas, três logins em cada e persistência preservada.')

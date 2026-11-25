@@ -147,7 +147,8 @@ def main(argumentos=None):
                     pass
             if args.demonstracao:
                 provisionar_demonstracao(app, titular)
-                print('Demonstração fictícia · Gestão: gestao.demo · Cliente: cliente.demo', flush=True)
+                print('Demonstração fictícia · Apresentação nos dois portais: master.demo · '
+                      'Gestão: gestao.demo · Cliente: cliente.demo', flush=True)
             else:
                 if not app.extensions['autenticacao'].contas.tem_gestor():
                     print('Nenhuma conta de Gestão. Provisione com python -m flask --app web criar-conta --usuario gestor --papel gestao.')

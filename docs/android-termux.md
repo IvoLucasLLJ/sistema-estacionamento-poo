@@ -20,7 +20,7 @@ O telefone ou tablet executa o servidor, o terminal, a Gestão e o Cliente. O na
    sh INICIAR_MOVE_ANDROID.sh
    ```
 
-5. Escolha no terminal as senhas fictícias de `gestao.demo` e `cliente.demo`, com a digitação oculta. O navegador recebe a URL após o teste HTTP do login. Se a abertura via `termux-open-url` falhar, abra manualmente `http://127.0.0.1:5000/entrar` ou a URL da porta escolhida. Gestão e Cliente podem ocupar uma aba normal e outra anônima. [Comando de abertura do Termux](https://github.com/termux/termux-tools/blob/master/scripts/termux-open-url.in)
+5. Escolha no terminal senhas distintas para `gestao.demo`, `cliente.demo` e `master.demo`, com a digitação oculta. Em uma instalação anterior, o inicializador solicita apenas a senha da conta que falta. O navegador recebe a URL após o teste HTTP do login. Se a abertura via `termux-open-url` falhar, abra manualmente `http://127.0.0.1:5000/entrar` ou a URL da porta escolhida. Para apresentar os dois portais na mesma aba, entre como **master.demo** e toque no seletor ao lado da marca MOVE. [Comando de abertura do Termux](https://github.com/termux/termux-tools/blob/master/scripts/termux-open-url.in)
 
 Para escolher outra porta ou abrir o navegador manualmente, use `sh INICIAR_MOVE_ANDROID.sh --porta 5001 --sem-navegador`. Para encerrar, retorne ao Termux e pressione Ctrl+C. Na próxima abertura, repita o comando inicial. O modo local dispensa rede Wi-Fi, outro computador e conexão externa depois da instalação.
 
@@ -68,7 +68,7 @@ cd "$HOME/MOVE"
 
 | Verificação no aparelho | Evidência de aprovação |
 |---|---|
-| Primeira instalação | Em cópia limpa, a venv é criada no armazenamento interno, as duas senhas são solicitadas e o login responde em loopback. Registre a versão do Python e o resultado do pip. |
+| Primeira instalação | Em cópia limpa, a venv é criada no armazenamento interno, as senhas das três contas são solicitadas e o login responde em loopback. Registre a versão do Python e o resultado do pip. |
 | Gestão, Cliente e autorização | Entre com os dois papéis. Lia vê apenas as próprias estadias. Abrir `/gestao/` com a conta Cliente resulta em acesso negado. |
 | Cobrança e comprovante | Na Gestão, consulte AV1 em 1,225 hora e obtenha R$ 6,13. Confirme o pagamento e atualize o Cliente. A vaga 2 continua ocupada. Conclua a saída e confira a liberação, o histórico e o comprovante. AM2 segue ativo. Confira isenção para a moto de Noa. |
 | Uso por toque | Em retrato e paisagem, navegue pelo menu, digite a duração com o teclado decimal, revise os dois temas e o foco. Confira legibilidade com o teclado aberto, gestos na borda inferior e a prévia de impressão se disponível. |

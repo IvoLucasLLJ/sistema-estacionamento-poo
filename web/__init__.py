@@ -20,7 +20,8 @@ def create_app(config=None):
     app = Flask(__name__)
     configurar(app, config)
     servico = EstacionamentoService(app.config['HISTORICO'])
-    autenticacao = AutenticacaoService(ContaRepository(app.config['CONTAS']), servico)
+    autenticacao = AutenticacaoService(ContaRepository(app.config['CONTAS']), servico,
+                                       demonstracao=app.config['DEMONSTRACAO'])
     app.extensions.update(revisoes=Revisoes(), estacionamento=servico, autenticacao=autenticacao,
                           escritor=EscritorLocal(app.config['HISTORICO']))
     for area in (acesso, gestao, cliente):

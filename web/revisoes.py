@@ -42,3 +42,9 @@ class Revisoes:
             if consumir:
                 del self._pendentes[chave]
             return dict(revisao.dados)
+
+    def invalidar_sessao(self, sessao):
+        with self._trava:
+            chaves = [chave for chave, revisao in self._pendentes.items() if revisao.sessao == sessao]
+            for chave in chaves:
+                del self._pendentes[chave]

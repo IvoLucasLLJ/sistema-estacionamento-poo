@@ -1,7 +1,6 @@
 {% extends 'layouts/cliente.html' %}
 {% from 'components/gestao.html' import dado, csrf with context %}
 {% block titulo %}Meu perfil{% endblock %}
-{% block aparencia %}{% endblock %}
 {% block conteudo %}
 <div class="titulo-pagina"><h1>Meu perfil</h1></div>
 <div class="gestao-divisao">
@@ -10,15 +9,11 @@
       {{ dado('Identificador para atendimento', cadastro.identificador) }}</dl>
     <p>Para solicitar atendimento sobre o cadastro, informe seu identificador à Gestão.</p>
   </section>
-  <section class="painel"><h2>Aparência</h2>
-    <p>A preferência vale para este navegador. Sistema acompanha a aparência do dispositivo.</p>
-    {{ ui.tema() }}
-  </section>
-</div>
 <section class="painel"><h2>Conta de acesso</h2>
-  <p>Você entrou como <strong>{{ g.identidade.usuario }}</strong>.</p>
+  <p>A conta deste ambiente é <strong>{{ g.identidade.usuario }}</strong>.</p>
   <form method="post" action="{{ url_for('acesso.sair') }}" data-submissao>
     {{ csrf() }}{{ ui.botao('Encerrar sessão', 'log-out', true) }}
   </form>
 </section>
+</div>
 {% endblock %}

@@ -28,6 +28,14 @@ class ControleTema {
     document.documentElement.dataset.tema = modo;
     for (const campo of document.querySelectorAll('input[name="tema"]')) {
       campo.checked = campo.value === this.#preferencia;
+      if (campo.checked) {
+        const opcao = campo.closest('label');
+        const botao = campo.closest('details').querySelector('summary');
+        const nome = 'Aparência: ' + opcao.textContent.trim();
+        botao.setAttribute('aria-label', nome);
+        botao.title = nome;
+        botao.querySelector('use').setAttribute('href', opcao.querySelector('use').getAttribute('href'));
+      }
     }
   }
 
@@ -68,17 +76,34 @@ class ControleSubmissao {
 const temaMove = new ControleTema();
 document.addEventListener('DOMContentLoaded', () => {
   temaMove.conectar();
-  document.querySelectorAll('[data-submissao]').forEach(form => new ControleSubmissao(form));
-  const controle = document.querySelector('[data-senha]');
-  if (controle) controle.addEventListener('click', () => {
-    const senha = document.getElementById('senha');
-    const mostrar = senha.type === 'password';
-    senha.type = mostrar ? 'text' : 'password';
-    controle.setAttribute('aria-pressed', String(mostrar));
-    controle.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
-    const uso = controle.querySelector('use');
-    uso.setAttribute('href', uso.getAttribute('href').split('#')[0] + (mostrar ? '#eye-off' : '#eye'));
+  const menus = document.querySelectorAll('[data-menu-cabecalho]');
+  function fecharOutros(evento) {
+    for (const menu of menus) {
+      if (menu.open && !menu.contains(evento.target)) menu.open = false;
+    }
+  }
+  document.addEventListener('click', fecharOutros);
+  document.addEventListener('focusin', fecharOutros);
+  document.addEventListener('keydown', evento => {
+    const menu = evento.target.closest('[data-menu-cabecalho][open]');
+    if (evento.key === 'Escape' && menu) {
+      menu.open = false;
+      menu.querySelector('summary').focus();
+    }
   });
+  document.querySelectorAll('[data-submissao]').forEach(form => new ControleSubmissao(form));
+  for (const controle of document.querySelectorAll('[data-senha]')) {
+    const senha = document.getElementById(controle.getAttribute('aria-controls'));
+    const rotulo = senha.labels[0].textContent.trim().toLowerCase();
+    controle.addEventListener('click', () => {
+      const mostrar = senha.type === 'password';
+      senha.type = mostrar ? 'text' : 'password';
+      controle.setAttribute('aria-pressed', String(mostrar));
+      controle.setAttribute('aria-label', (mostrar ? 'Ocultar ' : 'Mostrar ') + rotulo);
+      const uso = controle.querySelector('use');
+      uso.setAttribute('href', uso.getAttribute('href').split('#')[0] + (mostrar ? '#eye-off' : '#eye'));
+    });
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {

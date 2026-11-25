@@ -31,6 +31,8 @@ def configurar(app, opcoes):
     app.config.from_mapping(
         DADOS=os.environ.get('MOVE_DADOS', 'instance'),
         CONTAS=os.environ.get('MOVE_CONTAS'),
+        DEMONSTRACAO=False,
+        VINCULOS_PORTAIS={},
         HISTORICO=historico_local(),
         SECRET_KEY=os.environ.get('MOVE_SECRET_KEY'), SESSION_COOKIE_NAME='move_session',
         SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax',

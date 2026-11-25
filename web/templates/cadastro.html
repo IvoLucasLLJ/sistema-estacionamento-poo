@@ -1,0 +1,18 @@
+{% extends 'login.html' %}
+{% block titulo %}Criar conta{% endblock %}
+{% block classe_acesso %} login-portal cadastro-portal{% endblock %}
+{% block conteudo %}
+<h1>Criar conta</h1>
+<p class="subtitulo">Cadastre-se para acessar o MOVE Cliente.</p>
+{% if erro %}{{ ui.aviso(erro) }}{% endif %}
+<form method="post" action="{{ url_for('acesso.criar_conta') }}" data-submissao>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="revisao" value="{{ revisao }}">
+  {{ ui.campo('nome', 'Nome completo', preenchimento='name', limite=120, valor=nome) }}
+  {{ ui.campo('usuario', 'Nome de usuário', valor=usuario) }}
+  {{ ui.campo('senha', 'Senha', true, preenchimento='new-password', ajuda='Use de 12 a 256 caracteres.') }}
+  {{ ui.campo('confirmacao', 'Confirmação de senha', true, preenchimento='new-password') }}
+  {{ ui.botao('Criar conta', 'arrow-right') }}
+</form>
+<p class="acesso-alternativa"><a href="{{ url_for('acesso.entrar') }}">Já tenho uma conta</a></p>
+{% endblock %}

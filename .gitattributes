@@ -1,0 +1,3 @@
+INICIAR_MOVE_WINDOWS.cmd text eol=crlf
+INICIAR_MOVE_*.sh text eol=lf
+INICIAR_MOVE_MAC.command text eol=lf

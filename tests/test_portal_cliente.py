@@ -144,7 +144,7 @@ class PortalClienteTests(TestCase):
 
     def test_titular_atual_nao_herda_saida_legada_da_placa(self):
         # O arquivo importado termina antes da nova ocupação legada, com a saída antiga já concluída.
-        eventos = json.loads(self.arquivo.read_text())
+        eventos = json.loads(self.arquivo.read_text(encoding='utf-8'))
         cadastro = next(e for e in eventos if e.get('identificador') == str(UUID(int=1)))
         self.arquivo.write_text(json.dumps([*eventos[:2], cadastro]))
         self.s.vincular_veiculo('LEG9', str(UUID(int=1)))

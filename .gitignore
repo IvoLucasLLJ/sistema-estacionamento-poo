@@ -13,3 +13,5 @@ contas.json
 sessao.key
 *.tmp
 *.log
+.move-demonstracao/
+.move-cenario-*/

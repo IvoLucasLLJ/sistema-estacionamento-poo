@@ -47,11 +47,15 @@ class WebTests(TestCase):
 
     def test_contas_atomicamente_separadas_e_recuperaveis(self):
         contas = self.pasta / 'contas.json'
-        gravado = contas.read_text()
+        gravado = contas.read_text(encoding='utf-8')
         self.assertNotIn(self.senha, gravado)
         self.assertIn('scrypt:', gravado)
-        self.assertNotIn('scrypt:', self.cfg['HISTORICO'].read_text())
-        self.assertEqual(contas.stat().st_mode & 0o777, 0o600)
+        self.assertNotIn('scrypt:', self.cfg['HISTORICO'].read_text(encoding='utf-8'))
+        if os.name == 'nt':
+            from persistence.privacidade import conferir_acl
+            conferir_acl(contas)
+        else:
+            self.assertEqual(contas.stat().st_mode & 0o777, 0o600)
         nova = create_app(self.cfg)
         self.assertEqual(nova.extensions['autenticacao'].autenticar('LIA', self.senha), self.pessoal)
         self.assertFalse(hasattr(self.pessoal, 'senha_hash'))

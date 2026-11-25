@@ -1,8 +1,9 @@
 """Leitura validada e substituição atômica do histórico de uma única instância."""
 import json
 import os
-import tempfile
 from pathlib import Path
+
+from persistence.privacidade import abrir_leitura, temporario_privado
 
 
 class FalhaAntesDaSubstituicao(OSError):
@@ -20,7 +21,8 @@ def _rejeitar_constante(valor):
 def ler(arquivo):
     """Retorna eventos e bytes originais; ausência é distinta de arquivo vazio."""
     try:
-        conteudo = Path(arquivo).read_bytes()
+        with abrir_leitura(Path(arquivo)) as entrada:
+            conteudo = entrada.read()
         dados = json.loads(conteudo.decode("utf-8"), parse_constant=_rejeitar_constante)
     except FileNotFoundError:
         return [], None
@@ -41,7 +43,8 @@ def salvar(arquivo, historico, esperado=None):
 
     def verificar_destino():
         try:
-            atual = destino.read_bytes()
+            with abrir_leitura(destino) as entrada:
+                atual = entrada.read()
         except FileNotFoundError:
             atual = None
         if atual != esperado:
@@ -51,9 +54,7 @@ def salvar(arquivo, historico, esperado=None):
     substituicao_iniciada = False
     try:
         verificar_destino()
-        with tempfile.NamedTemporaryFile(mode="wb", dir=destino.parent,
-                                         prefix=destino.name + ".", suffix=".tmp", delete=False) as saida:
-            temporario = Path(saida.name)
+        with temporario_privado(destino) as (temporario, saida):
             saida.write(conteudo)
             saida.flush()
             os.fsync(saida.fileno())

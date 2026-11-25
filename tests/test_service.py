@@ -224,7 +224,7 @@ class ServiceTests(AmbienteTemporario):
 
         def falhar_antes_do_replace(fd):
             # O volume fica indisponível para as leituras seguintes à falha de fsync.
-            self.enterContext(patch.object(Path, 'read_bytes', side_effect=OSError('volume indisponível')))
+            self.enterContext(patch('persistence.historico_json.abrir_leitura', side_effect=OSError('volume indisponível')))
             raise OSError('falha ao sincronizar o temporário')
 
         with patch('os.fsync', falhar_antes_do_replace), patch('os.replace') as substituir:
@@ -297,7 +297,11 @@ class ConcorrenciaTests(AmbienteTemporario):
         # Cada participante abre seu próprio serviço. Os dois caminhos denotam o mesmo JSON.
         inicio = Barrier(len(operacoes), timeout=5)
         alias = self.pasta / 'alias.json'
-        if not alias.is_symlink():
+        if os.name == 'nt':
+            subpasta = self.pasta / 'subpasta'
+            subpasta.mkdir(exist_ok=True)
+            alias = subpasta / '..' / self.arquivo.name
+        elif not alias.is_symlink():
             alias.symlink_to(self.arquivo)
 
         def executar(indice, operacao):

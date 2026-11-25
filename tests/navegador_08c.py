@@ -19,7 +19,7 @@ def preparar_servidor(pasta, senha):
     with TemporaryDirectory() as origem:
         base = Path(origem) / 'base.json'
         preparar_p0(base)
-        eventos = json.loads(base.read_text())
+        eventos = json.loads(base.read_text(encoding='utf-8'))
     assert [(e['acao'], e['estadia_id']) for e in eventos[-2:]] == [
         ('entrada_cliente', 22), ('entrada_cliente', 23)]
     historico = pasta / 'historico.json'

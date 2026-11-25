@@ -4,6 +4,7 @@ from functools import wraps
 from time import time as agora
 
 from flask import abort, current_app, g, redirect, request, session, url_for
+from werkzeug.exceptions import SecurityError
 
 from service.estacionamento_service import ErroDeInfraestrutura, ErroDeNegocio
 from web.contas import PapelAcesso
@@ -30,6 +31,9 @@ def destino():
 
 def preparar_requisicao():
     g.identidade = None
+    if isinstance(request.routing_exception, SecurityError):
+        # O Flask recusou o host antes de criar o adaptador usado pelos templates.
+        return 'Endereço de acesso inválido.', 400, {'Content-Type': 'text/plain; charset=utf-8'}
     if request.endpoint == 'static':
         return
     try:

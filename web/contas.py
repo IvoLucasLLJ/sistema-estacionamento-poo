@@ -1,5 +1,4 @@
 """Identidade de acesso local, independente das categorias comerciais."""
-import fcntl
 import re
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
@@ -9,6 +8,7 @@ from uuid import UUID, uuid4
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from persistence import historico_json
+from persistence.exclusividade import trava_de_arquivo
 from service.estacionamento_service import ErroDeInfraestrutura
 
 
@@ -83,10 +83,12 @@ class ContaRepository:
     def por_usuario(self, usuario):
         return next((c for c in self._ler()[0] if c.identidade.usuario == usuario), None)
 
+    def tem_gestor(self):
+        return any(conta.identidade.papel == PapelAcesso.GESTAO for conta in self._ler()[0])
+
     def adicionar(self, conta):
         try:
-            with Path(str(self.caminho) + '.lock').open('a') as trava:
-                fcntl.flock(trava, fcntl.LOCK_EX)
+            with trava_de_arquivo(str(self.caminho) + '.lock', esperar=True):
                 contas, anterior = self._ler()
                 for existente in contas:
                     i = existente.identidade

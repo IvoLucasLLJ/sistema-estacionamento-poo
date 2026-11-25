@@ -1,10 +1,28 @@
 # MOVE — Sistema Inteligente de Estacionamento
 
-Projeto acadêmico de POO em Python com uma interface web local em Flask e uma interface de terminal que utiliza a biblioteca padrão.
+Projeto acadêmico de POO em Python com aplicação web Flask, interface de terminal e persistência JSON.
+
+## Abrir a demonstração acadêmica
+
+| Ambiente | Inicializador |
+|---|---|
+| Linux | `./INICIAR_MOVE_LINUX.sh` |
+| macOS Intel ou Apple Silicon | Abrir `INICIAR_MOVE_MAC.command` |
+| Windows 10/11 x64 | Abrir `INICIAR_MOVE_WINDOWS.cmd` em uma pasta privada NTFS |
+| Android 15+ com Termux | Na pasta interna `$HOME/MOVE`, executar `sh INICIAR_MOVE_ANDROID.sh` |
+
+Use Python 3 com venv e pip. No Android, use o Python dos pacotes do Termux.
+Na primeira abertura, escolha as senhas de `gestao.demo` e `cliente.demo`.
+O endereço padrão é `http://127.0.0.1:5000/entrar`. Encerre com Ctrl+C.
+O guia distingue as plataformas em preparação das efetivamente testadas.
+[Inicialização](docs/inicializacao-10a2.md) · [Matriz de compatibilidade](docs/compatibilidade-10a1.md) · [Instalação e aceite no Android](docs/android-termux.md)
 
 ## Executar a aplicação web
 
-Na raiz do repositório, prepare o ambiente e provisione a primeira conta de Gestão. O comando solicita a senha duas vezes com entrada oculta. Em um ambiente já preparado, ative a mesma `.venv` e use apenas o comando de inicialização.
+Para usar o histórico operacional, prepare o ambiente na raiz do repositório e
+provisione a primeira conta de Gestão. O comando solicita a senha duas vezes
+com entrada oculta. Em um ambiente já preparado, ative a mesma `.venv` e use
+apenas o comando de inicialização.
 
 ```bash
 python3 -m venv .venv
@@ -111,13 +129,7 @@ custo crescente com o número de eventos.
 
 ## Executar no Termux
 
-```sh
-cd ~/MOVE
-python -B main.py
-python -B -m unittest discover -s tests -v
-```
-
-SQLite, aplicativo mobile e vagas especiais ficam para versões futuras.
+O aparelho hospeda a Gestão, o Cliente e o terminal na própria instalação. Depois de preparar o ambiente com o inicializador Android, use `.venv/bin/python -B main.py` para o menu textual. O guia inclui instalação, utilização sem internet e recuperação após interrupções. [MOVE completo em Android 15 e 16](docs/android-termux.md)
 
 ## Demonstração pelo menu
 

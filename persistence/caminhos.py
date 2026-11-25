@@ -2,13 +2,16 @@
 import os
 from pathlib import Path
 
+from persistence.ambiente_termux import caminho_interno
+
 
 RAIZ_MOVE = Path(__file__).resolve().parents[1]
 
 
 def caminho_local(caminho):
     """Resolve a configuração relativa a esta instalação, inclusive após um chdir."""
-    return (RAIZ_MOVE / Path(caminho).expanduser()).resolve()
+    caminho_interno(RAIZ_MOVE)
+    return caminho_interno((RAIZ_MOVE / Path(caminho).expanduser()).resolve())
 
 
 def historico_local():

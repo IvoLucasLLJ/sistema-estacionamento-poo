@@ -1,9 +1,30 @@
 import os
 import secrets
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+
+from persistence import privacidade
 
 from persistence.caminhos import caminho_local, historico_local
+from persistence.exclusividade import trava_de_arquivo
+
+
+def chave_persistida(chave):
+    # Todos os inicializadores usam a mesma trava. O Termux pode não oferecer os.link.
+    with trava_de_arquivo(str(chave) + '.lock', esperar=True):
+        if not chave.exists():
+            temporario = None
+            try:
+                with privacidade.temporario_privado(chave) as (temporario, saida):
+                    saida.write(secrets.token_bytes(32))
+                    saida.flush()
+                    os.fsync(saida.fileno())
+                os.replace(temporario, chave)
+            finally:
+                if temporario is not None:
+                    temporario.unlink(missing_ok=True)
+        if os.name == 'nt':
+            privacidade.conferir_acl(chave)
+        return chave.read_bytes()
 
 
 def configurar(app, opcoes):
@@ -18,24 +39,20 @@ def configurar(app, opcoes):
     )
     app.config.update(opcoes or {})
     dados = caminho_local(app.config['DADOS'])
-    dados.mkdir(mode=0o700, parents=True, exist_ok=True)
+    privacidade.criar_pasta_privada(dados)
     contas = caminho_local(app.config.get('CONTAS') or dados / 'contas.json')
     historico = caminho_local(app.config['HISTORICO'])
-    chave = dados / 'sessao.key'
-    caminhos = [historico, contas, chave, Path(str(historico) + '.lock'), Path(str(contas) + '.lock')]
+    chave = caminho_local(dados / 'sessao.key')
+    caminhos = [historico, contas, chave, Path(str(historico) + '.lock'), Path(str(contas) + '.lock'),
+                Path(str(chave) + '.lock')]
     if len(set(caminhos)) != len(caminhos) or any(p.is_relative_to(Path(app.static_folder)) for p in caminhos):
         raise ValueError('Use arquivos privados distintos, fora da pasta estática.')
+    if os.name == 'nt':
+        privacidade.conferir_acl(contas.parent)
+        if contas.exists():
+            privacidade.conferir_acl(contas)
     app.config.update(DADOS=dados, CONTAS=contas, HISTORICO=historico)
     if app.config['SECRET_KEY'] is None:
-        if not chave.exists():
-            with NamedTemporaryFile(dir=dados) as temporario:
-                temporario.write(secrets.token_bytes(32))
-                temporario.flush()
-                os.fsync(temporario.fileno())
-                try:
-                    os.link(temporario.name, chave)
-                except FileExistsError:
-                    pass
-        app.config['SECRET_KEY'] = chave.read_bytes()
+        app.config['SECRET_KEY'] = chave_persistida(chave)
     if len(app.config['SECRET_KEY']) < 32:
         raise ValueError('A chave da sessão precisa ter pelo menos 32 bytes.')

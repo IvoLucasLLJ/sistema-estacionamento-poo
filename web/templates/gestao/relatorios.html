@@ -1,0 +1,58 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Relatórios
+{% endblock %}
+{% block corpo %}
+  <div class="gestao-divisao">
+    {{ ui.disponibilidade(ocupacao) }}
+    <section class="painel">
+      <h2>Faturamento acumulado</h2>
+      <div class="medida">
+        <strong>{{ faturamento.reais|dinheiro }}</strong>
+      </div>
+      <p>Todas as saídas concluídas, incluindo valores legados.</p>
+    </section>
+  </div>
+  <section class="painel">
+    <h2>Saídas por período</h2>
+    <form class="filtros">
+      {{ adm.campo('inicio','Saída a partir de',request.args.get('inicio',''),'date',false) }}
+      {{ adm.campo('fim','Saída até',request.args.get('fim',''),'date',false) }}
+      {{ ui.botao('Aplicar período',secundario=true) }}
+    </form>
+    <dl class="ficha">
+      {{ adm.dado('Receita do período',rel.receita|dinheiro) }}
+      {{ adm.dado('Saídas pagas identificadas',rel.pagas) }}
+      {{ adm.dado('Saídas isentas identificadas',rel.isentas) }}
+      {{ adm.dado('Saídas legadas',rel.legadas) }}
+    </dl>
+    <p>As saídas legadas conservam a precisão registrada e aparecem sem categoria histórica.</p>
+  </section>
+  <div class="gestao-divisao">
+    {% for titulo,linhas,rotulos in [('Tipo de veículo',rel.por_tipo,tipos),('Categoria na entrada',rel.por_categoria,categorias)] %}
+      <section class="painel">
+        <table>
+          <caption>Saídas por {{ titulo|lower }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ titulo }}</th>
+              <th scope="col">Quantidade</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for chave,n in linhas %}
+              <tr>
+                <th scope="row">{{ rotulos.get(chave,'Legado') }}</th>
+                <td>{{ n }} <meter min="0" max="{{ rel.pagas + rel.isentas + rel.legadas }}" value="{{ n }}" aria-label="Participação de {{ rotulos.get(chave,'Legado') }} nas saídas"></meter></td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="2">Nenhuma saída no período.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endfor %}
+  </div>
+{% endblock %}

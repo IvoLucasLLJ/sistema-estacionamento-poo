@@ -18,6 +18,8 @@ Abra [o login local](http://127.0.0.1:5000/entrar). O terminal continua disponí
 
 O guia da 08A apresenta o provisionamento pessoal por UUID, os arquivos privados, as opções de ambiente, a arquitetura de apresentação e a reprodução dos testes. [Guia da aplicação web](docs/web-08a.md)
 
+O guia da Gestão descreve os 14 modelos administrativos, o fluxo de pagamento e saída, a recuperação por estadia e os testes em Chromium. [Guia MOVE Gestão](docs/web-08b.md)
+
 ## Serviço de aplicação — Etapa 05
 
 `service.estacionamento_service.EstacionamentoService(arquivo)` é a entrada Python

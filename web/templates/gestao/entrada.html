@@ -1,0 +1,92 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Registrar entrada
+{% endblock %}
+{% block corpo %}
+  {% if revisao %}
+    <section class="painel">
+      <h2>Revisar entrada</h2>
+      <dl class="ficha">
+        {{ adm.dado('Cliente',dono.nome) }}
+        {{ adm.dado('UUID',dono.identificador) }}
+        {{ adm.dado('Categoria',categorias[dono.categoria]) }}
+        {{ adm.dado('Veículo',veiculo.placa ~ ' · ' ~ veiculo.modelo) }}
+        {{ adm.dado('Vaga',vaga) }}
+      </dl>
+      <form method="post" action="{{ url_for('gestao.entrada') }}" data-submissao>
+        {{ adm.revisao(revisao) }}
+        <div class="acoes">
+          {{ ui.botao('Confirmar entrada') }}
+          {{ adm.link('Voltar à seleção',url_for('gestao.entrada',cliente_id=dono.identificador,placa=placa,vaga=vaga)) }}
+        </div>
+      </form>
+    </section>
+  {% else %}
+    <div class="gestao-divisao">
+      <section class="painel">
+        <h2>Identificar cliente</h2>
+        {% if clientes %}
+          <form>
+            <div class="entrada">
+              <label for="escolha-cliente_id">Cliente</label>
+              <select id="escolha-cliente_id" name="cliente_id" required>
+                <option value="">Selecione</option>
+                {% for c in clientes %}
+                  <option value="{{ c.identificador }}" {% if dono and c.identificador==dono.identificador %}selected{% endif %}>{{ c.nome }} · {{ c.identificador }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% if vaga %}
+              <input type="hidden" name="vaga" value="{{ vaga }}">
+            {% endif %}
+            {{ ui.botao('Consultar veículos',secundario=true) }}
+          </form>
+        {% else %}
+          {{ adm.link('Cadastrar primeiro cliente',url_for('gestao.clientes')) }}
+        {% endif %}
+      </section>
+      {% if dono %}
+        <section class="painel">
+          <h2>Veículo e vaga</h2>
+          {% set livres=vagas|rejectattr('ocupada')|list %}
+          {% if not frota %}
+            <p>Cliente sem veículos vinculados.</p>
+            {{ adm.link('Ver cadastro',url_for('gestao.cliente',identificador=dono.identificador)) }}
+          {% elif not livres %}
+            <p>Estacionamento lotado.</p>
+          {% elif not frota|rejectattr('placa','in',ocupadas)|list %}
+            <p>Todos os veículos vinculados já estão estacionados.</p>
+          {% else %}
+            <form>
+              <input type="hidden" name="cliente_id" value="{{ dono.identificador }}">
+              <input type="hidden" name="revisar" value="1">
+              <div class="entrada">
+                <label for="escolha-placa">Veículo vinculado</label>
+                <select id="escolha-placa" name="placa" required>
+                  <option value="">Selecione</option>
+                  {% for v in frota %}
+                    <option value="{{ v.placa }}" {% if v.placa in ocupadas %}disabled{% elif v.placa == placa %}selected{% endif %}>{{ v.placa }} · {{ v.modelo }}
+                    {% if v.placa in ocupadas %}
+                      · Estacionado
+                    {% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="entrada">
+                <label for="escolha-vaga">Vaga livre</label>
+                <select id="escolha-vaga" name="vaga" required>
+                  <option value="">Selecione</option>
+                  {% for v in livres %}
+                    <option value="{{ v.numero }}" {% if vaga == v.numero %}selected{% endif %}>Vaga {{ v.numero }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ ui.botao('Revisar entrada') }}
+            </form>
+          {% endif %}
+        </section>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

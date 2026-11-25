@@ -1,0 +1,53 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  {{ c.nome }}
+{% endblock %}
+{% block introducao %}
+  <p class="subtitulo">{{ categorias[c.categoria] }} · {{ c.identificador }}</p>
+{% endblock %}
+{% block corpo %}
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Veículos vinculados</h2>
+      {% for v in frota %}
+        <p>
+        <a href="{{ url_for('gestao.veiculo',placa=v.placa) }}">{{ v.placa }}</a> · {{ tipos[v.tipo] }} · {{ v.modelo }}</p>
+      {% else %}
+        <p>Sem veículos vinculados.</p>
+      {% endfor %}
+    </section>
+    <section class="painel">
+      <h2>Vincular veículo</h2>
+      {% if elegiveis %}
+        <form method="post" action="{{ url_for('gestao.vincular') }}" data-submissao>
+          {{ adm.csrf() }}
+          <input type="hidden" name="cliente_id" value="{{ c.identificador }}">
+          <div class="entrada">
+            <label for="escolha-placa">Veículo disponível</label>
+            <select id="escolha-placa" name="placa" required>
+              {% for v in elegiveis %}
+                <option value="{{ v.placa }}">{{ v.placa }} · {{ v.modelo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {{ ui.botao('Vincular veículo') }}
+        </form>
+      {% else %}
+        <p>Nenhum veículo disponível para vínculo.</p>
+      {% endif %}
+    </section>
+  </div>
+  <section class="painel">
+    <h2>Estadias ativas</h2>
+    {% for e in ativas %}
+      <p><a href="{{ url_for('gestao.detalhe_estadia', numero=e.estadia_id) }}">Estadia {{ e.estadia_id }}</a>
+        · {{ e.placa }} · Vaga {{ e.vaga }} · {{ pagamentos[e.pagamento] }}</p>
+    {% else %}
+      <p>Nenhuma estadia ativa deste cliente.</p>
+    {% endfor %}
+  </section>
+  <section class="painel">
+    <h2>Histórico identificado</h2>
+    {{ adm.eventos(eventos) }}
+  </section>
+{% endblock %}

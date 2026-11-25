@@ -80,3 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
     uso.setAttribute('href', uso.getAttribute('href').split('#')[0] + (mostrar ? '#eye-off' : '#eye'));
   });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const menu = document.querySelector('[data-menu]');
+  if (menu) {
+    menu.parentElement.classList.add('com-menu');
+    menu.addEventListener('click', () => {
+      menu.setAttribute('aria-expanded', String(menu.getAttribute('aria-expanded') !== 'true'));
+    });
+  }
+  document.querySelector('[data-imprimir]')?.addEventListener('click', () => window.print());
+});

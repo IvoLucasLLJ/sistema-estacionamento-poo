@@ -1,0 +1,35 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Estadias ativas
+{% endblock %}
+{% block corpo %}
+  <form class="filtros">
+    {{ adm.campo('q','Buscar placa, cliente ou estadia',request.args.get('q',''),obrigatorio=false) }}
+    {{ adm.seletor('pagamento','Situação financeira',pagamentos.items(),request.args.get('pagamento'),'Todas',false) }}
+    {{ ui.botao('Filtrar') }}
+  </form>
+  <div class="colecao">
+    {% for e in lista %}
+      <article class="painel">
+        <div class="titulo-painel">
+          <h2>{{ e.placa }}</h2><b>Vaga {{ e.vaga }}</b>
+        </div>
+        <p>{{ tipos[e.tipo] }} · {{ pagamentos[e.pagamento] }}</p>
+        {% if e.estadia_id %}
+          <p>Estadia {{ e.estadia_id }} · {{ e.nome }} · {{ categorias[e.categoria] }}</p>
+        {% else %}
+          <p>Ocupação legada sem titular identificado</p>
+        {% endif %}
+        <p>Entrada {{ e.horario_entrada|horario }}</p>
+        {% if e.estadia_id %}
+          <div class="acoes">
+            {{ adm.link('Ver estadia',url_for('gestao.detalhe_estadia',numero=e.estadia_id)) }}
+            {{ adm.link('Preparar saída',url_for('gestao.saida',numero=e.estadia_id)) }}
+          </div>
+        {% endif %}
+      </article>
+    {% else %}
+      <p>Nenhuma estadia encontrada.</p>
+    {% endfor %}
+  </div>
+{% endblock %}

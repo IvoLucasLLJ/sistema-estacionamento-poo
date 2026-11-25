@@ -1,0 +1,37 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Estadia {{ e.estadia_id }}
+{% endblock %}
+{% block introducao %}
+  <div class="marca-impressao">
+    {{ ui.marca('Gestão') }}
+  </div>
+  <p class="subtitulo">{{ 'Concluída' if e.situacao=='concluida' else 'Ativa' }} · {{ pagamentos[e.pagamento] }}</p>
+{% endblock %}
+{% block corpo %}
+  {% if request.args.get('recuperar') %}
+    <p class="noticia" role="status">Estado persistido da estadia {{ e.estadia_id }} consultado.</p>
+  {% endif %}
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Dados da utilização</h2>
+      {{ adm.ficha_estadia(e,dono,v) }}
+    </section>
+    <section class="painel" data-componente="V07">
+      <h2>{{ 'Comprovante acadêmico' if e.situacao=='concluida' else 'Situação financeira' }}</h2>
+      {% if e.cobranca %}
+        {{ adm.cobranca(e.cobranca) }}
+      {% endif %}
+      {% if e.situacao=='concluida' %}
+        <p>Utilização concluída · Sem valor fiscal.</p>
+        <button class="botao secundario" type="button" data-imprimir>Imprimir comprovante</button>
+      {% elif revisao %}
+        <p class="confirmado">Pagamento confirmado. Veículo na vaga {{ e.vaga }}.</p>
+        {{ adm.concluir(e,revisao,'Concluir saída paga') }}
+      {% else %}
+        <p>Sem pagamento confirmado.</p>
+        {{ adm.link('Preparar saída',url_for('gestao.saida',numero=e.estadia_id),true) }}
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

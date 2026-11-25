@@ -9,7 +9,9 @@ from service.estacionamento_service import (
 from web.apresentacao import centavos, dinheiro, horario
 from web.config import configurar
 from web.contas import AutenticacaoService, ContaRepository, PapelAcesso
-from web.rotas import acesso, cliente, gestao
+from web.gestao import gestao
+from web.revisoes import Revisoes
+from web.rotas import acesso, cliente
 from web.seguranca import csrf_token, destino, preparar_requisicao
 
 
@@ -18,7 +20,7 @@ def create_app(config=None):
     configurar(app, config)
     servico = EstacionamentoService(app.config['HISTORICO'])
     autenticacao = AutenticacaoService(ContaRepository(app.config['CONTAS']), servico)
-    app.extensions.update(estacionamento=servico, autenticacao=autenticacao,
+    app.extensions.update(revisoes=Revisoes(), estacionamento=servico, autenticacao=autenticacao,
                           escritor=EscritorLocal(app.config['HISTORICO']))
     for area in (acesso, gestao, cliente):
         app.register_blueprint(area)
@@ -51,28 +53,36 @@ def create_app(config=None):
             400: ('Solicitação inválida', 'Abra o formulário novamente e confira os dados.', 'M04'),
             401: ('Sessão expirada', 'Entre novamente para consultar seus dados.', 'S03'),
             403: ('Acesso negado', 'Sua conta não tem acesso a esta área.', 'S02'),
+            409: ('Revisão indisponível', 'O formulário expirou ou já foi enviado. Consulte o estado antes de revisar novamente.', 'M08'),
             404: ('Recurso indisponível', 'Não foi possível disponibilizar o recurso solicitado.', 'S04'),
         }
         estado = dados.get(exc.code, ('Solicitação indisponível', 'Volte ao início para continuar.', 'S04'))
         pagina, _ = erro(exc.code, *estado, atencao=exc.code == 401,
-                         acao='Entrar novamente' if exc.code == 401 else 'Voltar ao início')
+                         acao='Entrar novamente' if exc.code == 401 else ('Consultar estado' if g.get('consulta_operacao') else 'Voltar ao início'),
+                         retorno=g.get('consulta_operacao'))
         resposta = exc.get_response()
         resposta.set_data(pagina)
         return resposta
 
     @app.errorhandler(ErroDeNegocio)
     def negocio(exc):
-        return erro(422, 'Confira os dados', 'Não foi possível realizar a operação informada.', 'M04')
+        mensagem = str(exc) if request.blueprint == 'gestao' else 'Não foi possível realizar a operação informada.'
+        return erro(422, 'Confira os dados', mensagem, 'M04', retorno=g.get('consulta_operacao'))
 
     @app.errorhandler(ConflitoDeHistorico)
     def conflito(exc):
-        return erro(409, 'Histórico atualizado', 'Consulte o estado atual antes de continuar.', atencao=True)
+        return erro(409, 'Histórico atualizado', 'Consulte o estado atual antes de continuar.',
+                    acao='Consultar estado', retorno=g.get('consulta_operacao'), atencao=True)
 
     @app.errorhandler(ResultadoIncerto)
     def incerto(exc):
         original = g.get('estadia_autorizada')
         consulta = url_for('cliente.estadia', estadia_id=original) if original is not None else destino()
-        return erro(503, 'Resultado incerto', 'Consulte a estadia original antes de qualquer novo envio.',
+        consulta = g.get('consulta_operacao', consulta)
+        mensagem = ('Confira os cadastros antes de tentar novamente. Homônimos podem impedir a identificação '
+                    'da tentativa pelo nome.' if request.endpoint == 'gestao.clientes' else
+                    'Confira o registro da operação antes de qualquer novo envio.')
+        return erro(503, 'Resultado incerto', mensagem,
                     acao='Consultar estado', retorno=consulta, atencao=True)
 
     @app.errorhandler(ErroDeInfraestrutura)
@@ -82,6 +92,9 @@ def create_app(config=None):
         leitura = request.method == 'GET' and request.endpoint in {
             'gestao.inicio', 'cliente.inicio', 'cliente.estadia', 'acesso.entrar',
         }
+        if request.method == 'POST' and g.get('consulta_operacao'):
+            return erro(503, 'Serviço indisponível', 'O serviço não confirmou a operação. Consulte o registro.',
+                        acao='Consultar estado', retorno=g.consulta_operacao)
         return erro(503, 'Serviço indisponível', 'Os dados não puderam ser consultados agora.',
                     acao='Repetir consulta' if leitura else 'Voltar ao início',
                     retorno=request.path if leitura else None)

@@ -1,3 +1,12 @@
 {% extends 'layouts/portal.html' %}
 {% set area = 'Gestão' %}
-{% set links = [('Visão geral', url_for('gestao.inicio'), 'layout-dashboard'), ('Mapa de vagas', '#vagas', 'circle-parking'), ('Financeiro', '#financeiro', 'receipt-text')] %}
+{% set links = [
+ ('Visão geral',url_for('gestao.inicio'),'layout-dashboard'),
+ ('Mapa de vagas',url_for('gestao.vagas'),'circle-parking'),
+ ('Registrar entrada',url_for('gestao.entrada'),'arrow-right'),
+ ('Estadias ativas',url_for('gestao.estadias'),'clock'),
+ ('Pagamentos',url_for('gestao.fila'),'circle-check'),
+ ('Clientes',url_for('gestao.clientes'),'user-round'),
+ ('Veículos',url_for('gestao.veiculos'),'car'),
+ ('Histórico',url_for('gestao.historico'),'receipt-text'),
+ ('Relatórios',url_for('gestao.relatorios'),'layout-dashboard')] %}

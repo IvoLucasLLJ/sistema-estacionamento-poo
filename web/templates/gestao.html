@@ -8,6 +8,7 @@
   </div>
   <a href="{{ url_for('gestao.inicio') }}" class="botao secundario">{{ ui.icone('refresh-cw') }} Atualizar</a>
 </div>
+<div class="acoes atalhos"><a class="botao primario" href="{{ url_for('gestao.entrada') }}">{{ ui.icone('arrow-right') }} Registrar entrada</a><a class="botao secundario" href="{{ url_for('gestao.estadias') }}">Preparar saída</a></div>
 <div class="row g-3">
   <div class="col-12 col-xl-6">{{ ui.disponibilidade(ocupacao) }}</div>
   <div class="col-12 col-xl-6">
@@ -18,7 +19,7 @@
       {% else %}
       <div class="medida"><strong>{{ financeiro.reais|dinheiro }}</strong></div>
       <p>Faturamento das estadias concluídas</p>
-      <div class="linha"><span>Pagamentos aguardando saída</span><strong>{{ pendentes }}</strong></div>
+      <div class="linha"><a href="{{ url_for('gestao.fila') }}">Pagamentos aguardando saída</a><strong>{{ pendentes }}</strong></div>
       {% endif %}
     </section>
   </div>
@@ -28,14 +29,6 @@
     <h2>{{ ui.icone('layout-dashboard') }} Mapa de vagas</h2>
     <span>{{ ocupacao.total }} vagas comuns</span>
   </div>
-  <ul class="grade-vagas">
-    {% for vaga in vagas %}
-    <li class="{{ 'ocupada' if vaga.ocupada else 'livre' }}">
-      <strong>{{ '%02d'|format(vaga.numero) }}</strong>
-      <span>{{ ui.icone('car' if vaga.ocupada else 'circle-check') }}{{ 'Ocupada' if vaga.ocupada else 'Livre' }}</span>
-      {% if vaga.ocupada %}<small>{{ vaga.placa }}</small>{% endif %}
-    </li>
-    {% endfor %}
-  </ul>
+  {% import 'components/gestao.html' as adm with context %}{{ adm.mapa(vagas) }}
 </section>
 {% endblock %}

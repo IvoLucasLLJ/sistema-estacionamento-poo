@@ -1,0 +1,37 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Veículos
+{% endblock %}
+{% block atalhos %}
+  {{ adm.link('Novo veículo','#cadastro',true) }}
+{% endblock %}
+{% block corpo %}
+  <form class="filtros">
+    {{ adm.campo('q','Buscar placa',request.args.get('q',''),obrigatorio=false) }}
+    {{ adm.seletor('tipo','Filtrar tipo',tipos.items(),request.args.get('tipo'),'Todos',false) }}
+    {{ ui.botao('Filtrar',secundario=true) }}
+  </form>
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Veículos cadastrados</h2>
+      {% for v in lista %}
+        <div class="registro-evento">
+          <a href="{{ url_for('gestao.veiculo',placa=v.placa) }}">{{ v.placa }}</a>
+          <span>{{ tipos[v.tipo] }} · {{ v.modelo }}</span>
+        </div>
+      {% else %}
+        <p>Nenhum veículo encontrado.</p>
+      {% endfor %}
+    </section>
+    <section class="painel" id="cadastro">
+      <h2>Cadastrar veículo</h2>
+      <form method="post" data-submissao>
+        {{ adm.revisao(revisao) }}
+        {{ adm.seletor('tipo','Tipo',tipos.items(),request.form.get('tipo'),'Selecione') }}
+        {{ adm.campo('placa','Placa',request.form.get('placa','')) }}
+        {{ adm.campo('modelo','Modelo',request.form.get('modelo','')) }}
+        {{ ui.botao('Cadastrar veículo') }}
+      </form>
+    </section>
+  </div>
+{% endblock %}

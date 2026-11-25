@@ -1,0 +1,46 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  {{ v.placa }}
+{% endblock %}
+{% block introducao %}
+  <p class="subtitulo">{{ tipos[v.tipo] }} · {{ v.modelo }}</p>
+{% endblock %}
+{% block corpo %}
+  <section class="painel">
+    <h2>Responsável e ocupação</h2>
+    {% if dono %}
+      <p>
+      <a href="{{ url_for('gestao.cliente',identificador=dono.identificador) }}">{{ dono.nome }}</a> · {{ categorias[dono.categoria] }}</p>
+    {% else %}
+      <p>Sem vínculo cadastral.</p>
+    {% endif %}
+    {% if ativo %}
+      <p>Estacionado na vaga {{ ativo.vaga }} · {{ pagamentos[ativo.pagamento] }}</p>
+      {% if ativo.estadia_id %}
+        {{ adm.link('Ver estadia',url_for('gestao.detalhe_estadia',numero=ativo.estadia_id)) }}
+      {% endif %}
+    {% else %}
+      <p>Fora do estacionamento.</p>
+      {% if dono %}
+        {{ adm.link('Registrar entrada',url_for('gestao.entrada',cliente_id=dono.identificador,placa=v.placa),true) }}
+      {% elif clientes %}
+        <form method="post" action="{{ url_for('gestao.vincular') }}" data-submissao>
+          {{ adm.csrf() }}
+          <input type="hidden" name="placa" value="{{ v.placa }}">
+          <div class="entrada">
+            <label for="escolha-cliente_id">Cliente responsável</label>
+            <select id="escolha-cliente_id" name="cliente_id" required>
+              <option value="">Selecione</option>
+              {% for c in clientes %}
+                <option value="{{ c.identificador }}">{{ c.nome }} · {{ c.identificador }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {{ ui.botao('Vincular cliente') }}
+        </form>
+      {% else %}
+        {{ adm.link('Cadastrar cliente',url_for('gestao.clientes')) }}
+      {% endif %}
+    {% endif %}
+  </section>
+{% endblock %}

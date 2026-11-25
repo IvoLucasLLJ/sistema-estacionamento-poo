@@ -1,0 +1,25 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Histórico
+{% endblock %}
+{% block corpo %}
+  <form class="filtros">
+    {{ adm.campo('q','Evento, estadia, placa ou cliente',request.args.get('q',''),obrigatorio=false) }}
+    {{ adm.seletor('acao','Tipo de evento',acoes.items(),request.args.get('acao'),'Todos',false) }}
+    {{ ui.botao('Filtrar',secundario=true) }}
+  </form>
+  {% if detalhe %}
+    <section class="painel">
+      <h2>Evento {{ detalhe.numero }} · {{ detalhe.rotulo }}</h2>
+      <dl class="ficha">
+        {% for rotulo, valor in campos %}
+          {{ adm.dado(rotulo, valor) }}
+        {% endfor %}
+      </dl>
+    </section>
+  {% endif %}
+  <section class="painel">
+    <h2>Eventos registrados</h2>
+    {{ adm.eventos(eventos) }}
+  </section>
+{% endblock %}

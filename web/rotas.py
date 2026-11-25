@@ -1,12 +1,10 @@
 from flask import Blueprint, current_app, g, redirect, render_template, request, session, url_for
 
-from service.estacionamento_service import ConflitoDeHistorico, ErroDeInfraestrutura, ResultadoIncerto
 from web.apresentacao import OcupacaoViewModel
 from web.contas import PapelAcesso
 from web.seguranca import acesso_restrito, destino, estadia_do_titular, iniciar_sessao
 
 acesso = Blueprint('acesso', __name__)
-gestao = Blueprint('gestao', __name__, url_prefix='/gestao')
 cliente = Blueprint('cliente', __name__, url_prefix='/cliente')
 
 
@@ -35,22 +33,6 @@ def entrar():
 def sair():
     session.clear()
     return redirect(url_for('acesso.entrar'), code=303)
-
-
-@gestao.get('/')
-@acesso_restrito(PapelAcesso.GESTAO)
-def inicio():
-    servico = current_app.extensions['estacionamento']
-    ocupacao = OcupacaoViewModel.da_consulta(servico.consultar_ocupacao())
-    try:
-        financeiro = servico.consultar_faturamento()
-        pendentes = len(servico.listar_pagamentos_abertos())
-    except (ConflitoDeHistorico, ResultadoIncerto):
-        raise
-    except ErroDeInfraestrutura:
-        financeiro = pendentes = None
-    return render_template('gestao.html', ocupacao=ocupacao, vagas=servico.consultar_vagas(),
-                           financeiro=financeiro, pendentes=pendentes)
 
 
 @cliente.get('/', endpoint='inicio')

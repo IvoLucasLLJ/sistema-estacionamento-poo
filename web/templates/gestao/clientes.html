@@ -1,0 +1,40 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Clientes
+{% endblock %}
+{% block atalhos %}
+  {{ adm.link('Novo cliente','#cadastro',true) }}
+{% endblock %}
+{% block corpo %}
+  <form class="filtros">
+    {{ adm.campo('q','Nome ou UUID',request.args.get('q',''),obrigatorio=false) }}
+    {{ adm.seletor('categoria','Filtrar categoria',categorias.items(),request.args.get('categoria'),'Todas',false) }}
+    {{ ui.botao('Filtrar',secundario=true) }}
+  </form>
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Clientes cadastrados</h2>
+      <div class="registros">
+        {% for c in lista %}
+          <div class="registro-evento">
+            <div>
+              <a href="{{ url_for('gestao.cliente',identificador=c.identificador) }}">{{ c.nome }}</a><small>{{ c.identificador }}</small>
+            </div>
+            <span class="categoria {{ c.categoria }}">{{ categorias[c.categoria] }}</span>
+          </div>
+        {% else %}
+          <p>Nenhum cliente encontrado.</p>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="painel" id="cadastro">
+      <h2>Cadastrar cliente</h2>
+      <form method="post" data-submissao>
+        {{ adm.revisao(revisao) }}
+        {{ adm.campo('nome','Nome',request.form.get('nome','')) }}
+        {{ adm.seletor('categoria','Categoria',categorias.items(),request.form.get('categoria'),'Selecione') }}
+        {{ ui.botao('Cadastrar cliente') }}
+      </form>
+    </section>
+  </div>
+{% endblock %}

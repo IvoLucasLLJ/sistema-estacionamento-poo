@@ -1,0 +1,117 @@
+{% import 'components/ui.html' as ui with context %}
+{% macro link(texto, url, principal=false) -%}
+  <a class="botao {{ 'primario' if principal else 'secundario' }}" href="{{ url }}">{{ texto }}</a>
+{%- endmacro %}
+{% macro campo(nome, texto, valor='', tipo='text', obrigatorio=true) -%}
+  <label class="entrada">{{ texto }}
+  <input name="{{ nome }}" type="{{ tipo }}" value="{{ valor }}" {% if obrigatorio %}required{% endif %}></label>
+{%- endmacro %}
+{% macro seletor(nome, texto, opcoes, atual='', vazio='', obrigatorio=true) -%}
+  {% set id = ('valor-' if obrigatorio else 'filtro-') ~ nome %}
+  <div class="entrada">
+    <label for="{{ id }}">{{ texto }}</label>
+    <select id="{{ id }}" name="{{ nome }}" {% if obrigatorio %}required{% endif %}>
+      {% if vazio %}
+        <option value="">{{ vazio }}</option>
+      {% endif %}
+      {% for valor, nome in opcoes %}
+        <option value="{{ valor }}" {% if valor|string == atual|string %}selected{% endif %}>{{ nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
+{%- endmacro %}
+{% macro csrf() -%}
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}
+{% macro dado(rotulo, valor) -%}
+  <div>
+    <dt>{{ rotulo }}</dt>
+    <dd>{{ valor }}</dd>
+  </div>
+{%- endmacro %}
+{% macro mapa(vagas, ativas={}, selecao=none) %}
+  <ul class="grade-vagas" data-componente="V02">
+    {% for v in vagas %}
+      <li class="{{ 'ocupada' if v.ocupada else 'livre' }}" data-componente="D05">
+        <a href="{{ url_for('gestao.vagas', vaga=v.numero) }}" aria-label="Vaga {{ v.numero }} · {{ 'ocupada' if v.ocupada else 'livre' }}" {% if selecao and selecao.numero == v.numero %}aria-current="true"{% endif %}> <strong>{{ '%02d'|format(v.numero) }}</strong>
+        <span>
+        {{ ui.icone('car' if v.ocupada else 'circle-check') }}{{ 'Ocupada' if v.ocupada else 'Livre' }}</span>
+        {% if v.ocupada %}
+          <small>{{ v.placa }}
+          {% if v.numero in ativas and ativas[v.numero].placa == v.placa and ativas[v.numero].pagamento == 'legado' %}
+            · Legada
+          {% endif %}
+          </small>
+        {% endif %}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+{% macro revisao(chave) -%}
+  {{ csrf() }}
+  <input type="hidden" name="revisao" value="{{ chave }}">
+{%- endmacro %}
+{% macro eventos(lista) %}
+  <div class="registros" data-componente="D06">
+    {% for e in lista %}
+      <article class="registro-evento" data-componente="D07">
+        <div>
+          <strong>#{{ e.numero }} · {{ e.rotulo }}</strong>
+          {% if e.placa %}
+            <b>{{ e.placa }}</b>
+          {% endif %}
+          {% if e.nome %}
+            <span>{{ e.nome }}</span>
+          {% endif %}
+          {% if e.cliente_id %}
+            <small>{{ e.cliente_id }}</small>
+          {% endif %}
+          {% if e.horario_saida or e.horario_entrada %}
+            <span>{{ (e.horario_saida or e.horario_entrada)|horario }}</span>
+          {% endif %}
+          {% if e.valor_centavos is defined %}
+            <b>{{ e.valor_centavos|centavos }}</b>
+          {% elif e.valor is defined %}
+            <b>{{ e.valor|dinheiro }}</b>
+          {% endif %}
+        </div>
+        <div>
+          {% if e.estadia_id %}
+            <a href="{{ url_for('gestao.detalhe_estadia',numero=e.estadia_id) }}">Estadia {{ e.estadia_id }}</a>
+          {% endif %}
+          <a href="{{ url_for('gestao.historico',evento=e.numero) }}">Detalhes do evento {{ e.numero }}</a>
+        </div>
+      </article>
+    {% else %}
+      <p>Nenhum evento encontrado.</p>
+    {% endfor %}
+  </div>
+{% endmacro %}
+{% macro ficha_estadia(e,dono,v) -%}
+  <dl class="ficha">
+    {{ dado('Cliente',dono.nome) }}
+    {{ dado('Categoria na entrada',categorias[e.categoria]) }}
+    {{ dado('Veículo',v.placa ~ ' · ' ~ v.modelo) }}
+    {{ dado('Tipo',tipos[e.tipo]) }}
+    {{ dado('Vaga',e.vaga) }}
+    {{ dado('Entrada', e.horario_entrada|horario) }}
+    {% if e.horario_saida %}
+      {{ dado('Saída', e.horario_saida|horario) }}
+    {% endif %}
+  </dl>
+{%- endmacro %}
+{% macro cobranca(c) %}
+  <dl class="conta" data-componente="P01">
+    {{ dado('Duração informada', c.horas|replace('.',',') ~ ' h') }}
+    {{ dado('Tarifa-base',c.tarifa_base|dinheiro) }}
+    {{ dado('Desconto exato',c.desconto|dinheiro) }}
+    {{ dado('Total definitivo',c.valor_centavos|centavos) }}
+  </dl>
+{% endmacro %}
+{% macro concluir(e,chave,rotulo) %}
+  <form method="post" action="{{ url_for('gestao.concluir',numero=e.estadia_id) }}" data-submissao>
+    {{ revisao(chave) }}
+    {{ ui.botao(rotulo) }}
+  </form>
+{% endmacro %}

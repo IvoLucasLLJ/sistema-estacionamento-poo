@@ -1,0 +1,35 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Preparar saída
+{% endblock %}
+{% block introducao %}
+  <p class="subtitulo">Estadia {{ e.estadia_id }} · Vaga {{ e.vaga }}</p>
+{% endblock %}
+{% block corpo %}
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Dados da utilização</h2>
+      {{ adm.ficha_estadia(e,dono,v) }}
+      <form>
+        <label class="entrada">Duração em horas
+        <input type="text" inputmode="decimal" name="horas" value="{{ request.args.get('horas','') }}" required aria-describedby="ajuda-horas"></label><small id="ajuda-horas">Use vírgula ou ponto para informar uma fração de hora.</small>
+        {{ ui.botao('Consultar cobrança') }}
+      </form>
+    </section>
+    <section class="painel">
+      <h2>Cotação</h2>
+      <p>{{ pagamentos[e.pagamento] }}</p>
+      {% if cotacao %}
+        {{ adm.cobranca(cotacao) }}
+        {% if cotacao.valor_centavos %}
+          {{ adm.link('Revisar pagamento',url_for('gestao.pagamento',numero=e.estadia_id,revisao=revisao),true) }}
+        {% else %}
+          <p>Utilização isenta.</p>
+          {{ adm.concluir(e,revisao,'Concluir saída isenta') }}
+        {% endif %}
+      {% else %}
+        <p>Informe a duração para consultar o valor devido.</p>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

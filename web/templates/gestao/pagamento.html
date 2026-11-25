@@ -1,0 +1,30 @@
+{% extends 'gestao/pagina.html' %}
+{% block nome %}
+  Confirmar pagamento
+{% endblock %}
+{% block introducao %}
+  <p class="subtitulo">Estadia {{ e.estadia_id }} · {{ e.placa }} · Vaga {{ e.vaga }}</p>
+{% endblock %}
+{% block corpo %}
+  <div class="gestao-divisao">
+    <section class="painel">
+      <h2>Revisão da estadia</h2>
+      {{ adm.ficha_estadia(e,dono,v) }}
+    </section>
+    <section class="painel">
+      <h2>Pagamento simulado</h2>
+      {{ adm.cobranca(cotacao) }}
+      <p>A confirmação mantém a vaga ocupada até a conclusão da saída.</p>
+      <div class="acoes">
+        {% for valor,rotulo in [('confirmar','Confirmar pagamento simulado'),('cancelar','Cancelar')] %}
+          <form method="post" action="{{ url_for('gestao.pagamento',numero=e.estadia_id) }}" data-submissao>
+            {{ adm.revisao(revisao) }}
+            <input type="hidden" name="decisao" value="{{ valor }}">
+            {{ ui.botao(rotulo,secundario=loop.last) }}
+          </form>
+        {% endfor %}
+      </div>
+      <p><a href="{{ url_for('gestao.detalhe_estadia', numero=e.estadia_id, recuperar=1) }}">Consultar estado da estadia {{ e.estadia_id }}</a></p>
+    </section>
+  </div>
+{% endblock %}

@@ -14,10 +14,11 @@
   </details>
 </header>
 <div class="portal">
-  <nav class="navegacao" aria-label="Navegação {{ area }}" data-componentes="N02 N03">
-    <div class="destinos">
+  <nav class="navegacao {{ 'nav-gestao' if area == 'Gestão' }}" aria-label="Navegação {{ area }}" data-componentes="N02 N03">
+    {% if area == 'Gestão' %}<button type="button" class="botao secundario menu-gestao" data-menu aria-controls="destinos" aria-expanded="false">Menu Gestão</button>{% endif %}
+    <div class="destinos" id="destinos">
       {% for texto, href, icone in links %}
-      <a href="{{ href }}">{{ ui.icone(icone) }}{{ texto }}</a>
+      <a href="{{ href }}" {% if request.path==href %}aria-current="page"{% endif %}>{{ ui.icone(icone) }}{{ texto }}</a>
       {% endfor %}
     </div>
     <div class="preferencia"><span>Aparência</span>{{ ui.tema() }}</div>

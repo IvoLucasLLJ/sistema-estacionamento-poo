@@ -1,0 +1,27 @@
+{% extends 'layouts/gestao.html' %}
+{% import 'components/gestao.html' as adm with context %}
+{% block titulo %}
+  {{ self.nome() }} · Gestão
+{% endblock %}
+{% block conteudo %}
+  <div class="titulo-pagina">
+    <div>
+      <h1>
+      {% block nome %}
+      {% endblock %}
+      </h1>
+      {% block introducao %}
+      {% endblock %}
+    </div>
+    {% block atalhos %}
+    {% endblock %}
+  </div>
+  {% for mensagem in get_flashed_messages() %}
+    <p class="noticia" role="status">{{ mensagem }}</p>
+  {% endfor %}
+  {% if erro %}
+    {{ ui.aviso(erro) }}
+  {% endif %}
+  {% block corpo %}
+  {% endblock %}
+{% endblock %}

@@ -15,8 +15,12 @@ def dinheiro(reais):
     valor = Decimal(reais)
     if not valor.is_finite():
         return 'Valor fora da faixa de representação'
+    if valor.is_zero():
+        return 'R$ 0,00'
+    if valor.adjusted() < -300:
+        return 'R$ ' + format(valor, 'E').replace('.', ',')
     inteiro, _, fracao = format(valor, ',f').partition('.')
-    return 'R$ ' + inteiro.replace(',', '.') + ',' + fracao.ljust(2, '0')
+    return 'R$ ' + inteiro.replace(',', '.') + ',' + fracao.rstrip('0').ljust(2, '0')
 
 
 def centavos(valor):

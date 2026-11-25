@@ -136,11 +136,43 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
     assert not erros and not externos, (erros, externos)
 
 
+def conferir_consulta_pessoal(browser, perfil, descricao, url, senha):
+    with browser.new_context(**perfil, locale='pt-BR', color_scheme='dark') as contexto:
+        pagina = contexto.new_page()
+        pagina.goto(url + '/entrar')
+        pagina.get_by_label('Usuário', exact=True).fill('lia.demo')
+        pagina.get_by_label('Senha', exact=True).fill(senha)
+
+        def ativar(controle):
+            if perfil.get('has_touch'):
+                controle.tap()
+            else:
+                controle.focus()
+                pagina.keyboard.press('Enter')
+
+        ativar(pagina.get_by_role('button', name='Entrar', exact=True))
+        pagina.wait_for_url(url + '/cliente/')
+        assert 'R$ 6,13' in pagina.locator('#estadias').inner_text()
+        nav = pagina.get_by_role('navigation')
+        consulta = nav.get_by_role('link', name='Disponibilidade', exact=True)
+        if not consulta.is_visible():
+            ativar(nav.get_by_role('button', name='Mais', exact=True))
+        ativar(consulta)
+        pagina.wait_for_url(url + '/cliente/disponibilidade')
+        ativar(pagina.get_by_role('link', name='Atualizar'))
+        assert pagina.locator('.medida strong').inner_text() == '7'
+        assert pagina.locator('html').get_attribute('data-tema') == 'escuro'
+        assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        assert 'AV1' not in pagina.locator('main').inner_text()
+        print(f'{descricao} · consulta pessoal aprovada em {browser.browser_type.name} {browser.version}', flush=True)
+
+
 def main():
     from playwright.sync_api import sync_playwright
 
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument('--chrome', help='Executável Chromium/Chrome já instalado.')
+    cli.add_argument('--webkit', action='store_true', help='Testar também perfis iPhone e iPad com o WebKit do Playwright.')
     cli.add_argument('--capturas', type=Path, help='Pasta de saída para os quatro PNGs.')
     args = cli.parse_args()
     if args.capturas:
@@ -162,6 +194,14 @@ def main():
                         percorrer(pagina, f'http://127.0.0.1:{servidor.server_port}', senha,
                                   terceiro, historico, args.capturas)
                         print(f'Percurso aprovado em Chromium {browser.version}.')
+                        url = f'http://127.0.0.1:{servidor.server_port}'
+                        conferir_consulta_pessoal(browser, pw.devices['Pixel 7'], 'Perfil Pixel 7', url, senha)
+                        conferir_consulta_pessoal(browser, {'viewport': {'width': 1366, 'height': 768}},
+                                                  'Chrome desktop com teclado · referência Chromebook', url, senha)
+                    if args.webkit:
+                        with pw.webkit.launch() as browser:
+                            for modelo in ('iPhone 13', 'iPad (gen 7)'):
+                                conferir_consulta_pessoal(browser, pw.devices[modelo], modelo, url, senha)
             finally:
                 servidor.shutdown()
                 thread.join()

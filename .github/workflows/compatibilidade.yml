@@ -29,12 +29,25 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python }}
-      - name: Preparar pela entrada nativa e executar a suíte
+      - name: Extrair o código e executar a suíte pelo inicializador nativo
         shell: python
         run: |
-          import os, platform, subprocess, sys, tempfile
+          import os, platform, subprocess, sys, tempfile, zipfile
           from pathlib import Path
-          raiz = Path.cwd()
+          temporaria = Path(os.environ['RUNNER_TEMP'])
+          pacote = temporaria / 'MOVE.zip'
+          raiz = temporaria / 'MOVE acadêmico'
+          subprocess.run(['git', 'archive', '--format=zip', '-o', str(pacote), 'HEAD'], check=True)
+          raiz.mkdir()
+          if sys.platform == 'darwin':
+              subprocess.run(['ditto', '-x', '-k', pacote, raiz], check=True)
+          elif os.name == 'nt':
+              with zipfile.ZipFile(pacote) as arquivo:
+                  arquivo.extractall(raiz)
+          else:
+              subprocess.run(['unzip', '-q', pacote, '-d', raiz], check=True)
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as ambiente:
+              print(f'MOVE_CI_PASTA={raiz}', file=ambiente)
           entrada = {'Windows': 'INICIAR_MOVE_WINDOWS.cmd', 'Darwin': 'INICIAR_MOVE_MAC.command',
                      'Linux': 'INICIAR_MOVE_LINUX.sh'}[platform.system()]
           print(platform.platform(), platform.machine(), sys.version, flush=True)
@@ -43,4 +56,15 @@ jobs:
                              env={**os.environ, 'MOVE_PYTHON': sys.executable})
           python = raiz / '.venv' / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
           subprocess.run([python, '-m', 'pip', 'check'], check=True)
-          subprocess.run([python, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-v'], check=True)
+          subprocess.run([python, '-B', '-m', 'unittest', 'discover', '-s', 'tests', '-v'], cwd=raiz, check=True)
+      - name: Testar os portais no Chrome e perfis móveis no WebKit do macOS
+        if: runner.os == 'macOS' && matrix.python == '3.12'
+        shell: bash
+        run: |
+          cd "$MOVE_CI_PASTA"
+          python=.venv/bin/python
+          "$python" -m pip install 'playwright==1.64.1'
+          "$python" -m playwright install webkit
+          chrome="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          "$python" -B -m tests.navegador_08a --chrome "$chrome" --webkit
+          "$python" -B -m tests.navegador_08c --chrome "$chrome"

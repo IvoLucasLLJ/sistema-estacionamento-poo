@@ -88,3 +88,19 @@ class TermuxTests(TestCase):
                 self.assertEqual(len(instalacoes), int(instalada != '3.0.4'))
                 if instalacoes:
                     self.assertIn('--no-binary=MarkupSafe', instalacoes[0])
+
+    def test_instalacao_nativa_interrompida_preserva_requisitos_e_nao_inicia_servidor(self):
+        requisitos = self.raiz / 'requirements.txt'
+        original = b'MarkupSafe==3.0.4\n'
+        requisitos.write_bytes(original)
+        with patch.object(iniciar_move, 'AMBIENTE', Path(sys.prefix).resolve()), \
+                patch.object(iniciar_move, 'RAIZ', self.raiz), \
+                patch.object(iniciar_move, 'prefixo_termux', return_value=self.prefixo), \
+                patch('importlib.metadata.version', side_effect=iniciar_move.metadata.PackageNotFoundError), \
+                patch('subprocess.run', return_value=subprocess.CompletedProcess([], 1)) as executar:
+            with self.assertRaisesRegex(ValueError, 'instalação falhou'):
+                iniciar_move.conferir_pacotes()
+        executar.assert_called_once()
+        self.assertIn('--no-binary=MarkupSafe', executar.call_args.args[0])
+        self.assertEqual(requisitos.read_bytes(), original)
+        self.assertFalse((self.raiz / '.move-demonstracao').exists())

@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import sys
@@ -209,14 +210,15 @@ class WebTests(TestCase):
         self.http.get('/entrar')
         main = Path(__file__).resolve().parents[1] / 'main.py'
         chamada = [sys.executable, '-B', str(main)]
-        bloqueado = subprocess.run(chamada, cwd=self.pasta, input='4\n', capture_output=True, text=True)
+        env = {**os.environ, 'MOVE_HISTORICO': str(self.cfg['HISTORICO'])}
+        bloqueado = subprocess.run(chamada, cwd=self.pasta, env=env, input='4\n', capture_output=True, text=True)
         self.assertNotEqual(bloqueado.returncode, 0)
         self.assertIn('em uso', bloqueado.stderr)
         segunda = create_app(self.cfg)
         self.addCleanup(segunda.extensions['escritor'].fechar)
         self.assertEqual(segunda.test_client().get('/entrar').status_code, 503)
         self.app.extensions['escritor'].fechar()
-        livre = subprocess.run(chamada, cwd=self.pasta, input='4\n', capture_output=True, text=True)
+        livre = subprocess.run(chamada, cwd=self.pasta, env=env, input='4\n', capture_output=True, text=True)
         self.assertEqual(livre.returncode, 0, livre.stderr)
 
     def test_sessao_verifica_conta_em_cada_acesso(self):

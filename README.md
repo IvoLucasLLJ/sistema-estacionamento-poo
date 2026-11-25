@@ -155,8 +155,14 @@ O polimorfismo ocorre quando `Estacionamento.retirar` chama
 
 ## Persistência e erros
 
-O arquivo `historico.json` fica no diretório de execução. Use sempre `~/MOVE`
-para manter o mesmo arquivo. O histórico é uma lista de eventos:
+O terminal e o servidor usam `historico.json` ao lado de `main.py`, inclusive
+quando o terminal é aberto de outra pasta. Para continuar usando um histórico
+guardado em outro lugar, defina `MOVE_HISTORICO` com o caminho absoluto desse
+arquivo em ambas as execuções. Caminhos relativos em `MOVE_HISTORICO`,
+`MOVE_DADOS` e `MOVE_CONTAS` partem da raiz da instalação. Se antes você usava
+um caminho relativo a outra pasta, use o endereço absoluto anterior para
+reabrir os mesmos dados. Consulte a [matriz de compatibilidade](docs/compatibilidade-10a1.md).
+O histórico é uma lista de eventos:
 
 - `cadastro`: placa, tipo e modelo;
 - `entrada`: placa, tipo, modelo, vaga e horário de entrada;

@@ -1,5 +1,6 @@
 """Regressões do histórico entre o terminal, o Repository e a aplicação web."""
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -31,8 +32,9 @@ class HorariosLegadosTests(TestCase):
         self.assertIsNone(datetime.fromisoformat(anteriores[2]['horario_entrada']).tzinfo)
         processo = subprocess.run(
             [sys.executable, '-B', str(Path(__file__).resolve().parents[1] / 'main.py')],
-            cwd=self.raiz, input='7\nLEG9\n2\n4\n', capture_output=True, text=True, timeout=10, check=True)
-        self.assertIn('Tarifa: R$ 10.00', processo.stdout)
+            cwd=self.raiz, env={**os.environ, 'MOVE_HISTORICO': str(self.arquivo)},
+            input='7\nLEG9\n2\n4\n', capture_output=True, text=True, timeout=10, check=True)
+        self.assertIn('Tarifa: R$ 10,00', processo.stdout)
         gravado = self.arquivo.read_bytes()
         eventos = json.loads(gravado)
         self.assertEqual(eventos[:-1], anteriores)

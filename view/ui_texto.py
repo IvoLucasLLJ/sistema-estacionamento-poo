@@ -1,9 +1,11 @@
 from controller.controller import Controller
+from persistence.caminhos import historico_local
+from view.formatacao import dinheiro
 
 
-def menu():
+def menu(arquivo=None):
     try:
-        ctrl = Controller()
+        ctrl = Controller(historico_local() if arquivo is None else arquivo)
     except (ValueError, OSError) as erro:
         print(f"Não foi possível abrir o histórico: {erro}")
         return
@@ -35,7 +37,7 @@ def menu():
                 vaga = int(input("Número da vaga: "))
                 horas = float(input("Horas estacionado: ").replace(",", "."))
                 tarifa = ctrl.retirar_veiculo(vaga, horas)
-                print(f"Veículo retirado. Tarifa: R$ {tarifa:.2f}")
+                print(f"Veículo retirado. Tarifa: {dinheiro(tarifa)}")
             except ValueError as e:
                 print(e)
 
@@ -63,14 +65,14 @@ def menu():
             try:
                 horas = float(input("Horas estacionado: ").replace(",", "."))
                 tarifa = ctrl.retirar_por_placa(placa, horas)
-                print(f"Veículo retirado. Tarifa: R$ {tarifa:.2f}")
+                print(f"Veículo retirado. Tarifa: {dinheiro(tarifa)}")
             except ValueError as erro:
                 print(erro)
 
         elif opcao == "3":
             rel = ctrl.relatorio()
             print(f"Vagas ocupadas: {rel['ocupadas']}, Vagas livres: {rel['livres']}")
-            print(f"Faturamento total: R$ {rel['faturamento']:.2f}")
+            print(f"Faturamento total: {dinheiro(rel['faturamento'])}")
 
         elif opcao == "4":
             try:

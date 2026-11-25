@@ -16,7 +16,7 @@ from view.ui_texto import menu
 
 class NucleoTests(unittest.TestCase):
     def setUp(self):
-        # O menu e o Controller usam o caminho padrão relativo à pasta da sessão.
+        # A API legada do Controller aceita o caminho padrão relativo à sessão.
         pasta = self.enterContext(tempfile.TemporaryDirectory())
         self.enterContext(chdir(pasta))
         self.ctrl = Controller()
@@ -112,7 +112,7 @@ class NucleoTests(unittest.TestCase):
                 patch.object(self.ctrl, 'salvar') as salvar, redirect_stdout(saida):
             menu()
         salvar.assert_called_once_with()
-        self.assertIn('Tarifa: R$ 15.00', saida.getvalue())
+        self.assertIn('Tarifa: R$ 15,00', saida.getvalue())
         self.assertIn('Vagas ocupadas: 0, Vagas livres: 10', saida.getvalue())
         self.assertEqual(self.ctrl.relatorio()['faturamento'], 15)
 

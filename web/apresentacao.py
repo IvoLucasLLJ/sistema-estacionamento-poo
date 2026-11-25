@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP, localcontext
+from decimal import Decimal
+
+from view.formatacao import dinheiro
 
 
 CATEGORIAS = {'comum': 'Comum', 'vip': 'VIP', 'mensalista': 'Mensalista'}
@@ -12,16 +14,6 @@ def horario(iso):
     texto = instante.strftime('%d/%m/%Y às %H:%M')
     fuso = instante.strftime('%z')
     return f'{texto} ({fuso[:3]}:{fuso[3:]})' if fuso else texto
-
-
-def dinheiro(reais):
-    """Formata reais em pt-BR com duas casas, arredondando somente a exibição."""
-    valor = Decimal(str(reais))
-    if not valor.is_finite():
-        return 'Valor fora da faixa de representação'
-    with localcontext(rounding=ROUND_HALF_UP):
-        inteiro, fracao = format(valor, 'z,.2f').split('.')
-    return 'R$ ' + inteiro.replace(',', '.') + ',' + fracao
 
 
 def centavos(valor):

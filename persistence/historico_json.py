@@ -51,10 +51,10 @@ def salvar(arquivo, historico, esperado=None):
     substituicao_iniciada = False
     try:
         verificar_destino()
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=destino.parent,
+        with tempfile.NamedTemporaryFile(mode="wb", dir=destino.parent,
                                          prefix=destino.name + ".", suffix=".tmp", delete=False) as saida:
             temporario = Path(saida.name)
-            saida.write(conteudo.decode("utf-8"))
+            saida.write(conteudo)
             saida.flush()
             os.fsync(saida.fileno())
         verificar_destino()

@@ -158,7 +158,7 @@ class EvolucaoTests(unittest.TestCase):
                 patch.object(ctrl, 'salvar'), redirect_stdout(io.StringIO()) as saida:
             menu()
         self.assertIn('Veículo ABC1234 cadastrado.', saida.getvalue())
-        self.assertIn('Tarifa: R$ 20.00', saida.getvalue())
+        self.assertIn('Tarifa: R$ 20,00', saida.getvalue())
         self.assertEqual(ctrl.relatorio()['faturamento'], 20)
         with patch('view.ui_texto.Controller', side_effect=ValueError('Corrompido')), \
                 patch('builtins.input') as entrada, redirect_stdout(io.StringIO()) as saida:

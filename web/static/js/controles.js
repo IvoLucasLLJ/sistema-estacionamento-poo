@@ -91,3 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.querySelector('[data-imprimir]')?.addEventListener('click', () => window.print());
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mais = document.querySelector('[data-mais]');
+  if (!mais) return;
+  const destinos = document.getElementById(mais.getAttribute('aria-controls'));
+  mais.closest('nav').classList.add('com-mais');
+  mais.addEventListener('click', () => {
+    mais.setAttribute('aria-expanded', String(mais.getAttribute('aria-expanded') !== 'true'));
+  });
+  document.addEventListener('keydown', evento => {
+    if (evento.key === 'Escape' && mais.getAttribute('aria-expanded') === 'true') {
+      mais.setAttribute('aria-expanded', 'false');
+      mais.focus();
+    }
+  });
+  function fecharFora(evento) {
+    if (!mais.contains(evento.target) && !destinos.contains(evento.target)) {
+      mais.setAttribute('aria-expanded', 'false');
+    }
+  }
+  document.addEventListener('click', fecharFora);
+  document.addEventListener('focusin', fecharFora);
+});

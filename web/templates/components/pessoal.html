@@ -1,0 +1,25 @@
+{% import 'components/ui.html' as ui with context %}
+{% macro ativa(e, modelo=none) %}
+<article class="registro registro-pessoal" data-componente="D04">
+  <h3><a href="{{ url_for('cliente.estadia', estadia_id=e.estadia_id) }}">{{ e.placa }} · Vaga {{ e.vaga }}</a></h3>
+  <p>{{ tipos[e.tipo] }}{% if modelo %} · {{ modelo }}{% endif %} · Estadia {{ e.estadia_id }}</p>
+  <p>Entrada <time datetime="{{ e.horario_entrada }}">{{ e.horario_entrada|horario }}</time>
+     · {{ categorias[e.categoria] }}</p>
+  {% if e.pagamento == 'confirmado' %}
+    <p class="confirmado" data-componente="P06">{{ ui.icone('circle-check') }} Pagamento confirmado · {{ e.cobranca.valor_centavos|centavos }}</p>
+    <p>Veículo ainda estacionado.</p>
+  {% else %}
+    <p>Sem pagamento confirmado</p>
+  {% endif %}
+</article>
+{% endmacro %}
+
+{% macro veiculo(v, ativa=none, consultada=true) %}
+<article class="registro registro-pessoal" data-componente="D03">
+  <h3>{{ v.placa }}</h3>
+  <p>{{ tipos[v.tipo] }} · {{ v.modelo }}</p>
+  {% if not consultada %}<p>Situação indisponível.</p>
+  {% elif ativa %}<a href="{{ url_for('cliente.estadia', estadia_id=ativa.estadia_id) }}">Ver estadia {{ ativa.estadia_id }} · Vaga {{ ativa.vaga }}</a>
+  {% else %}<p>Fora do estacionamento.</p>{% endif %}
+</article>
+{% endmacro %}

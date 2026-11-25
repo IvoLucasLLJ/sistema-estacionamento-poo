@@ -1,0 +1,10 @@
+{% extends 'layouts/cliente.html' %}
+{% import 'components/pessoal.html' as pessoal with context %}
+{% block titulo %}Meus veículos{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina"><h1>Meus veículos</h1></div>
+<section class="painel"><h2>Veículos vinculados{% if frota %} · {{ frota|length }}{% endif %}</h2>
+  {% for v in frota %}{{ pessoal.veiculo(v, por_placa.get(v.placa) if por_placa is not none, por_placa is not none) }}
+  {% else %}<p>Nenhum veículo vinculado. Procure o atendimento do estacionamento.</p>{% endfor %}
+</section>
+{% endblock %}

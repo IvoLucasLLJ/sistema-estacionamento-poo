@@ -1,3 +1,19 @@
 {% extends 'layouts/portal.html' %}
 {% set area = 'Cliente' %}
-{% set links = [('Início', url_for('cliente.inicio'), 'layout-dashboard'), ('Estadias', '#estadias', 'clock'), ('Veículos', '#veiculos', 'car'), ('Disponibilidade', '#disponibilidade', 'circle-parking')] %}
+{% set links = [('Início', url_for('cliente.inicio'), 'layout-dashboard'),
+                ('Estadias', url_for('cliente.estadias'), 'clock'),
+                ('Veículos', url_for('cliente.veiculos'), 'car')] %}
+{% set outros = [('Disponibilidade', 'cliente.disponibilidade', 'circle-parking'),
+                 ('Tarifas e benefícios', 'cliente.tarifas', 'receipt-text'),
+                 ('Meu histórico', 'cliente.historico', 'clock'),
+                 ('Meu perfil', 'cliente.perfil', 'user-round')] %}
+{% block mais_destinos %}
+  <button class="mais-cliente" type="button" aria-controls="mais-destinos" aria-expanded="false" data-mais>
+    {{ ui.icone('layout-dashboard') }} Mais
+  </button>
+  <div id="mais-destinos" class="mais-destinos">
+    {% for texto, endpoint, icone in outros %}
+      <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ ui.icone(icone) }}{{ texto }}</a>
+    {% endfor %}
+  </div>
+{% endblock %}

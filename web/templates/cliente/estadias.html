@@ -1,0 +1,10 @@
+{% extends 'layouts/cliente.html' %}
+{% import 'components/pessoal.html' as pessoal with context %}
+{% block titulo %}Minhas estadias{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina"><h1>Minhas estadias</h1></div>
+<section class="painel"><h2>Ativas{% if ativas %} · {{ ativas|length }}{% endif %}</h2>
+  {% for e in ativas %}{{ pessoal.ativa(e, modelos.get(e.placa)) }}
+  {% else %}<p>Nenhuma estadia ativa.</p>{% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'layouts/cliente.html' %}
+{% block titulo %}Tarifas e benefícios{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina"><h1>Tarifas e benefícios</h1></div>
+<div class="gestao-divisao">
+  <section class="painel"><h2>Seu benefício</h2>
+    <span class="categoria {{ cadastro.categoria }}">{{ categorias[cadastro.categoria] }}</span>
+    <p>{{ beneficios[cadastro.categoria] }}</p>
+    <a href="{{ url_for('cliente.perfil') }}">Ver meu perfil</a>
+  </section>
+  <section class="painel"><h2>Tarifa-base por hora</h2>
+    <dl class="ficha">{% for tipo, valor in tarifas.items() %}
+      <div><dt>{{ tipos[tipo] }}</dt><dd>{{ valor|dinheiro }}/h</dd></div>
+    {% endfor %}</dl>
+  </section>
+</div>
+<section class="painel"><h2>Categorias comerciais</h2>
+  <dl class="ficha">{% for categoria, regra in beneficios.items() %}
+    <div><dt>{{ categorias[categoria] }}</dt><dd>{{ regra }}</dd></div>
+  {% endfor %}</dl>
+  <p>Em cada estadia, vale a categoria registrada na entrada.</p>
+</section>
+{% endblock %}

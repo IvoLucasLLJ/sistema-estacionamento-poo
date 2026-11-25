@@ -4,6 +4,9 @@ from threading import Lock
 from weakref import WeakValueDictionary
 
 from controller.controller import Controller
+from model.caminhao import Caminhao
+from model.carro import Carro
+from model.moto import Moto
 from persistence.historico_json import FalhaAntesDaSubstituicao, HistoricoAlterado
 from service import representacoes as dto
 
@@ -113,6 +116,11 @@ class EstacionamentoService:
 
     def consultar_vagas(self):
         return self._executar(dto.vagas)
+
+    @staticmethod
+    def consultar_tarifas():
+        """Preços de referência em reais por hora, publicados pelas subclasses."""
+        return {tipo.__name__.lower(): tipo.TARIFA_POR_HORA for tipo in (Carro, Moto, Caminhao)}
 
     def consultar_ocupacao(self):
         return self._executar(dto.ocupacao)

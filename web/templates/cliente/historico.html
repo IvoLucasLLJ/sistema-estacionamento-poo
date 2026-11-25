@@ -1,0 +1,37 @@
+{% extends 'layouts/cliente.html' %}
+{% from 'components/gestao.html' import campo, seletor %}
+{% block titulo %}Meu histórico{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina"><h1>Meu histórico</h1></div>
+<details class="filtros-pessoais" {% if request.args.get('placa') or request.args.get('estado') or request.args.get('inicio') or request.args.get('fim') %}open{% endif %}>
+  <summary>Filtrar utilizações</summary>
+  <form class="filtros" method="get">
+    <div class="entrada"><label for="placa">Veículo</label>
+      <select name="placa" id="placa"><option value="">Todos</option>
+        {% for placa in placas %}<option {% if request.args.get('placa') == placa %}selected{% endif %}>{{ placa }}</option>{% endfor %}
+      </select>
+    </div>
+    {{ seletor('estado', 'Situação', estados.items(), request.args.get('estado'), 'Todas', false) }}
+    {{ campo('inicio', 'Entrada a partir de', request.args.get('inicio',''), 'date', false) }}
+    {{ campo('fim', 'Entrada até', request.args.get('fim',''), 'date', false) }}
+    {{ ui.botao('Filtrar', secundario=true) }}
+    <a href="{{ url_for('cliente.historico') }}">Limpar filtros</a>
+  </form>
+</details>
+{% if erro %}{{ ui.aviso(erro) }}
+{% else %}
+  <section class="painel"><h2>Utilizações{% if lista %} · {{ lista|length }}{% endif %}</h2>
+    {% for e in lista %}
+    <article class="registro registro-pessoal">
+      <h3><a href="{{ url_for('cliente.estadia', estadia_id=e.estadia_id) }}">Estadia {{ e.estadia_id }} · {{ e.placa }}</a></h3>
+      <p>{{ tipos[e.tipo] }} · {{ categorias[e.categoria] }} na entrada · {{ estados[e.estado] }}</p>
+      <p>Entrada {{ e.horario_entrada|horario }}{% if e.horario_saida %} · Saída {{ e.horario_saida|horario }}{% endif %}</p>
+      {% if e.valor_centavos is not none %}
+      <p>{{ e.horas|replace('.', ',') }} h · {{ 'Valor confirmado' if e.estado == 'aguardando' else 'Valor definitivo' }}
+        <strong>{{ e.valor_centavos|centavos }}</strong></p>
+      {% endif %}
+    </article>
+    {% else %}<p>{{ 'Nenhuma utilização corresponde aos filtros.' if possui_historico else 'Nenhuma utilização registrada.' }}</p>{% endfor %}
+  </section>
+{% endif %}
+{% endblock %}

@@ -4,14 +4,12 @@ from datetime import date
 from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from service.estacionamento_service import ConflitoDeHistorico, ErroDeInfraestrutura, ErroDeNegocio, ResultadoIncerto
-from web.apresentacao import OcupacaoViewModel, centavos, dinheiro, horario
+from web.apresentacao import CATEGORIAS, TIPOS, OcupacaoViewModel, centavos, dinheiro, horario
 from web.contas import PapelAcesso
 from web.eventos import ROTULOS, RelatorioSaidas, eventos_identificados
 from web.seguranca import acesso_restrito, csrf_token
 
 gestao = Blueprint('gestao', __name__, url_prefix='/gestao')
-CATEGORIAS = {'comum': 'Comum', 'vip': 'VIP', 'mensalista': 'Mensalista'}
-TIPOS = {'carro': 'Carro', 'moto': 'Moto', 'caminhao': 'Caminhão'}
 PAGAMENTOS = {'sem_confirmacao': 'Sem confirmação', 'confirmado': 'Pagamento confirmado',
               'isento': 'Isento', 'legado': 'Legado'}
 

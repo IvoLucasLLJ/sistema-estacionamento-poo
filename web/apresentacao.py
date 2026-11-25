@@ -3,6 +3,10 @@ from datetime import datetime
 from decimal import Decimal
 
 
+CATEGORIAS = {'comum': 'Comum', 'vip': 'VIP', 'mensalista': 'Mensalista'}
+TIPOS = {'carro': 'Carro', 'moto': 'Moto', 'caminhao': 'Caminhão'}
+
+
 def horario(iso):
     instante = datetime.fromisoformat(iso)
     texto = instante.strftime('%d/%m/%Y às %H:%M')

@@ -20,6 +20,8 @@ O guia da 08A apresenta o provisionamento pessoal por UUID, os arquivos privados
 
 O guia da Gestão descreve os 14 modelos administrativos, o fluxo de pagamento e saída, a recuperação por estadia e os testes em Chromium. [Guia MOVE Gestão](docs/web-08b.md)
 
+O portal Cliente permite acompanhar estadias, consultar a frota e imprimir os próprios comprovantes. [Guia MOVE Cliente](docs/web-08c.md)
+
 ## Serviço de aplicação — Etapa 05
 
 `service.estacionamento_service.EstacionamentoService(arquivo)` é a entrada Python

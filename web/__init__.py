@@ -11,7 +11,8 @@ from web.config import configurar
 from web.contas import AutenticacaoService, ContaRepository, PapelAcesso
 from web.gestao import gestao
 from web.revisoes import Revisoes
-from web.rotas import acesso, cliente
+from web.rotas import acesso
+from web.cliente import cliente
 from web.seguranca import csrf_token, destino, preparar_requisicao
 
 
@@ -89,9 +90,8 @@ def create_app(config=None):
     @app.errorhandler(500)
     def indisponivel(exc):
         # Somente consultas conhecidas podem ser retomadas. Um POST nunca é repetido.
-        leitura = request.method == 'GET' and request.endpoint in {
-            'gestao.inicio', 'cliente.inicio', 'cliente.estadia', 'acesso.entrar',
-        }
+        leitura = request.method == 'GET' and (request.blueprint == 'cliente' or
+                                               request.endpoint in {'gestao.inicio', 'acesso.entrar'})
         if request.method == 'POST' and g.get('consulta_operacao'):
             return erro(503, 'Serviço indisponível', 'O serviço não confirmou a operação. Consulte o registro.',
                         acao='Consultar estado', retorno=g.consulta_operacao)

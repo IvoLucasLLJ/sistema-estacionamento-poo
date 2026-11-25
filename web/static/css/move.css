@@ -219,3 +219,36 @@ dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
   .principal { max-width:none; padding:0; }
   .painel { break-inside:avoid; margin:10pt 0; box-shadow:none; }
 }
+
+/* Portal pessoal */
+.filtros-pessoais summary { display:list-item; width:fit-content; padding:12px; color:var(--move-foco); cursor:pointer; }
+.filtros-pessoais .filtros { margin-bottom:0; }
+.mais-cliente { display:none; }
+.mais-destinos { display:contents; }
+.nav-cliente .destinos a:first-child:not([aria-current]) { background:transparent; color:var(--move-texto); }
+.nav-cliente .destinos a[aria-current], .nav-cliente .destinos a:hover {
+  color:var(--move-foco); background:var(--move-selecao);
+}
+.registro-pessoal { padding-block:12px; border-bottom:1px solid var(--move-borda); }
+.registro-pessoal h3 { font-size:1.05rem; margin:0; }
+.registro-pessoal .confirmado { display:flex; align-items:center; gap:8px; font-weight:650; }
+.registro-pessoal p { margin:4px 0; }
+@media (max-width:767.98px) {
+  .nav-cliente:not(.com-mais) .destinos { position:static; flex-wrap:wrap; }
+  .nav-cliente:not(.com-mais) .destinos a { flex:1 0 25%; }
+  .com-mais .mais-cliente {
+    display:flex; align-items:center; justify-content:center; flex:1; flex-direction:column; gap:2px;
+    font:inherit; font-size:.75rem; font-weight:550; border:0; background:var(--move-superficie);
+    color:var(--move-texto); min-height:44px;
+  }
+  .com-mais .mais-destinos {
+    position:absolute; bottom:100%; right:8px; display:flex; flex-direction:column; gap:2px;
+    padding:8px; background:var(--move-superficie); border:1px solid var(--move-borda);
+    border-radius:var(--move-raio); max-height:65svh; overflow:auto;
+  }
+  .com-mais .mais-destinos a { flex-direction:row; justify-content:start; gap:8px; padding:8px 14px; font-size:.875rem; }
+  .com-mais [aria-expanded="false"] + .mais-destinos { display:none; }
+}
+@media print {
+  [data-tema] .marca-impressao img { filter:none; }
+}

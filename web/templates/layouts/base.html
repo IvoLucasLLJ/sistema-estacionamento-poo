@@ -1,0 +1,8 @@
+{% import 'components/ui.html' as ui with context -%}
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block titulo %}MOVE{% endblock %} · Estacionamento</title>
+<link rel="icon" href="{{ url_for('static', filename='brand/monograma.svg') }}">
+<script src="{{ url_for('static', filename='js/controles.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap-grid.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/move.css') }}"></head>
+<body><a class="pular" href="#principal">Ir ao conteúdo</a>{% block estrutura %}{% endblock %}</body></html>

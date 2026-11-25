@@ -1,0 +1,52 @@
+{% extends 'layouts/cliente.html' %}
+{% block titulo %}Início · Cliente{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina">
+  <div>
+    <h1>Olá, {{ cadastro.nome }}</h1>
+    <span class="categoria {{ cadastro.categoria }}">
+      {{ {'vip': 'VIP', 'comum': 'Comum', 'mensalista': 'Mensalista'}[cadastro.categoria] }}
+    </span>
+  </div>
+  <a class="botao secundario" href="{{ url_for('cliente.inicio') }}">{{ ui.icone('refresh-cw') }} Atualizar</a>
+</div>
+{% if selecionada %}
+<section class="painel" aria-labelledby="detalhe">
+  <h2 id="detalhe">Estadia {{ selecionada.estadia_id }}</h2>
+  <p>{{ selecionada.placa }} · Vaga {{ selecionada.vaga }} · {{ 'Concluída' if selecionada.situacao == 'concluida' else 'Ativa' }}</p>
+  <p>Entrada <time datetime="{{ selecionada.horario_entrada }}">{{ selecionada.horario_entrada|horario }}</time></p>
+</section>
+{% endif %}
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <section id="estadias" class="painel">
+      <h2>{{ ui.icone('clock') }} Minhas estadias ativas</h2>
+      {% for estadia in ativas %}
+      <article class="registro">
+        <a href="{{ url_for('cliente.estadia', estadia_id=estadia.estadia_id) }}">{{ estadia.placa }} · Vaga {{ estadia.vaga }}</a>
+        {% if estadia.pagamento == 'confirmado' %}
+        <p class="confirmado">Pagamento confirmado · {{ estadia.cobranca.valor_centavos|centavos }}</p>
+        <p>Veículo ainda estacionado.</p>
+        {% else %}
+        <p>Sem pagamento confirmado</p>
+        {% endif %}
+      </article>
+      {% else %}
+      <p>Nenhuma estadia ativa.</p>
+      {% endfor %}
+    </section>
+  </div>
+  <div class="col-12 col-lg-5">{{ ui.disponibilidade(ocupacao) }}</div>
+</div>
+<section id="veiculos" class="painel">
+  <h2>{{ ui.icone('car') }} Meus veículos</h2>
+  {% for veiculo in veiculos %}
+  <div class="linha">
+    <strong>{{ veiculo.placa }}</strong>
+    <span>{{ veiculo.modelo or 'Modelo não registrado' }} · {{ veiculo.tipo|capitalize }}</span>
+  </div>
+  {% else %}
+  <p>Nenhum veículo vinculado. Procure o atendimento para vincular um veículo.</p>
+  {% endfor %}
+</section>
+{% endblock %}

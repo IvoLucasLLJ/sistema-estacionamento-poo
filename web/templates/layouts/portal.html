@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+{% block estrutura %}
+<header class="cabecalho" data-componente="N01">
+  <a class="assinatura" href="{{ destino() }}">{{ ui.marca(area) }}</a>
+  <details class="perfil" data-componente="N06">
+    <summary>{{ ui.icone('user-round') }}<span>{{ g.identidade.usuario }}</span></summary>
+    <div class="menu-perfil">
+      <span>{{ area }}</span>
+      <form method="post" action="{{ url_for('acesso.sair') }}" data-submissao>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {{ ui.botao('Sair', 'log-out', true) }}
+      </form>
+    </div>
+  </details>
+</header>
+<div class="portal">
+  <nav class="navegacao" aria-label="Navegação {{ area }}" data-componentes="N02 N03">
+    <div class="destinos">
+      {% for texto, href, icone in links %}
+      <a href="{{ href }}">{{ ui.icone(icone) }}{{ texto }}</a>
+      {% endfor %}
+    </div>
+    <div class="preferencia"><span>Aparência</span>{{ ui.tema() }}</div>
+  </nav>
+  <main id="principal" class="principal">{% block conteudo %}{% endblock %}</main>
+</div>
+{% endblock %}

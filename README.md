@@ -1,6 +1,22 @@
 # MOVE — Sistema Inteligente de Estacionamento
 
-Projeto acadêmico de POO em Python, sem dependências externas.
+Projeto acadêmico de POO em Python com uma interface web local em Flask e uma interface de terminal que utiliza a biblioteca padrão.
+
+## Executar a aplicação web
+
+Na raiz do repositório, prepare o ambiente e provisione a primeira conta de Gestão. O comando solicita a senha duas vezes com entrada oculta. Em um ambiente já preparado, ative a mesma `.venv` e use apenas o comando de inicialização.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m flask --app web criar-conta --usuario operador --papel gestao
+python -B -m web
+```
+
+Abra [o login local](http://127.0.0.1:5000/entrar). O terminal continua disponível com `python3 -B main.py`. Os dois executáveis reservam o histórico durante o uso.
+
+O guia da 08A apresenta o provisionamento pessoal por UUID, os arquivos privados, as opções de ambiente, a arquitetura de apresentação e a reprodução dos testes. [Guia da aplicação web](docs/web-08a.md)
 
 ## Serviço de aplicação — Etapa 05
 

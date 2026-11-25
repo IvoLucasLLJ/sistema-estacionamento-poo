@@ -1,0 +1,10 @@
+{% extends 'layouts/compartilhado.html' %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block conteudo %}
+<div class="erro{% if atencao %} atencao{% endif %}" data-modelo="{{ modelo }}">
+  <span class="simbolo-erro">{{ ui.icone('circle-alert') }}</span>
+  <h1>{{ titulo }}</h1>
+  <p class="subtitulo">{{ mensagem }}</p>
+  <a class="botao secundario" href="{{ retorno }}">{{ acao }} {{ ui.icone('arrow-right') }}</a>
+</div>
+{% endblock %}

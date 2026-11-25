@@ -1,0 +1,41 @@
+{% extends 'layouts/gestao.html' %}
+{% block titulo %}Visão geral · Gestão{% endblock %}
+{% block conteudo %}
+<div class="titulo-pagina">
+  <div>
+    <h1>Visão geral</h1>
+    <p class="subtitulo">Ocupação e movimento financeiro do estacionamento.</p>
+  </div>
+  <a href="{{ url_for('gestao.inicio') }}" class="botao secundario">{{ ui.icone('refresh-cw') }} Atualizar</a>
+</div>
+<div class="row g-3">
+  <div class="col-12 col-xl-6">{{ ui.disponibilidade(ocupacao) }}</div>
+  <div class="col-12 col-xl-6">
+    <section class="painel" id="financeiro">
+      <h2>{{ ui.icone('receipt-text') }} Financeiro</h2>
+      {% if financeiro is none %}
+      {{ ui.aviso('Dados financeiros indisponíveis. Atualize a consulta.', 'M09') }}
+      {% else %}
+      <div class="medida"><strong>{{ financeiro.reais|dinheiro }}</strong></div>
+      <p>Faturamento das estadias concluídas</p>
+      <div class="linha"><span>Pagamentos aguardando saída</span><strong>{{ pendentes }}</strong></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+<section class="painel" id="vagas">
+  <div class="titulo-painel">
+    <h2>{{ ui.icone('layout-dashboard') }} Mapa de vagas</h2>
+    <span>{{ ocupacao.total }} vagas comuns</span>
+  </div>
+  <ul class="grade-vagas">
+    {% for vaga in vagas %}
+    <li class="{{ 'ocupada' if vaga.ocupada else 'livre' }}">
+      <strong>{{ '%02d'|format(vaga.numero) }}</strong>
+      <span>{{ ui.icone('car' if vaga.ocupada else 'circle-check') }}{{ 'Ocupada' if vaga.ocupada else 'Livre' }}</span>
+      {% if vaga.ocupada %}<small>{{ vaga.placa }}</small>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

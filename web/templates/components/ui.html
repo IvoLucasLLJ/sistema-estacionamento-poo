@@ -1,0 +1,30 @@
+{% macro icone(nome) -%}
+<svg class="icone" aria-hidden="true" focusable="false"><use href="{{ url_for('static', filename='vendor/lucide.svg') }}#{{ nome }}"></use></svg>
+{%- endmacro %}
+{% macro marca(area='') -%}
+<span class="marca"><img src="{{ url_for('static', filename='brand/move.svg') }}" width="142" height="32" alt="MOVE">{% if area %}<span class="area">{{ area }}</span>{% endif %}</span>
+{%- endmacro %}
+{% macro botao(texto, simbolo='', secundario=false) -%}
+<button type="submit" class="botao {{ 'secundario' if secundario else 'primario' }}" data-componente="{{ 'A02' if secundario else 'A01' }}">{{ texto }}{% if simbolo %}{{ icone(simbolo) }}{% endif %}</button>
+{%- endmacro %}
+{% macro tema() -%}
+<fieldset class="tema" data-componente="N07"><legend class="sr">Preferência de tema</legend>
+{% for valor,rotulo,s in [('sistema','Sistema','monitor'),('claro','Claro','sun'),('escuro','Escuro','moon')] %}
+<label><input type="radio" name="tema" value="{{ valor }}" {% if loop.first %}checked{% endif %}>{{ icone(s) }}<span>{{ rotulo }}</span></label>
+{% endfor %}</fieldset>
+{%- endmacro %}
+{% macro campo(nome, rotulo, senha=false) -%}
+<div class="campo" data-componente="{{ 'F03' if senha else 'F01' }}"><label for="{{ nome }}">{{ rotulo }}</label>
+<div class="controle"><input id="{{ nome }}" name="{{ nome }}" type="{{ 'password' if senha else 'text' }}" autocomplete="{{ 'current-password' if senha else 'username' }}" maxlength="{{ 256 if senha else 64 }}" required {% if not senha %}autocapitalize="none" spellcheck="false"{% endif %}>
+{% if senha %}<button type="button" data-senha aria-label="Mostrar senha" aria-pressed="false">{{ icone('eye') }}</button>{% endif %}</div></div>
+{%- endmacro %}
+{% macro aviso(texto, tipo='M04') -%}
+<div class="aviso" role="alert" data-componente="{{ tipo }}">{{ icone('circle-alert') }}<span>{{ texto }}</span></div>
+{%- endmacro %}
+{% macro disponibilidade(o) -%}
+<section class="painel ocupacao" id="disponibilidade"><h2>{{ icone('circle-parking') }} Disponibilidade</h2>
+<div class="medida"><strong>{{ o.livres }}</strong> de {{ o.total }} vagas livres</div>
+<meter value="{{ o.ocupadas }}" min="0" max="{{ o.total }}" aria-label="Vagas ocupadas">{{ o.percentual }}%</meter>
+<div class="legenda"><span>{{ o.ocupadas }} ocupadas</span><span>{{ o.percentual }}% de ocupação</span></div>
+</section>
+{%- endmacro %}

@@ -4,3 +4,12 @@ __pycache__/
 historico.json
 ProjetoParkSys.zip
 ProjetoParkSys/
+.venv/
+instance/
+.env
+.env.*
+*.lock
+contas.json
+sessao.key
+*.tmp
+*.log

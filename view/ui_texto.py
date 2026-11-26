@@ -1,3 +1,5 @@
+from decimal import InvalidOperation
+from view.operacoes_vagas import operacao
 from controller.controller import Controller
 from persistence.caminhos import historico_local
 from view.formatacao import dinheiro
@@ -19,6 +21,10 @@ def menu(arquivo=None):
         print("5. Cadastrar veículo")
         print("6. Estacionar veículo cadastrado")
         print("7. Retirar por placa")
+        print("8. Consultar setor | 9. Novo cliente | 10. Veículo com motorização | 11. Vincular veículo")
+        print("12. Conferir autorização | 13. Revogar | 14. Reservar | 15. Cancelar reserva")
+        print("16. Entrada identificada | 17. Carregador simulado | 18. Cobrança, pagamento ou saída")
+        print("19. Clientes, frota e reservas | 20. Mudança de categoria simulada")
         opcao = input("Escolha: ").strip()
 
         if opcao == "1":
@@ -69,9 +75,15 @@ def menu(arquivo=None):
             except ValueError as erro:
                 print(erro)
 
+        elif opcao in {str(n) for n in range(8, 21)}:
+            try:
+                operacao(ctrl, opcao)
+            except (ValueError, InvalidOperation) as erro:
+                print(f"Operação recusada: {erro}")
         elif opcao == "3":
             rel = ctrl.relatorio()
             print(f"Vagas ocupadas: {rel['ocupadas']}, Vagas livres: {rel['livres']}")
+            print(f"Capacidade: {len(ctrl.listar_vagas())} · Reservadas: {sum(v.reserva is not None for v in ctrl.listar_vagas())}")
             print(f"Faturamento total: {dinheiro(rel['faturamento'])}")
 
         elif opcao == "4":

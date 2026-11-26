@@ -71,7 +71,7 @@ def percorrer(browser, raiz, largura, capturas):
             assert 'R$ 40,01' in p.locator('#financeiro').inner_text()
             foto('dashboard')
             navegar('Mapa de vagas')
-            seguir('Vaga 02 Ocupada AV1')
+            seguir('Vaga 002 Ocupada Comum AV1')
             seguir('Ver estadia')
             seguir('Preparar saída')
             p.get_by_label('Duração em horas').fill('1,225')
@@ -95,7 +95,7 @@ def percorrer(browser, raiz, largura, capturas):
             titulo('Estadia 22')
             navegar('Pagamentos')
             seguir('Continuar saída')
-            assert 'Veículo na vaga 2' in p.locator('main').inner_text()
+            assert 'Veículo na vaga 002' in p.locator('main').inner_text()
             assert s.consultar_faturamento()['reais']=='40.005'
             clicar('Concluir saída paga')
             titulo('Comprovante acadêmico')
@@ -139,7 +139,7 @@ def percorrer(browser, raiz, largura, capturas):
             clicar('Consultar cobrança')
             seguir('Revisar pagamento')
             clicar('Confirmar pagamento simulado')
-            assert 'Veículo na vaga 2' in p.locator('main').inner_text()
+            assert 'Veículo na vaga 002' in p.locator('main').inner_text()
             clicar('Concluir saída paga')
             titulo('Comprovante acadêmico')
             assert s.consultar_faturamento()['reais'] == '66.135'

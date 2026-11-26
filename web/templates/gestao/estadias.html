@@ -12,9 +12,9 @@
     {% for e in lista %}
       <article class="painel">
         <div class="titulo-painel">
-          <h2>{{ e.placa }}</h2><b>Vaga {{ e.vaga }}</b>
+          <h2>{{ e.placa }}</h2><b>Vaga {{ '%03d'|format(e.vaga) }}</b>
         </div>
-        <p>{{ tipos[e.tipo] }} · {{ pagamentos[e.pagamento] }}</p>
+        <p>{{ tipos[e.tipo] }} · {{ pagamentos[e.pagamento] }} · {{ classes_vaga.get(e.classificacao,'Classificação histórica não registrada') }}{% if e.vip %} · VIP sob demanda{% endif %}</p>
         {% if e.estadia_id %}
           <p>Estadia {{ e.estadia_id }} · {{ e.nome }} · {{ categorias[e.categoria] }}</p>
         {% else %}

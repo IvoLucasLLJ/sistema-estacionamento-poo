@@ -27,6 +27,11 @@
       {% block mais_destinos %}{% endblock %}
     </div>
   </nav>
-  <main id="principal" class="principal">{% block conteudo %}{% endblock %}</main>
+  <main id="principal" class="principal">
+    {% if area == 'Cliente' %}{% for mensagem in get_flashed_messages(category_filter=['pessoal']) %}
+      <p class="noticia" role="status">{{ mensagem }}</p>
+    {% endfor %}{% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
 </div>
 {% endblock %}

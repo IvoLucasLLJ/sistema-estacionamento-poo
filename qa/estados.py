@@ -10,6 +10,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from model.cliente import Cliente
+from model.vaga import DISTRIBUICAO_HISTORICA
 from model.veiculo import Veiculo
 from persistence import historico_json
 from service.estacionamento_service import ErroDeInfraestrutura, ErroDeNegocio, EstacionamentoService
@@ -19,7 +20,7 @@ from web.contas import normalizar_usuario
 
 def ciclos(arquivo, semente):
     rng = random.Random(semente)
-    s = EstacionamentoService(arquivo)
+    s = EstacionamentoService(arquivo, distribuicao=DISTRIBUICAO_HISTORICA)
     ids = {p: s.cadastrar_cliente(cat, p)['identificador']
            for p, cat in [('A', 'vip'), ('B', 'mensalista'), ('C', 'comum')]}
     for placa in ids:
@@ -58,7 +59,7 @@ def ciclos(arquivo, semente):
                 receita += esperado
                 del ativas[p]
             elif operacao == 'reinicio':
-                s = EstacionamentoService(arquivo)
+                s = EstacionamentoService(arquivo, distribuicao=DISTRIBUICAO_HISTORICA)
             # Cancelar uma revisão não exige chamada de escrita ao domínio.
         except ErroDeNegocio:
             assert not sucesso, (semente, _, p, operacao)

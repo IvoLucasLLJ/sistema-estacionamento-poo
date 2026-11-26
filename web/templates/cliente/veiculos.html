@@ -3,8 +3,11 @@
 {% block titulo %}Meus veículos{% endblock %}
 {% block conteudo %}
 <div class="titulo-pagina"><h1>Meus veículos</h1></div>
+{% if erro %}{{ ui.aviso(erro) }}{% endif %}
 <section class="painel"><h2>Veículos vinculados{% if frota %} · {{ frota|length }}{% endif %}</h2>
   {% for v in frota %}{{ pessoal.veiculo(v, por_placa.get(v.placa) if por_placa is not none, por_placa is not none) }}
-  {% else %}<p>Nenhum veículo vinculado. Procure o atendimento do estacionamento.</p>{% endfor %}
+  {% else %}<p>Nenhum veículo vinculado. Cadastre seu primeiro veículo abaixo.</p>{% endfor %}
 </section>
+{% from 'components/veiculo.html' import formulario with context %}
+{{ formulario(url_for('cliente.veiculos')) }}
 {% endblock %}

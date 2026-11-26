@@ -32,10 +32,11 @@
 {% macro mapa(vagas, ativas={}, selecao=none) %}
   <ul class="grade-vagas" data-componente="V02">
     {% for v in vagas %}
-      <li class="{{ 'ocupada' if v.ocupada else 'livre' }}" data-componente="D05">
-        <a href="{{ url_for('gestao.vagas', vaga=v.numero) }}" {% if selecao and selecao.numero == v.numero %}aria-current="true"{% endif %}> <strong><span class="sr">Vaga </span>{{ '%02d'|format(v.numero) }}</strong>
+      <li class="{{ v.estado }}" data-componente="D05">
+        <a href="{{ url_for('gestao.vagas', _anchor='detalhe-vaga', **dict(request.args, vaga=v.numero)) }}" {% if selecao and selecao.numero == v.numero %}aria-current="true"{% endif %}> <strong><span class="sr">Vaga </span>{{ '%03d'|format(v.numero) }}</strong>
         <span>
-        {{ ui.icone('car' if v.ocupada else 'circle-check') }}{{ 'Ocupada' if v.ocupada else 'Livre' }}</span>
+        {{ ui.icone('car' if v.ocupada else 'clock' if v.placa_reservada else 'circle-check') }}{{ 'Ocupada' if v.ocupada else 'Reservada' if v.placa_reservada else 'Livre' }}</span>
+        <small>{{ classes_vaga[v.classificacao] }}{% if v.vip %} · VIP{% endif %}{% if v.carregador is sameas false %} · Carregador indisponível{% endif %}</small>
         {% if v.ocupada %}
           <small>{{ v.placa }}
           {% if v.numero in ativas and ativas[v.numero].placa == v.placa and ativas[v.numero].pagamento == 'legado' %}
@@ -94,7 +95,9 @@
     {{ dado('Categoria na entrada',categorias[e.categoria]) }}
     {{ dado('Veículo',v.placa ~ ' · ' ~ v.modelo) }}
     {{ dado('Tipo',tipos[e.tipo]) }}
-    {{ dado('Vaga',e.vaga) }}
+    {{ dado('Vaga','%03d'|format(e.vaga)) }}
+    {{ dado('Classificação na entrada',classes_vaga.get(e.classificacao,'Não registrada no histórico')) }}
+    {% if e.vip %}{{ dado('Destinação na entrada','VIP sob demanda') }}{% endif %}
     {{ dado('Entrada', e.horario_entrada|horario) }}
     {% if e.horario_saida %}
       {{ dado('Saída', e.horario_saida|horario) }}

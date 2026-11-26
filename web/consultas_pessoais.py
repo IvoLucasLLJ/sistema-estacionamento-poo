@@ -23,7 +23,8 @@ class ConsultasPessoais:
             if evento['acao'] == 'entrada_cliente':
                 estadias[numero] = {chave: evento[chave] for chave in
                                     ('estadia_id', 'placa', 'tipo', 'vaga', 'categoria', 'horario_entrada')}
-                estadias[numero].update(estado='ativa', horario_saida=None, horas=None, valor_centavos=None)
+                estadias[numero].update(classificacao=evento.get('classificacao'), vip=evento.get('vip',False),
+                                        estado='ativa', horario_saida=None, horas=None, valor_centavos=None)
             elif evento['acao'] == 'pagamento_confirmado':
                 estadias[numero].update(estado='aguardando', horas=evento['horas'],
                                         valor_centavos=evento['valor_centavos'])

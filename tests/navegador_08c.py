@@ -12,6 +12,7 @@ from werkzeug.serving import make_server
 
 from tests.cenario_gestao import preparar_p0
 from tests.navegador_08a import escolher_tema
+from model.vaga import DISTRIBUICAO_HISTORICA
 from web import create_app
 
 
@@ -26,7 +27,7 @@ def preparar_servidor(pasta, senha):
     historico = pasta / 'historico.json'
     with historico.open('x') as destino:
         json.dump(eventos[:-2], destino)
-    app = create_app(dict(DADOS=pasta, HISTORICO=historico, CONTAS=pasta / 'contas.json',
+    app = create_app(dict(DISTRIBUICAO=DISTRIBUICAO_HISTORICA, DADOS=pasta, HISTORICO=historico, CONTAS=pasta / 'contas.json',
                           SECRET_KEY=None, SESSION_COOKIE_SECURE=False))
     auth = app.extensions['autenticacao']
     auth.provisionar('gestor.demo', senha, 'gestao')
@@ -78,7 +79,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
                 cliente.screenshot(path=capturas / f'08c-{largura}-{nome}.png', full_page=True)
 
         def abrir_estadia():
-            cliente.locator('main').get_by_role('link', name='AV1 · Vaga 2').click()
+            cliente.locator('main').get_by_role('link', name='AV1 · Vaga 002').click()
             assert cliente.url.endswith('/cliente/estadias/22')
 
         def sem_terceiros():
@@ -103,7 +104,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
         abrir_estadia()
         assert 'Sem pagamento confirmado' in conteudo()
         destino(cliente, 'Veículos')
-        cliente.get_by_role('link', name='Ver estadia 22 · Vaga 2').click()
+        cliente.get_by_role('link', name='Ver estadia 22 · Vaga 002').click()
         assert cliente.url.endswith('/cliente/estadias/22')
         destino(cliente, 'Disponibilidade')
         cliente.get_by_role('link', name='Atualizar', exact=True).click()
@@ -123,7 +124,7 @@ def jornadas(browser, app, url, senha, largura, capturas):
         assert 'R$ 6,13' in conteudo() and 'Sem pagamento confirmado' in conteudo()
         foto('estadias-p1')
         abrir_estadia()
-        assert 'ainda estacionado na vaga 2' in conteudo()
+        assert 'ainda estacionado na vaga 002' in conteudo()
         assert cliente.locator('.conta dd').all_inner_texts() == ['1,225 h', 'R$ 12,25', 'R$ 6,13', 'R$ 6,13']
 
         gestao.goto(url + '/gestao/estadias/22')

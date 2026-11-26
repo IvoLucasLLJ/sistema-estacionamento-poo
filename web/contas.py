@@ -212,6 +212,7 @@ class AutenticacaoService:
         reserva = ContaUsuario.criar(identidade, senha, nome_pendente=cliente.nome)
         self.contas.adicionar(reserva)
         self._concluir_cadastro(reserva)
+        return identidade
 
     def _concluir_cadastro(self, reserva):
         cliente = ClienteComum(reserva.nome_pendente, identificador=reserva.identidade.cliente_id)

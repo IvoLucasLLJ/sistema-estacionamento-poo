@@ -11,7 +11,7 @@
       <h2>Veículos vinculados</h2>
       {% for v in frota %}
         <p>
-        <a href="{{ url_for('gestao.veiculo',placa=v.placa) }}">{{ v.placa }}</a> · {{ tipos[v.tipo] }} · {{ v.modelo }}</p>
+        <a href="{{ url_for('gestao.veiculo',placa=v.placa) }}">{{ v.placa }}</a> · {{ tipos[v.tipo] }} · {{ v.modelo }} · {{ motores[v.motorizacao] }}</p>
       {% else %}
         <p>Sem veículos vinculados.</p>
       {% endfor %}
@@ -26,7 +26,7 @@
             <label for="escolha-placa">Veículo disponível</label>
             <select id="escolha-placa" name="placa" required>
               {% for v in elegiveis %}
-                <option value="{{ v.placa }}">{{ v.placa }} · {{ v.modelo }}</option>
+                <option value="{{ v.placa }}">{{ v.placa }} · {{ v.modelo }} · {{ motores[v.motorizacao] }}</option>
               {% endfor %}
             </select>
           </div>
@@ -37,11 +37,14 @@
       {% endif %}
     </section>
   </div>
+  {% include 'gestao/autorizacoes.html' %}
+  {% from 'components/veiculo.html' import formulario with context %}
+  {{ formulario(url_for('gestao.cadastrar_veiculo_do_cliente', identificador=c.identificador)) }}
   <section class="painel">
     <h2>Estadias ativas</h2>
     {% for e in ativas %}
       <p><a href="{{ url_for('gestao.detalhe_estadia', numero=e.estadia_id) }}">Estadia {{ e.estadia_id }}</a>
-        · {{ e.placa }} · Vaga {{ e.vaga }} · {{ pagamentos[e.pagamento] }}</p>
+        · {{ e.placa }} · Vaga {{ '%03d'|format(e.vaga) }} · {{ pagamentos[e.pagamento] }}</p>
     {% else %}
       <p>Nenhuma estadia ativa deste cliente.</p>
     {% endfor %}

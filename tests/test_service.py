@@ -41,7 +41,7 @@ class AmbienteTemporario(unittest.TestCase):
 class ServiceTests(AmbienteTemporario):
     def test_cada_escrita_recuperavel_e_consultas_sem_gravar(self):
         s = self.servico
-        self.assertEqual(s.consultar_ocupacao(), {'total': 10, 'livres': 10, 'ocupadas': 0})
+        self.assertEqual(s.consultar_ocupacao(), {'total': 200, 'livres': 200, 'ocupadas': 0})
         self.assertFalse(self.arquivo.exists())
         cliente = s.cadastrar_cliente('vip', ' Bia ')
         chave = cliente['identificador']
@@ -57,8 +57,9 @@ class ServiceTests(AmbienteTemporario):
         eid = entrada['estadia_id']
         self.assertEqual(self.reabrir().consultar_estadia(eid), entrada)
         self.assertEqual(s.listar_estadias_ativas(), [entrada])
-        self.assertEqual(s.consultar_vagas()[9], {'numero': 10, 'ocupada': True, 'placa': 'CAR1'})
-        self.assertEqual(len(s.consultar_vagas()), 10)
+        self.assertEqual(s.consultar_vagas()[9], dict(numero=10, ocupada=True, placa='CAR1', estado='ocupada',
+                                                   setor=1, classificacao='comum', vip=False, carregador=None))
+        self.assertEqual(len(s.consultar_vagas()), 200)
         antes = self.arquivo.read_bytes()
         c = s.consultar_cobranca('CAR1', '1.225')
         self.assertEqual(c['valor_centavos'], 613)

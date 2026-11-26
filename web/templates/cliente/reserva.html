@@ -1,0 +1,25 @@
+{% extends 'layouts/cliente.html' %}
+{% from 'components/gestao.html' import revisao as campo_revisao with context %}
+{% block titulo %}Reservar vaga {{ '%03d'|format(vaga) }}{% endblock %}
+{% block conteudo %}
+<h1>Reservar vaga {{ '%03d'|format(vaga) }}</h1>
+<section class="painel">
+  {% if erro %}{{ ui.aviso(erro) }}{% endif %}
+  {% if not disponivel %}<p>Esta vaga já não está disponível.</p>
+  {% elif not frota %}<p>Você precisa de um veículo cadastrado que esteja fora do estacionamento e sem reserva.</p>
+    <p><a href="{{ url_for('cliente.veiculos') }}">Meus veículos</a></p>
+  {% else %}
+    <p>{% if vip %}Destinação VIP sob demanda. {% endif %}A vaga fica reservada até a entrada deste veículo ou o cancelamento da reserva.</p>
+    <form method="post" data-submissao>
+      {{ campo_revisao(revisao) }}
+      <label class="entrada">Veículo da reserva
+        <select name="placa" required>{% for v in frota %}
+          <option value="{{ v.placa }}">{{ v.placa }} · {{ v.modelo }}</option>
+        {% endfor %}</select>
+      </label>
+      {{ ui.botao('Confirmar reserva') }}
+    </form>
+  {% endif %}
+  <p><a href="{{ url_for('cliente.disponibilidade') }}">Voltar à disponibilidade</a></p>
+</section>
+{% endblock %}

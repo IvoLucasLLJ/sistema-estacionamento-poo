@@ -84,7 +84,7 @@ class PersistenciaClientesTests(unittest.TestCase):
         self.assertEqual(novo.retirar_por_placa('ABC1234', 2), 20)
         novo.salvar()
         final = Controller(self.arquivo)
-        self.assertEqual(final.relatorio(), {'ocupadas': 0, 'livres': 10, 'faturamento': 20})
+        self.assertEqual(final.relatorio(), {'ocupadas': 0, 'livres': 200, 'faturamento': 20})
         self.assertEqual(final.estacionamento.historico[:-1], eventos)
         self.assertEqual(len(final.listar_clientes()), 3)
 

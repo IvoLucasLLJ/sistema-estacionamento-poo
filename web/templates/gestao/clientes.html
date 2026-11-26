@@ -29,6 +29,7 @@
     </section>
     <section class="painel" id="cadastro">
       <h2>Cadastrar cliente</h2>
+      <p>Depois de salvar, você poderá cadastrar os veículos na ficha deste cliente.</p>
       <form method="post" data-submissao>
         {{ adm.revisao(revisao) }}
         {{ adm.campo('nome','Nome',request.form.get('nome','')) }}

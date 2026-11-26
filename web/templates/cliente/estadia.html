@@ -10,7 +10,7 @@
   <section class="painel" data-componente="{{ 'V07' if comprovante else 'P01' }}">
     <h2>{{ 'Comprovante acadêmico' if comprovante else 'Situação financeira' }}</h2>
     {% if e.situacao == 'ativa' and e.pagamento == 'confirmado' %}
-      <p class="confirmado">Pagamento confirmado. Veículo ainda estacionado na vaga {{ e.vaga }}.</p>
+      <p class="confirmado">Pagamento confirmado. Veículo ainda estacionado na vaga {{ '%03d'|format(e.vaga) }}.</p>
     {% elif e.situacao == 'ativa' %}<p>Sem pagamento confirmado.</p>
     {% elif e.pagamento == 'isento' %}<p>Saída isenta.</p>
     {% else %}<p>Saída paga.</p>{% endif %}

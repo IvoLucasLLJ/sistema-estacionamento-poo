@@ -37,7 +37,7 @@ class NucleoTests(unittest.TestCase):
                 self.assertFalse(self.est.vagas[vaga - 1].ocupada)
                 self.assertIsNone(self.est.vagas[vaga - 1].veiculo)
         self.assertEqual(self.ctrl.relatorio(), {
-            'ocupadas': 0, 'livres': 10, 'faturamento': 70,
+            'ocupadas': 0, 'livres': 200, 'faturamento': 70,
         })
         with tempfile.TemporaryDirectory() as pasta:
             arquivo = Path(pasta) / 'historico.json'
@@ -51,7 +51,7 @@ class NucleoTests(unittest.TestCase):
             self.assertEqual(entrada['tipo'], saida['tipo'])
 
     def test_vagas_invalidas_na_entrada_e_saida(self):
-        for vaga in (0, -1, 11, 1.5, '1', None, True):
+        for vaga in (0, -1, 201, 1.5, '1', None, True):
             with self.subTest(vaga=vaga):
                 with self.assertRaises(ValueError):
                     self.ctrl.estacionar_veiculo('carro', 'ABC1234', 'Modelo', vaga)
@@ -113,7 +113,7 @@ class NucleoTests(unittest.TestCase):
             menu()
         salvar.assert_called_once_with()
         self.assertIn('Tarifa: R$ 15,00', saida.getvalue())
-        self.assertIn('Vagas ocupadas: 0, Vagas livres: 10', saida.getvalue())
+        self.assertIn('Vagas ocupadas: 0, Vagas livres: 200', saida.getvalue())
         self.assertEqual(self.ctrl.relatorio()['faturamento'], 15)
 
     def test_menu_permite_tentar_salvar_novamente(self):

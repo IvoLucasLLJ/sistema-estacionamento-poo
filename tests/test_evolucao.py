@@ -56,7 +56,7 @@ class EvolucaoTests(unittest.TestCase):
         self.assertEqual(ctrl.retirar_por_placa('ABC-1234', 2), 20)
         with self.assertRaises(ValueError):
             ctrl.retirar_por_placa('ABC1234', 1)
-        self.assertEqual(ctrl.relatorio(), {'ocupadas': 0, 'livres': 10, 'faturamento': 20})
+        self.assertEqual(ctrl.relatorio(), {'ocupadas': 0, 'livres': 200, 'faturamento': 20})
         ctrl.estacionar_cadastrado('ABC1234', 10)
         self.assertIs(ctrl.estacionamento.vagas[9].veiculo, veiculo)
 
@@ -70,7 +70,7 @@ class EvolucaoTests(unittest.TestCase):
         est.estacionar_cadastrado('CARRO', 1)
         with self.assertRaises(ValueError):
             est.estacionar_cadastrado('MOTO', 1)
-        for numero in (0, 11, True):
+        for numero in (0, 201, True):
             with self.assertRaises(ValueError):
                 est.estacionar_cadastrado('MOTO', numero)
 
@@ -92,7 +92,7 @@ class EvolucaoTests(unittest.TestCase):
             novo = Controller(arquivo)
             self.assertEqual(novo.estacionamento.historico, original)
             self.assertEqual(novo.buscar_veiculo('ABC1234').modelo, 'Modelo')
-            self.assertEqual(novo.relatorio(), {'ocupadas': 1, 'livres': 9, 'faturamento': 20})
+            self.assertEqual(novo.relatorio(), {'ocupadas': 1, 'livres': 199, 'faturamento': 20})
             self.assertEqual(novo.retirar_por_placa('DEF1234', 1), 5)
             novo.salvar()
             terceiro = Controller(arquivo)

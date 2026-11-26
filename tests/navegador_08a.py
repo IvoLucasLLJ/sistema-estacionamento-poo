@@ -84,9 +84,9 @@ def percorrer(pagina, url, senha, terceiro, historico, capturas):
     pagina.get_by_role('alert').wait_for()
     login('operacao.demo')
     assert pagina.url == url + '/gestao/'
-    assert pagina.locator('.grade-vagas li').count() == 10
+    assert pagina.locator('.grade-vagas li').count() == 20
     assert pagina.locator('.grade-vagas .ocupada').count() == 3
-    assert pagina.locator('.ocupacao .medida strong').inner_text() == '7'
+    assert pagina.locator('.ocupacao .medida strong').inner_text() == '197'
     assert 'R$ 20,00' in pagina.locator('#financeiro').inner_text()
     foto('gestao')
     sem_transbordamento()
@@ -165,7 +165,7 @@ def conferir_consulta_pessoal(browser, perfil, descricao, url, senha):
         pagina.wait_for_url(url + '/cliente/disponibilidade')
         with pagina.expect_navigation(url=url + '/cliente/disponibilidade', wait_until='load'):
             ativar(pagina.get_by_role('link', name='Atualizar'))
-        assert pagina.locator('.medida strong').inner_text() == '7'
+        assert pagina.locator('.medida strong').inner_text() == '197'
         assert pagina.locator('html').get_attribute('data-tema') == 'escuro'
         assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
         assert 'AV1' not in pagina.locator('main').inner_text()

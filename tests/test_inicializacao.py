@@ -40,7 +40,7 @@ class InicializacaoTests(TestCase):
         self.assertNotEqual(app.config['SESSION_COOKIE_NAME'], 'move_session')
         s = app.extensions['estacionamento']
         self.assertEqual(s.buscar_cliente(titular)['nome'], 'Lia Vale')
-        self.assertEqual(s.consultar_ocupacao(), dict(total=10, ocupadas=3, livres=7))
+        self.assertEqual(s.consultar_ocupacao(), dict(total=200, ocupadas=3, livres=197))
         self.assertEqual(s.consultar_cobranca('AV1', '1.225')['valor_centavos'], 613)
         self.assertEqual(s.consultar_cobranca('NM4', '2')['valor_centavos'], 0)
         self.assertEqual(s.consultar_faturamento()['centavos'], 4000)

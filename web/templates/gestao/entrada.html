@@ -11,10 +11,15 @@
         {{ adm.dado('UUID',dono.identificador) }}
         {{ adm.dado('Categoria',categorias[dono.categoria]) }}
         {{ adm.dado('Veículo',veiculo.placa ~ ' · ' ~ veiculo.modelo) }}
-        {{ adm.dado('Vaga',vaga) }}
+        {{ adm.dado('Vaga','%03d'|format(vaga)) }}
+        {{ adm.dado('Classificação',classes_vaga[selecionada.classificacao]) }}
+        {% if selecionada.vip %}{{ adm.dado('Destinação','VIP sob demanda') }}{% endif %}
       </dl>
       <form method="post" action="{{ url_for('gestao.entrada') }}" data-submissao>
         {{ adm.revisao(revisao) }}
+        {% if selecionada.classificacao in ('pcd','idoso','adicional','familia') %}
+        <label class="opcao-vaga"><input type="checkbox" name="presente" value="sim" required> Conferi a presença do beneficiário ({{ selecionada.beneficiario }}) da autorização simulada #{{ selecionada.conferencia }}.</label>
+        {% endif %}
         <div class="acoes">
           {{ ui.botao('Confirmar entrada') }}
           {{ adm.link('Voltar à seleção',url_for('gestao.entrada',cliente_id=dono.identificador,placa=placa,vaga=vaga)) }}
@@ -48,21 +53,20 @@
       {% if dono %}
         <section class="painel">
           <h2>Veículo e vaga</h2>
-          {% set livres=vagas|rejectattr('ocupada')|list %}
           {% if not frota %}
             <p>Cliente sem veículos vinculados.</p>
             {{ adm.link('Ver cadastro',url_for('gestao.cliente',identificador=dono.identificador)) }}
-          {% elif not livres %}
+          {% elif ocupadas|length == vagas|length %}
             <p>Estacionamento lotado.</p>
           {% elif not frota|rejectattr('placa','in',ocupadas)|list %}
             <p>Todos os veículos vinculados já estão estacionados.</p>
           {% else %}
             <form>
               <input type="hidden" name="cliente_id" value="{{ dono.identificador }}">
-              <input type="hidden" name="revisar" value="1">
+
               <div class="entrada">
                 <label for="escolha-placa">Veículo vinculado</label>
-                <select id="escolha-placa" name="placa" required>
+                <select id="escolha-placa" name="placa" data-atualiza-vagas required>
                   <option value="">Selecione</option>
                   {% for v in frota %}
                     <option value="{{ v.placa }}" {% if v.placa in ocupadas %}disabled{% elif v.placa == placa %}selected{% endif %}>{{ v.placa }} · {{ v.modelo }}
@@ -77,13 +81,19 @@
                 <label for="escolha-vaga">Vaga livre</label>
                 <select id="escolha-vaga" name="vaga" required>
                   <option value="">Selecione</option>
-                  {% for v in livres %}
-                    <option value="{{ v.numero }}" {% if vaga == v.numero %}selected{% endif %}>Vaga {{ v.numero }}</option>
+                  {% for setor, grupo in disponiveis|groupby('setor') %}
+                  <optgroup label="Setor {{ '%02d'|format(setor) }}">
+                  {% for v in grupo %}
+                    <option value="{{ v.numero }}" {% if vaga == v.numero %}selected{% endif %}>Vaga {{ '%03d'|format(v.numero) }} · {{ classes_vaga[v.classificacao] }}{% if v.estado == 'reservada' %} · Reservada para {{ placa }}{% endif %}</option>
+                  {% endfor %}</optgroup>
                   {% endfor %}
                 </select>
               </div>
-              {{ ui.botao('Revisar entrada') }}
+              <button type="submit" name="revisar" value="1" class="botao primario">Revisar entrada</button>
+              <noscript><button type="submit" formnovalidate>Atualizar vagas para o veículo</button></noscript>
             </form>
+            {% if restricoes %}<details><summary>Por que algumas vagas estão indisponíveis?</summary>
+            {% for motivo in restricoes %}<p>{{ motivo }}</p>{% endfor %}</details>{% endif %}
           {% endif %}
         </section>
       {% endif %}

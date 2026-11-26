@@ -63,6 +63,27 @@ def _redireciona(caminho):
     return False
 
 
+def validar_pasta_demonstrativa(pasta, manifesto):
+    if os.name == 'nt':
+        privacidade.conferir_acl(pasta)
+    elif pasta.stat().st_mode & 0o077 or pasta.stat().st_uid != os.getuid():
+        raise PermissionError(f'Confira o proprietário e as permissões de {pasta}.')
+    if not pasta.is_dir():
+        raise ValueError(f'Pasta de demonstração inválida. Confira o proprietário e as permissões de {pasta}.')
+    for nome in (manifesto, 'historico.json', 'contas.json', 'sessao.key', 'historico.json.lock', 'contas.json.lock', 'sessao.key.lock',
+                 'sessoes.json', 'sessoes.json.lock'):
+        arquivo = pasta / nome
+        if (nome.endswith('.lock') or nome == 'sessoes.json') and not os.path.lexists(arquivo):
+            continue
+        modo = arquivo.lstat()
+        if not stat.S_ISREG(modo.st_mode) or _redireciona(arquivo) or modo.st_nlink != 1:
+            raise ValueError(f'Arquivo de demonstração inválido: {nome}. A pasta foi preservada.')
+        if os.name == 'nt':
+            privacidade.conferir_acl(arquivo)
+        elif modo.st_uid != os.getuid():
+            raise ValueError(f'Arquivo de demonstração inválido: {nome}. A pasta foi preservada.')
+
+
 def preparar_demonstracao():
     pasta = RAIZ_MOVE / '.move-demonstracao'
     verificar_separacao(pasta)
@@ -80,24 +101,7 @@ def preparar_demonstracao():
                     arquivo.write('[]')
                 (pronto / 'cenario.json').write_text(json.dumps(dict(versao=1, titular=lia)), encoding='utf-8')
                 pronto.rename(pasta)
-        if os.name == 'nt':
-            privacidade.conferir_acl(pasta)
-        elif pasta.stat().st_mode & 0o077 or pasta.stat().st_uid != os.getuid():
-            raise PermissionError(f'Confira o proprietário e as permissões de {pasta}.')
-        if not pasta.is_dir():
-            raise ValueError(f'Pasta de demonstração inválida. Confira o proprietário e as permissões de {pasta}.')
-        for nome in ('cenario.json', 'historico.json', 'contas.json', 'sessao.key', 'historico.json.lock', 'contas.json.lock', 'sessao.key.lock',
-                     'sessoes.json', 'sessoes.json.lock'):
-            arquivo = pasta / nome
-            if (nome.endswith('.lock') or nome == 'sessoes.json') and not os.path.lexists(arquivo):
-                continue
-            modo = arquivo.lstat()
-            if not stat.S_ISREG(modo.st_mode) or _redireciona(arquivo) or modo.st_nlink != 1:
-                raise ValueError(f'Arquivo de demonstração inválido: {nome}. A pasta foi preservada.')
-            if os.name == 'nt':
-                privacidade.conferir_acl(arquivo)
-            elif modo.st_uid != os.getuid():
-                raise ValueError(f'Arquivo de demonstração inválido: {nome}. A pasta foi preservada.')
+        validar_pasta_demonstrativa(pasta, 'cenario.json')
         info = json.loads((pasta / 'cenario.json').read_bytes())
         if not isinstance(info, dict) or info.get('versao') != 1 or not isinstance(info.get('titular'), str):
             raise ValueError('Identificação do cenário inválida. A pasta foi preservada.')

@@ -1,15 +1,16 @@
 from copy import deepcopy
 import math
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Context, Decimal, DecimalException, localcontext
 
 from model.caminhao import Caminhao
 from model.carro import Carro
-from model.categorias_cliente import classe_da_categoria
+from model.categorias_cliente import classe_da_categoria, preco_da_mudanca
 from model.cliente import Cliente
 from model.estadia import Cobranca, Estadia, reais_de_centavos
 from model.moto import Moto
-from model.vaga import Vaga
+from model.uso_vaga import AutorizacaoUso, BeneficiarioFicticio, ContextoUso
+from model.vaga import DISTRIBUICAO, ReservaVaga, VagaProtegida, construir_vagas
 from model.veiculo import Veiculo
 
 
@@ -32,8 +33,9 @@ def _saida_legada_anterior(entrada, saida):
 
 
 class Estacionamento:
-    def __init__(self, arquivo="historico.json"):
-        self._vagas = [Vaga(num+1) for num in range(10)]
+    def __init__(self, arquivo="historico.json", *, distribuicao=DISTRIBUICAO):
+        self._vagas = construir_vagas(distribuicao)
+        self._autorizacoes = {}
         self._historico = []
         self._veiculos = {}
         self._clientes = {}
@@ -84,22 +86,114 @@ class Estacionamento:
             raise ValueError("Veículo já vinculado a um cliente.")
         if any(vaga.veiculo is veiculo for vaga in self._vagas):
             raise ValueError("Não é possível vincular um veículo estacionado.")
-        self._vinculos[veiculo.placa] = cliente
+        self._vinculos[veiculo.placa] = cliente.identificador
         self._historico.append({"acao": "vinculo", "placa": veiculo.placa,
                                 "cliente_id": cliente.identificador})
 
     def cliente_do_veiculo(self, placa):
-        return self._vinculos.get(self.buscar_veiculo(placa).placa)
+        return self._clientes.get(self._vinculos.get(self.buscar_veiculo(placa).placa))
 
     def veiculos_do_cliente(self, cliente_id):
         cliente = self.buscar_cliente(cliente_id)
-        return tuple(self._veiculos[p] for p, dono in self._vinculos.items() if dono is cliente)
+        return tuple(self._veiculos[p] for p, dono in self._vinculos.items() if dono == cliente.identificador)
 
-    def iniciar_estadia(self, placa, vaga, cliente_id):
+    def mudar_categoria(self, cliente_id, origem, destino):
+        atual = self.buscar_cliente(cliente_id)
+        if atual.categoria != origem:
+            raise ValueError("Sua categoria mudou. Confira o valor antes de confirmar.")
+        valor = preco_da_mudanca(origem, destino)
+        # A estadia aberta conserva a instância que recebeu na entrada.
+        novo = classe_da_categoria(destino)(atual.nome, identificador=atual.identificador)
+        self._clientes[novo.identificador] = novo
+        self._historico.append(dict(acao="mudanca_categoria", cliente_id=novo.identificador,
+                                    origem=origem, categoria=destino, valor_centavos=valor))
+
+    def conferir_autorizacao(self, cliente_id, placa, grupo, beneficiario, conferencia, validade, numero_beneficiario=1):
+        veiculo = self.buscar_veiculo(placa)
+        if self._vinculos.get(veiculo.placa) != self.buscar_cliente(cliente_id).identificador:
+            raise ValueError("Veículo sem vínculo com o titular.")
+        numero = len(self._historico) + 1
+        if not isinstance(validade, str):
+            raise ValueError("Informe uma data de validade.")
+        pessoa = BeneficiarioFicticio(cliente_id, numero_beneficiario)
+        credencial = AutorizacaoUso(numero, cliente_id, veiculo.placa, grupo, beneficiario,
+                                    conferencia, date.fromisoformat(validade), pessoa)
+        if conferencia == "digital" and any(a.pessoa == pessoa and a.grupo == grupo and a.conferencia == "digital"
+                                           and a.placa != veiculo.placa for a in self.autorizacoes(cliente_id)):
+            raise ValueError("Revogue o vínculo digital anterior deste beneficiário antes de vinculá-lo a outro veículo.")
+        self._autorizacoes[numero] = credencial
+        self._historico.append(dict(acao="autorizacao_conferida", autorizacao_id=numero,
+                                    cliente_id=cliente_id, placa=veiculo.placa, grupo=grupo,
+                                    beneficiario=beneficiario, conferencia=conferencia, validade=validade,
+                                    numero_beneficiario=numero_beneficiario))
+        return numero
+
+    def autorizacoes(self, cliente_id):
+        return tuple(a for a in self._autorizacoes.values() if a.cliente_id == cliente_id)
+
+    def revogar_autorizacao(self, cliente_id, numero):
+        autorizacao = self._autorizacoes.get(numero)
+        if type(numero) is not int or not autorizacao or autorizacao.cliente_id != cliente_id:
+            raise ValueError("Autorização indisponível para revogação.")
+        del self._autorizacoes[numero]
+        self._historico.append(dict(acao="autorizacao_revogada", cliente_id=cliente_id, autorizacao_id=numero))
+
+    def alterar_carregador(self, numero, disponivel):
+        aparelho = self._buscar_vaga(numero).carregador
+        if aparelho is None:
+            raise ValueError("Esta vaga não possui carregador.")
+        aparelho.definir_disponibilidade(disponivel)
+        self._historico.append(dict(acao="estado_carregador", vaga=numero, disponivel=disponivel))
+
+    def contexto(self, veiculo, dia, vip=False, autorizacao_id=None):
+        if type(vip) is not bool:
+            raise ValueError("Destinação inválida.")
+        dono = self._clientes.get(self._vinculos.get(veiculo.placa))
+        autorizacoes = self.autorizacoes(dono.identificador) if dono else ()
+        if autorizacao_id is not None:
+            autorizacoes = tuple(a for a in autorizacoes if a.identificador == autorizacao_id)
+        return ContextoUso(dono.identificador if dono else None, dono.categoria if dono else None,
+                           veiculo, dia, autorizacoes, vip)
+
+    def reservar_vaga(self, cliente_id, placa, numero, *, vip=False):
+        self._reservar_vaga(cliente_id, placa, numero, vip, date.today())
+
+    def _reservar_vaga(self, cliente_id, placa, numero, vip, dia):
+        titular = self.buscar_cliente(cliente_id)
+        placa = Veiculo.normalizar_placa(placa)
+        if self._vinculos.get(placa) != titular.identificador:
+            raise ValueError("Selecione um veículo do seu cadastro.")
+        if any(v.ocupada and v.veiculo.placa == placa for v in self.vagas):
+            raise ValueError("Este veículo já está estacionado.")
+        if any(v.reserva and v.reserva.placa == placa for v in self.vagas):
+            raise ValueError("Este veículo já tem uma reserva. Cancele-a para escolher outra vaga.")
+        vaga = self._buscar_vaga(numero)
+        contexto = self.contexto(self.buscar_veiculo(placa), dia, vip)
+        vaga.validar_uso(contexto)
+        autorizacao = contexto.autorizacao(vaga.grupos) if isinstance(vaga, VagaProtegida) else None
+        reserva = ReservaVaga(len(self._historico) + 1, titular.identificador, placa, vip,
+                              autorizacao.identificador if autorizacao else None)
+        vaga.reservar(reserva, contexto=contexto)
+        self._historico.append(dict(acao="reserva_vaga", cliente_id=titular.identificador,
+                                    vaga=numero, placa=placa, reserva_id=reserva.identificador))
+        if vip or vaga.classificacao != "comum":
+            self._historico[-1].update(vip=vip, dia=dia.isoformat(), classificacao=vaga.classificacao)
+        if isinstance(vaga, VagaProtegida):
+            self._historico[-1]["autorizacao_id"] = contexto.autorizacao(vaga.grupos).identificador
+
+    def cancelar_reserva(self, cliente_id, numero, reserva_id):
+        vaga = self._buscar_vaga(numero)
+        reserva = vaga.reserva
+        vaga.cancelar_reserva(cliente_id, reserva_id)
+        self._historico.append(dict(acao="cancelamento_reserva", cliente_id=cliente_id,
+                                    vaga=numero, placa=reserva.placa, reserva_id=reserva_id))
+
+    def iniciar_estadia(self, placa, vaga, cliente_id, *, beneficiario_presente=False):
         cliente = self.buscar_cliente(cliente_id)
         if self.cliente_do_veiculo(placa) is not cliente:
             raise ValueError("O veículo não está vinculado ao cliente informado.")
-        self.estacionar_cadastrado(placa, vaga)
+        self._estacionar(self.buscar_veiculo(placa), vaga, datetime.now().astimezone().isoformat(),
+                         beneficiario_presente=beneficiario_presente)
 
     def cadastrar_veiculo(self, veiculo):
         if not isinstance(veiculo, Veiculo):
@@ -111,6 +205,8 @@ class Estacionamento:
             "acao": "cadastro", "placa": veiculo.placa,
             "tipo": type(veiculo).__name__.lower(), "modelo": veiculo.modelo,
         })
+        if veiculo.motorizacao != "desconhecida":
+            self._historico[-1]["motorizacao"] = veiculo.motorizacao
         return veiculo
 
     def buscar_veiculo(self, placa):
@@ -137,7 +233,7 @@ class Estacionamento:
     def estacionar(self, veiculo, num_vaga):
         self._estacionar(veiculo, num_vaga, datetime.now().astimezone().isoformat())
 
-    def _estacionar(self, veiculo, num_vaga, horario):
+    def _estacionar(self, veiculo, num_vaga, horario, *, registrar_classe=True, beneficiario_presente=False):
         if not isinstance(veiculo, Veiculo):
             raise ValueError("Informe um veículo válido.")
         existente = self._veiculos.get(veiculo.placa)
@@ -153,14 +249,28 @@ class Estacionamento:
             "tipo": type(veiculo).__name__.lower(), "modelo": veiculo.modelo,
             "vaga": vaga.numero, "horario_entrada": horario,
         }
-        cliente = self._vinculos.get(veiculo.placa)
+        if any(v is not vaga and v.reserva and v.reserva.placa == veiculo.placa for v in self.vagas):
+            raise ValueError("Este veículo tem reserva em outra vaga.")
+        cliente = self._clientes.get(self._vinculos.get(veiculo.placa))
         estadia = None
         if cliente is not None:
             # O identificador é a posição da entrada no histórico, contando a partir de 1.
             estadia = Estadia(len(self._historico) + 1, veiculo, cliente, vaga, horario)
             evento.update(acao="entrada_cliente", cliente_id=cliente.identificador,
                           categoria=estadia.categoria, estadia_id=estadia.identificador)
-        vaga.ocupar(veiculo, estadia=estadia)
+        vip = bool(vaga.reserva and vaga.reserva.vip)
+        contexto = self.contexto(veiculo, datetime.fromisoformat(horario).date(), vip,
+                                 vaga.reserva.autorizacao_id if vaga.reserva else None)
+        vaga.validar_uso(contexto)
+        if registrar_classe or vip or vaga.classificacao != "comum":
+            evento.update(classificacao=vaga.classificacao, vip=vip)
+        if isinstance(vaga, VagaProtegida):
+            if beneficiario_presente is not True:
+                raise ValueError("Confirme a presença do beneficiário nesta entrada identificada.")
+            evento["autorizacao_id"] = contexto.autorizacao(vaga.grupos).identificador
+        if existente is None and veiculo.motorizacao != "desconhecida":
+            evento["motorizacao"] = veiculo.motorizacao
+        vaga.ocupar(veiculo, estadia=estadia, contexto=contexto)
         self._veiculos[veiculo.placa] = veiculo
         if estadia is not None:
             self._estadias[veiculo.placa] = estadia
@@ -271,14 +381,15 @@ class Estacionamento:
         ocupadas = sum(1 for vaga in self.vagas if vaga.ocupada)
         return {
             "ocupadas": ocupadas,
-            "livres": len(self.vagas) - ocupadas,
+            "livres": sum(vaga.livre for vaga in self.vagas),
             "faturamento": self._faturamento(),
         }
 
     def _reproduzir_evento_veiculo(self, acao, evento):
         classe = _CLASSES_DE_VEICULOS[evento["tipo"]]
         # Arquivos da versão anterior não registravam o modelo.
-        veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"))
+        veiculo = classe(evento["placa"], evento.get("modelo", "Modelo não registrado"),
+                       evento.get("motorizacao", "desconhecida"))
         if evento['placa'] != veiculo.placa:
             raise ValueError("Placa do histórico não normalizada.")
         if acao in ("entrada", "saida") and veiculo.placa in self._vinculos:
@@ -287,7 +398,11 @@ class Estacionamento:
             self.cadastrar_veiculo(veiculo)
         elif acao == "entrada":
             datetime.fromisoformat(evento["horario_entrada"])
-            self.estacionar(veiculo, evento["vaga"])
+            self._estacionar(veiculo, evento["vaga"], evento["horario_entrada"],
+                             registrar_classe="classificacao" in evento)
+            for campo in ("classificacao", "vip"):
+                if self._historico[-1].get(campo) != evento.get(campo):
+                    raise ValueError("Destinação da entrada incompatível.")
         elif acao == "saida":
             entrada = next((e for e in reversed(self._historico)
                             if e['acao'] == 'entrada' and e['placa'] == veiculo.placa), None)
@@ -319,7 +434,8 @@ class Estacionamento:
                 raise ValueError("Entrada vinculada exige horário com fuso.")
             if self.cliente_do_veiculo(placa) is None:
                 raise ValueError("Entrada sem vínculo cadastrado.")
-            self._estacionar(self.buscar_veiculo(placa), evento["vaga"], horario)
+            self._estacionar(self.buscar_veiculo(placa), evento["vaga"], horario,
+                             registrar_classe="classificacao" in evento, beneficiario_presente="autorizacao_id" in evento)
         else:
             if not isinstance(evento["horas"], str):
                 raise ValueError("As horas da estadia devem estar em texto decimal.")
@@ -330,6 +446,9 @@ class Estacionamento:
                 self._concluir_saida(consulta, evento["horario_saida"])
 
         # A regra de negócio gera o evento esperado, inclusive os centavos e o estado de pagamento.
+        self._validar_evento_reproduzido(evento)
+
+    def _validar_evento_reproduzido(self, evento):
         esperado = self._historico[-1]
         if evento.keys() != esperado.keys() or any(
             type(evento[k]) is not type(v) or evento[k] != v for k, v in esperado.items()
@@ -337,9 +456,9 @@ class Estacionamento:
             raise ValueError("Evento incompatível com o vínculo, a estadia ou a cobrança.")
 
     @classmethod
-    def reconstruir(cls, dados):
+    def reconstruir(cls, dados, *, distribuicao=DISTRIBUICAO):
         """Reconstrói um agregado validado em memória, sem acessar arquivos."""
-        est = cls()
+        est = cls(distribuicao=distribuicao)
         try:
             if not isinstance(dados, list):
                 raise ValueError("O histórico deve ser uma lista.")
@@ -358,6 +477,25 @@ class Estacionamento:
                     est._reproduzir_evento_veiculo(acao, evento)
                 elif acao in ("vinculo", "entrada_cliente", "pagamento_confirmado", "saida_cliente"):
                     est._reproduzir_evento_estadia(acao, evento)
+                elif acao in ("autorizacao_conferida", "autorizacao_revogada", "estado_carregador"):
+                    if acao == "autorizacao_conferida":
+                        est.conferir_autorizacao(*(evento[k] for k in ("cliente_id", "placa", "grupo",
+                                                "beneficiario", "conferencia", "validade", "numero_beneficiario")))
+                    elif acao == "autorizacao_revogada":
+                        est.revogar_autorizacao(evento["cliente_id"], evento["autorizacao_id"])
+                    else:
+                        est.alterar_carregador(evento["vaga"], evento["disponivel"])
+                    est._validar_evento_reproduzido(evento)
+                elif acao in ("reserva_vaga", "cancelamento_reserva", "mudanca_categoria"):
+                    if acao == "reserva_vaga":
+                        dia = date.fromisoformat(evento["dia"]) if "dia" in evento else date.min
+                        est._reservar_vaga(evento["cliente_id"], evento["placa"], evento["vaga"],
+                                           evento.get("vip", False), dia)
+                    elif acao == "cancelamento_reserva":
+                        est.cancelar_reserva(evento["cliente_id"], evento["vaga"], evento["reserva_id"])
+                    else:
+                        est.mudar_categoria(evento["cliente_id"], evento["origem"], evento["categoria"])
+                    est._validar_evento_reproduzido(evento)
                 else:
                     raise ValueError("Ação desconhecida.")
                 # Mantém horários e campos originais, sem substituir pela hora da leitura.

@@ -5,10 +5,12 @@ from datetime import datetime
 from decimal import Decimal, localcontext
 
 
-ROTULOS = {'cadastro_cliente': 'Cadastro de cliente', 'cadastro': 'Cadastro de veículo',
+ROTULOS = {'autorizacao_conferida': 'Conferência de autorização', 'autorizacao_revogada': 'Autorização revogada',
+           'estado_carregador': 'Disponibilidade de carregador', 'cadastro_cliente': 'Cadastro de cliente', 'cadastro': 'Cadastro de veículo',
            'vinculo': 'Vínculo', 'entrada': 'Entrada legada', 'saida': 'Saída legada',
            'entrada_cliente': 'Entrada identificada', 'pagamento_confirmado': 'Pagamento confirmado',
-           'saida_cliente': 'Saída concluída'}
+           'saida_cliente': 'Saída concluída', 'reserva_vaga': 'Reserva de vaga',
+           'cancelamento_reserva': 'Reserva cancelada', 'mudanca_categoria': 'Mudança de categoria'}
 
 
 def eventos_identificados(historico):
@@ -19,13 +21,20 @@ def eventos_identificados(historico):
         e = {'numero': numero, 'acao': acao, 'rotulo': ROTULOS[acao]}
         if acao == 'cadastro_cliente':
             e.update(cliente_id=origem['identificador'], nome=origem['nome'], categoria=origem['categoria'])
-        else:
+        elif acao == 'mudanca_categoria':
+            e.update({campo: origem[campo] for campo in ('cliente_id', 'origem', 'categoria', 'valor_centavos')})
+        elif 'placa' in origem:
             e['placa'] = origem['placa']
+        for campo in ('classificacao', 'vip', 'motorizacao', 'grupo', 'autorizacao_id', 'disponivel', 'vaga'):
+            if campo in origem:
+                e[campo] = origem[campo]
+        if acao in ('reserva_vaga', 'cancelamento_reserva'):
+            e.update({campo: origem[campo] for campo in ('cliente_id', 'vaga', 'reserva_id')})
         if acao in ('cadastro', 'entrada', 'saida', 'entrada_cliente'):
             e.update(tipo=origem['tipo'], modelo=origem.get('modelo'))
         if acao in ('entrada', 'saida', 'entrada_cliente', 'saida_cliente'):
             e.update(vaga=origem['vaga'], horario_entrada=origem['horario_entrada'])
-        if acao in ('vinculo', 'entrada_cliente'):
+        if acao in ('vinculo', 'entrada_cliente', 'autorizacao_conferida', 'autorizacao_revogada'):
             e['cliente_id'] = origem['cliente_id']
         if acao == 'entrada_cliente':
             e.update(categoria=origem['categoria'], estadia_id=origem['estadia_id'])
@@ -34,6 +43,7 @@ def eventos_identificados(historico):
             entrada = entradas[origem['estadia_id']]
             for campo in ('cliente_id', 'categoria', 'estadia_id', 'tipo'):
                 e[campo] = entrada[campo]
+            e.update(classificacao=entrada.get('classificacao'), vip=entrada.get('vip', False))
             e.update(horas=origem['horas'], valor_centavos=origem['valor_centavos'])
         if acao in ('saida', 'saida_cliente'):
             e['horario_saida'] = origem['horario_saida']

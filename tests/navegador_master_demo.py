@@ -92,7 +92,7 @@ def apresentar(pagina, url, senha, largura, capturas):
     botao('Confirmar entrada')
     numero = int(pagina.url.rsplit('/', 1)[1])
     alternar('Gestão', 'Cliente', 'seletor-gestao')
-    seguir('MD3 · Vaga 3')
+    seguir('MD3 · Vaga 003')
     assert 'Sem pagamento confirmado' in pagina.locator('main').inner_text()
     alternar('Cliente', 'Gestão')
     gestao('Estadias ativas')
@@ -158,7 +158,7 @@ def main():
                 leitor = EstacionamentoService(app.config['HISTORICO'])
                 estadia = leitor.consultar_estadia(numero)
                 assert estadia['situacao'] == 'concluida' and estadia['cobranca']['valor_centavos'] == 613
-                assert leitor.consultar_ocupacao()['livres'] == 7
+                assert leitor.consultar_ocupacao()['livres'] == 197
                 print(f'{largura} × {altura} · Chrome {browser.version} · um login · estadia {numero} · 613 centavos persistidos',
                       flush=True)
 

@@ -8,6 +8,7 @@ from uuid import UUID
 
 from service.estacionamento_service import ErroDeInfraestrutura
 from tests.cenario_gestao import preparar_p0
+from model.vaga import DISTRIBUICAO_HISTORICA
 from web import create_app
 
 
@@ -18,7 +19,7 @@ class PortalClienteTests(TestCase):
         raiz = Path(tmp.name)
         self.arquivo = raiz / 'historico.json'
         preparar_p0(self.arquivo)
-        self.app = create_app(dict(TESTING=True, DADOS=raiz, HISTORICO=self.arquivo,
+        self.app = create_app(dict(TESTING=True, DISTRIBUICAO=DISTRIBUICAO_HISTORICA, DADOS=raiz, HISTORICO=self.arquivo,
                                    CONTAS=raiz / 'contas.json', SECRET_KEY=None, SESSION_COOKIE_SECURE=False))
         self.addCleanup(self.app.extensions['escritor'].fechar)
         self.s = self.app.extensions['estacionamento']
@@ -100,7 +101,7 @@ class PortalClienteTests(TestCase):
     def test_disponibilidade_agregada_lotacao_e_falha(self):
         html = self.pagina('disponibilidade')
         self.assertIn('30% de ocupação', html)
-        for dado in ('AV1', 'AM2', 'LEG9', 'Vaga 2', 'Lia Vale', 'Faturamento'):
+        for dado in ('AV1', 'AM2', 'LEG9', 'Vaga 002', 'Lia Vale', 'Faturamento'):
             self.assertNotIn(dado, html)
         dono = str(UUID(int=1))
         for vaga in (1, 3, 4, 6, 7, 9, 10):
@@ -189,7 +190,7 @@ class PortalClienteTests(TestCase):
                                                     decisao='confirmar'))
         self.assertEqual(r.status_code, 303)
         self.assertIn('R$ 6,13', self.pagina('estadias'))
-        self.assertIn('ainda estacionado na vaga 2', self.pagina('estadias/22'))
+        self.assertIn('ainda estacionado na vaga 002', self.pagina('estadias/22'))
         self.assertIn('30% de ocupação', self.pagina('disponibilidade'))
         self.assertIn('R$ 40,01', admin.get('/gestao/').text)
         self.assertEqual(admin.post(url + '/concluir', data=dict(

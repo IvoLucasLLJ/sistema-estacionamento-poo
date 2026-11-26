@@ -6,7 +6,7 @@
   <div class="colecao">
     {% for e in lista %}
       <article class="painel">
-        <h2>{{ e.placa }} · Vaga {{ e.vaga }}</h2>
+        <h2>{{ e.placa }} · Vaga {{ '%03d'|format(e.vaga) }}</h2>
         <p>Estadia {{ e.estadia_id }} · {{ e.nome }}</p>
         <p>{{ e.cobranca.horas|replace('.',',') }} h · {{ e.cobranca.valor_centavos|centavos }}</p>
         {{ adm.link('Continuar saída',url_for('gestao.detalhe_estadia',numero=e.estadia_id)) }}

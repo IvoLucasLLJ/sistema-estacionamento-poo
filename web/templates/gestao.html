@@ -27,8 +27,9 @@
 <section class="painel" id="vagas">
   <div class="titulo-painel">
     <h2>{{ ui.icone('layout-dashboard') }} Mapa de vagas</h2>
-    <span>{{ ocupacao.total }} vagas comuns</span>
+    <a href="{{ url_for('gestao.vagas') }}">Consultar as {{ ocupacao.total }} vagas</a>
   </div>
-  {% import 'components/gestao.html' as adm with context %}{{ adm.mapa(vagas) }}
+  {% import 'components/gestao.html' as adm with context %}<p>Setor 01 · {{ indicadores.vip }} vaga(s) com destinação VIP temporária.</p>{{ adm.mapa(vagas) }}
 </section>
+{% import 'components/vagas.html' as mapa with context %}{{ mapa.classificacoes(indicadores) }}
 {% endblock %}

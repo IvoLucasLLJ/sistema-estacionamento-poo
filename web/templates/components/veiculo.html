@@ -1,0 +1,15 @@
+{% import 'components/ui.html' as ui with context %}
+{% from 'components/gestao.html' import campo, csrf, seletor with context %}
+{% macro formulario(acao) %}
+<section class="painel" id="novo-veiculo">
+  <h2>Cadastrar veículo</h2>
+  <form method="post" action="{{ acao }}" data-submissao>
+    {{ csrf() }}
+    {{ seletor('tipo', 'Tipo de veículo', tipos.items(), request.form.get('tipo'), 'Selecione') }}
+    {{ seletor('motorizacao','Motorização',motores.items(),request.form.get('motorizacao','desconhecida')) }}
+        {{ campo('placa', 'Placa', request.form.get('placa', '')) }}
+    {{ campo('modelo', 'Modelo', request.form.get('modelo', '')) }}
+    {{ ui.botao('Cadastrar veículo', 'car') }}
+  </form>
+</section>
+{% endmacro %}

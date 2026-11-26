@@ -3,7 +3,7 @@
   {{ v.placa }}
 {% endblock %}
 {% block introducao %}
-  <p class="subtitulo">{{ tipos[v.tipo] }} · {{ v.modelo }}</p>
+  <p class="subtitulo">{{ tipos[v.tipo] }} · {{ v.modelo }} · {{ motores[v.motorizacao] }}</p>
 {% endblock %}
 {% block corpo %}
   <section class="painel">
@@ -15,7 +15,7 @@
       <p>Sem vínculo cadastral.</p>
     {% endif %}
     {% if ativo %}
-      <p>Estacionado na vaga {{ ativo.vaga }} · {{ pagamentos[ativo.pagamento] }}</p>
+      <p>Estacionado na vaga {{ '%03d'|format(ativo.vaga) }} · {{ pagamentos[ativo.pagamento] }}</p>
       {% if ativo.estadia_id %}
         {{ adm.link('Ver estadia',url_for('gestao.detalhe_estadia',numero=ativo.estadia_id)) }}
       {% endif %}

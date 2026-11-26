@@ -1,4 +1,5 @@
 {% extends 'gestao/pagina.html' %}
+{% import 'components/vagas.html' as mapa with context %}
 {% block nome %}
   Mapa de vagas
 {% endblock %}
@@ -7,18 +8,31 @@
 {% endblock %}
 {% block corpo %}
   <section class="painel">
-    <h2>Dez vagas comuns</h2>
+    <h2>Consultar vagas</h2>
+    <form class="filtros">{{ mapa.filtros(pagina) }}{{ ui.botao('Filtrar') }}</form>
+    <p>Livre permite nova utilização. Reservada identifica uma reserva ativa. Ocupada indica veículo estacionado.</p>
+    {{ mapa.paginar(pagina) }}
     {{ adm.mapa(vagas, ativas, selecao) }}
   </section>
   {% if selecao %}
-    <section class="painel">
-      <h2>Vaga {{ selecao.numero }}</h2>
+    <section class="painel" id="detalhe-vaga">
+      <h2>Vaga {{ '%03d'|format(selecao.numero) }}</h2>
+      <p>Setor {{ selecao.setor }} · {{ classes_vaga[selecao.classificacao] }}{% if selecao.vip %} · VIP temporária{% endif %}</p>
+      {% if selecao.classificacao in ('pcd','idoso','adicional','familia') %}<p>Exige beneficiário presente e autorização conferida na ficha do cliente.</p>{% endif %}
+      {% if selecao.carregador is not none %}
+      <p>Recarga simulada para elétrico ou híbrido plug-in. Carregador {{ 'operacional' if selecao.carregador else 'indisponível' }}.</p>
+      <form method="post" action="{{ url_for('gestao.carregador',numero=selecao.numero) }}" data-submissao>
+      {{ adm.revisao(revisao) }}{{ ui.botao('Simular indisponibilidade' if selecao.carregador else 'Restabelecer carregador', secundario=true) }}</form>
+      {% endif %}
       {% set e = ativas.get(selecao.numero) %}
       {% if e and e.placa == selecao.placa %}
         <p>{{ e.placa }} · {{ pagamentos[e.pagamento] }} · Entrada {{ e.horario_entrada|horario }}</p>
         {% if e.estadia_id %}
           {{ adm.link('Ver estadia', url_for('gestao.detalhe_estadia', numero=e.estadia_id)) }}
         {% endif %}
+      {% elif selecao.placa_reservada %}
+        <p>Reserva #{{ selecao.reserva_id }} · Reservada para {{ selecao.placa_reservada }}.</p>
+        {{ adm.link('Registrar entrada da reserva',url_for('gestao.entrada', vaga=selecao.numero, cliente_id=selecao.titular_reserva, placa=selecao.placa_reservada)) }}
       {% elif not selecao.ocupada and not e %}
         <p>Livre. A disponibilidade será conferida ao confirmar a entrada.</p>
         {{ adm.link('Registrar entrada',url_for('gestao.entrada', vaga=selecao.numero)) }}

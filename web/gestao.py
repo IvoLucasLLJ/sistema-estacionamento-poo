@@ -4,9 +4,10 @@ from datetime import date
 from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from service.estacionamento_service import ConflitoDeHistorico, ErroDeInfraestrutura, ErroDeNegocio, ResultadoIncerto
-from web.apresentacao import CATEGORIAS, TIPOS, OcupacaoViewModel, centavos, dinheiro, horario
+from web.apresentacao import CATEGORIAS, TIPOS, OcupacaoViewModel, PaginaVagas, centavos, dinheiro, horario
 from web.contas import PapelAcesso
 from web.eventos import ROTULOS, RelatorioSaidas, eventos_identificados
+from web.revisoes import consumir, emitir
 from web.seguranca import acesso_restrito, csrf_token
 
 gestao = Blueprint('gestao', __name__, url_prefix='/gestao')
@@ -43,7 +44,8 @@ def ir(endpoint, **valores):
 @gestao.get('/')
 def inicio():
     servico = current_app.extensions['estacionamento']
-    ocupacao = OcupacaoViewModel.da_consulta(servico.consultar_ocupacao())
+    leitura = servico.consultar_ocupacao(detalhada=True)
+    ocupacao = OcupacaoViewModel.da_consulta(leitura)
     try:
         financeiro = servico.consultar_faturamento()
         pendentes = len(servico.listar_pagamentos_abertos())
@@ -51,7 +53,8 @@ def inicio():
         raise
     except ErroDeInfraestrutura:
         financeiro = pendentes = None
-    return render_template('gestao.html', ocupacao=ocupacao, vagas=servico.consultar_vagas(),
+    return render_template('gestao.html', ocupacao=ocupacao, vagas=PaginaVagas.filtrar(leitura['mapa'], {}).vagas,
+                           indicadores=leitura['indicadores'],
                            financeiro=financeiro, pendentes=pendentes)
 
 
@@ -63,7 +66,37 @@ def vagas():
     if 'vaga' in request.args and not selecao:
         abort(400)
     ativas = {e['vaga']: e for e in servico().listar_estadias_ativas()}
-    return render_template('gestao/vagas.html', vagas=lista, selecao=selecao, ativas=ativas)
+    pagina = PaginaVagas.filtrar(lista, request.args)
+    chave = emitir(f'carregador/{numero}', dict(disponivel=not selecao['carregador'])) if selecao and selecao['carregador'] is not None else None
+    return render_template('gestao/vagas.html', vagas=pagina.vagas, pagina=pagina, selecao=selecao,
+                           ativas=ativas, revisao=chave)
+
+
+@gestao.post('/vagas/<int:numero>/carregador')
+def carregador(numero):
+    dados = consumir(f'carregador/{numero}')
+    g.consulta_operacao = url_for('gestao.vagas', vaga=numero)
+    servico().alterar_carregador(numero, dados['disponivel'])
+    return ir('vagas', vaga=numero)
+
+
+@gestao.post('/clientes/<identificador>/autorizacoes')
+def conferir(identificador):
+    consumir(f'conferir/{identificador}')
+    g.consulta_operacao = url_for('gestao.cliente', identificador=identificador)
+    servico().conferir_autorizacao(identificador, *(request.form.get(k, '') for k in
+                                   ('placa', 'grupo', 'beneficiario', 'conferencia', 'validade')),
+                                  numero_beneficiario=request.form.get('numero_beneficiario', type=int))
+    flash('Conferência simulada registrada.')
+    return ir('cliente', identificador=identificador)
+
+
+@gestao.post('/clientes/<identificador>/autorizacoes/<int:numero>/revogar')
+def revogar(identificador, numero):
+    g.consulta_operacao = url_for('gestao.cliente', identificador=identificador)
+    consumir(f'revogar/{identificador}/{numero}')
+    servico().revogar_autorizacao(identificador, numero)
+    return ir('cliente', identificador=identificador)
 
 
 @gestao.get('/estadias')
@@ -78,18 +111,6 @@ def estadias():
                 busca, e['placa'], e['estadia_id'], nome, e['cliente_id']):
             lista.append(dict(e, nome=nome))
     return render_template('gestao/estadias.html', lista=lista)
-
-
-def emitir(acao, dados=None):
-    return current_app.extensions['revisoes'].emitir(csrf_token(), acao, dados)
-
-
-def consumir(acao):
-    dados = current_app.extensions['revisoes'].obter(
-        request.form.get('revisao'), csrf_token(), acao, consumir=True)
-    if dados is None:
-        abort(409)
-    return dados
 
 
 def coincide(busca, *valores):
@@ -125,7 +146,7 @@ def veiculos():
         consumir('veiculo')
         try:
             novo = servico().cadastrar_veiculo(request.form.get('tipo'), request.form.get('placa'),
-                                               request.form.get('modelo'))
+                                               request.form.get('modelo'), request.form.get('motorizacao', 'desconhecida'))
         except ErroDeNegocio as exc:
             erro = str(exc)
         else:
@@ -150,7 +171,10 @@ def cliente(identificador):
     ocupadas = {e['placa'] for e in ativas}
     inelegiveis = vinculados | ocupadas
     elegiveis = [v for v in s.listar_veiculos() if v['placa'] not in inelegiveis]
-    return render_template('gestao/cliente.html', c=c, frota=frota, elegiveis=elegiveis,
+    autorizacoes = s.autorizacoes(chave)
+    revogacoes = {a.identificador: emitir(f'revogar/{chave}/{a.identificador}') for a in autorizacoes}
+    return render_template('gestao/cliente.html', c=c, frota=frota, elegiveis=elegiveis, autorizacoes=autorizacoes, revogacoes=revogacoes,
+                           conferir_revisao=emitir(f'conferir/{chave}'),
                            ativas=[e for e in ativas if e['cliente_id'] == chave],
                            eventos=[e for e in eventos if e.get('cliente_id') == chave])
 
@@ -163,6 +187,15 @@ def veiculo(placa):
     dono = s.cliente_do_veiculo(v['placa'])
     return render_template('gestao/veiculo.html', v=v, dono=dono, ativo=ativo,
                            clientes=[] if dono or ativo else s.listar_clientes())
+
+
+@gestao.post('/clientes/<identificador>/veiculos')
+def cadastrar_veiculo_do_cliente(identificador):
+    g.consulta_operacao = url_for('gestao.cliente', identificador=identificador)
+    servico().cadastrar_veiculo_do_cliente(identificador, request.form.get('tipo'),
+                                          request.form.get('placa'), request.form.get('modelo'), request.form.get('motorizacao', 'desconhecida'))
+    flash('Veículo cadastrado e vinculado ao cliente.')
+    return ir('cliente', identificador=identificador)
 
 
 @gestao.post('/vinculos')
@@ -180,8 +213,12 @@ def dados_entrada(cliente_id, placa, vaga):
     frota = s.veiculos_do_cliente(dono['identificador']) if dono else []
     vagas = s.consultar_vagas()
     ocupadas = {v['placa'] for v in vagas if v['ocupada']}
-    return dict(clientes=clientes, dono=dono, frota=frota, vagas=vagas,
-                ocupadas=ocupadas, placa=placa, vaga=vaga)
+    placa = placa or next((v['placa'] for v in frota if v['placa'] not in ocupadas), '')
+    opcoes = s.opcoes_de_vaga(cliente_id, placa, entrada=True) if any(v['placa'] == placa for v in frota) else []
+    disponiveis = [v for v in opcoes if not v['motivo']]
+    restricoes = sorted({v['motivo'] for v in opcoes if v['motivo'] and v['estado'] != 'ocupada'})
+    return dict(clientes=clientes, dono=dono, frota=frota, vagas=vagas, restricoes=restricoes,
+                ocupadas=ocupadas, disponiveis=disponiveis, placa=placa, vaga=vaga)
 
 
 @gestao.route('/entrada', methods=['GET', 'POST'])
@@ -189,9 +226,12 @@ def entrada():
     if request.method == 'POST':
         g.consulta_operacao = url_for('gestao.historico', acao='entrada_cliente')
         dados = consumir('entrada')
+        if dados.pop('protegida', False) and request.form.get('presente') != 'sim':
+            abort(400)
         g.consulta_operacao = url_for('gestao.historico', q=dados['placa'], acao='entrada_cliente')
+        expectativa = dados.pop('expectativa_uso')
         try:
-            e = servico().iniciar_estadia(**dados)
+            e = servico().iniciar_estadia(**dados, expectativa_uso=expectativa, beneficiario_presente=request.form.get('presente') == 'sim')
         except ErroDeNegocio as exc:
             contexto = dados_entrada(**dados)
             return render_template('gestao/entrada.html', **contexto, erro=str(exc)), 409
@@ -204,12 +244,15 @@ def entrada():
     contexto = dados_entrada(cliente_id, placa, vaga)
     if 'revisar' in request.args:
         veiculo = next((v for v in contexto['frota'] if v['placa'] == placa), None)
-        livre = any(v['numero'] == vaga and not v['ocupada'] for v in contexto['vagas'])
-        if not veiculo or placa in contexto['ocupadas'] or not livre:
+        disponivel = any(v['numero'] == vaga for v in contexto['disponiveis'])
+        if not veiculo or not disponivel:
             return render_template('gestao/entrada.html', **contexto,
                                    erro='Confira o vínculo, a situação do veículo e a vaga disponível.'), 422
         dados = dict(cliente_id=cliente_id, placa=placa, vaga=vaga)
-        contexto.update(revisao=emitir('entrada', dados), veiculo=veiculo)
+        selecionada = next(v for v in contexto['disponiveis'] if v['numero'] == vaga)
+        dados['expectativa_uso'] = {k: selecionada[k] for k in ('classificacao','vip','reserva_id','conferencia')}
+        dados['protegida'] = selecionada['classificacao'] not in ('comum', 'eletrica')
+        contexto.update(revisao=emitir('entrada', dados), veiculo=veiculo, selecionada=selecionada)
     return render_template('gestao/entrada.html', **contexto)
 
 
@@ -311,10 +354,12 @@ def campos_do_evento(evento):
     campos = [
         ('placa', 'Placa', str), ('cliente_id', 'UUID do cliente', str), ('nome', 'Cliente', str),
         ('categoria', 'Categoria', CATEGORIAS.get), ('tipo', 'Tipo', TIPOS.get), ('modelo', 'Modelo', str),
-        ('vaga', 'Vaga', str), ('estadia_id', 'Estadia', str), ('horario_entrada', 'Entrada', horario),
+        ('classificacao', 'Classificação da vaga', str), ('vip', 'Destinação VIP', lambda v: 'Sim' if v else 'Não'),
+        ('vaga', 'Vaga', lambda n: f'{n:03d}'), ('estadia_id', 'Estadia', str), ('horario_entrada', 'Entrada', horario),
         ('horario_saida', 'Saída', horario), ('horas', 'Duração (h)', lambda h: str(h).replace('.', ',')),
         ('tarifa_base', 'Tarifa-base', dinheiro), ('desconto', 'Desconto', dinheiro),
         ('valor', 'Valor legado', dinheiro), ('valor_centavos', 'Valor definitivo', centavos),
+        ('origem', 'Categoria anterior', CATEGORIAS.get), ('reserva_id', 'Reserva', str),
         ('pagamento', 'Situação financeira', PAGAMENTOS.get),
     ]
     return [(rotulo, formatar(evento[chave])) for chave, rotulo, formatar in campos
@@ -353,6 +398,7 @@ def relatorios():
         raise ErroDeNegocio('A data inicial deve preceder ou coincidir com a data final.')
     s = servico()
     relatorio = RelatorioSaidas.do_periodo(eventos_identificados(s.consultar_historico()), inicio, fim)
+    leitura = s.consultar_ocupacao(detalhada=True)
     return render_template('gestao/relatorios.html', rel=relatorio,
-                           ocupacao=OcupacaoViewModel.da_consulta(s.consultar_ocupacao()),
-                           faturamento=s.consultar_faturamento())
+                           ocupacao=OcupacaoViewModel.da_consulta(leitura),
+                           faturamento=s.consultar_faturamento(), indicadores=leitura['indicadores'])

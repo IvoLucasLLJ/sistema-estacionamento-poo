@@ -1,11 +1,17 @@
 from abc import ABC, abstractmethod
 
 
+from model.uso_vaga import MOTORES
+
+
 class Veiculo(ABC):
-    def __init__(self, placa, modelo):
+    def __init__(self, placa, modelo, motorizacao="desconhecida"):
         self._placa = self.normalizar_placa(placa)
         if not isinstance(modelo, str) or not modelo.strip():
             raise ValueError("Informe um modelo válido.")
+        if motorizacao not in MOTORES:
+            raise ValueError("Motorização inválida.")
+        self._motorizacao = motorizacao
         self._modelo = modelo.strip()
 
     @staticmethod
@@ -24,6 +30,10 @@ class Veiculo(ABC):
     @property
     def modelo(self):
         return self._modelo
+
+    @property
+    def motorizacao(self):
+        return self._motorizacao
 
     @abstractmethod
     def calcular_tarifa(self, horas):

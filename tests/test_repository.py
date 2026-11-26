@@ -74,7 +74,7 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual(moto.modelo, 'Biz')
         self.assertIs(est.vagas[2].veiculo, moto)
         self.assertEqual(est.historico, eventos)
-        self.assertEqual(est.relatorio(), {'ocupadas': 1, 'livres': 9, 'faturamento': 0})
+        self.assertEqual(est.relatorio(), {'ocupadas': 1, 'livres': 199, 'faturamento': 0})
 
     def test_entrada_e_saida_sem_modelo_recuperam_cadastro_e_faturamento(self):
         inicio = '2025-03-10T08:00:00-03:00'
@@ -91,7 +91,7 @@ class RepositoryTests(unittest.TestCase):
         carro = est.buscar_veiculo('ABC1234')
         self.assertIsInstance(carro, Carro)
         self.assertEqual(carro.modelo, 'Modelo não registrado')
-        self.assertEqual(est.relatorio(), {'ocupadas': 0, 'livres': 10, 'faturamento': 15})
+        self.assertEqual(est.relatorio(), {'ocupadas': 0, 'livres': 200, 'faturamento': 15})
         self.repo.salvar(est)
         self.assertEqual(json.loads(self.arquivo.read_text(encoding='utf-8')), eventos)
         est.estacionar_cadastrado('ABC1234', 2)

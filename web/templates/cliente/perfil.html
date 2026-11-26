@@ -8,6 +8,7 @@
     <dl class="ficha">{{ dado('Nome', cadastro.nome) }}{{ dado('Categoria', categorias[cadastro.categoria]) }}
       {{ dado('Identificador para atendimento', cadastro.identificador) }}</dl>
     <p>Para solicitar atendimento sobre o cadastro, informe seu identificador à Gestão.</p>
+    <p><a href="{{ url_for('cliente.tarifas') }}">Consultar ou mudar minha categoria</a></p>
   </section>
 <section class="painel"><h2>Conta de acesso</h2>
   <p>A conta deste ambiente é <strong>{{ g.identidade.usuario }}</strong>.</p>

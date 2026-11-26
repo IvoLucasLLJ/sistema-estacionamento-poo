@@ -20,16 +20,25 @@
   </div>
   <div class="col-12 col-lg-5">
     {% if ocupacao %}{{ ui.disponibilidade(ocupacao) }}
+      <p><a href="{{ url_for('cliente.disponibilidade') }}">Ver vagas livres e reservas</a></p>
     {% else %}{{ ui.aviso('Disponibilidade indisponível. Atualize a consulta.', 'M09') }}{% endif %}
   </div>
 </div>
+<section class="painel"><h2>Reservas e benefícios</h2>
+  {% if reservas is none %}<p>Reservas indisponíveis.</p>{% else %}
+  {% for r in reservas %}<p>Vaga {{ '%03d'|format(r.vaga) }} · {{ r.placa }} · {{ classes_vaga[r.classificacao] }}{% if r.vip %} · VIP temporária{% endif %}</p>
+  {% else %}<p>Sem reservas ativas.</p>{% endfor %}{% endif %}
+  {% if autorizacoes is none %}<p>Autorizações indisponíveis.</p>{% else %}
+  {% for a in autorizacoes %}<p>{{ grupos_uso[a.grupo] }} · {{ a.placa }} · {{ a.beneficiario }} · validade {{ a.validade }}</p>{% endfor %}{% endif %}
+  <a href="{{ url_for('cliente.tarifas') }}">Consultar benefícios da minha categoria</a>
+</section>
 <section id="veiculos" class="painel">
   <h2>{{ ui.icone('car') }} Meus veículos</h2>
   {% if frota is none %}{{ ui.aviso('Lista de veículos indisponível.', 'M09') }}
   {% else %}
     {% for v in frota %}<div class="linha"><strong>{{ v.placa }}</strong><span>{{ tipos[v.tipo] }} · {{ v.modelo }}</span></div>
-    {% else %}<p>Nenhum veículo vinculado. Procure o atendimento para vincular um veículo.</p>{% endfor %}
+    {% else %}<p>Nenhum veículo vinculado. Você já pode cadastrar o primeiro.</p>{% endfor %}
   {% endif %}
-  <p><a href="{{ url_for('cliente.veiculos') }}">Consultar meus veículos</a></p>
+  <p><a href="{{ url_for('cliente.veiculos') }}">Consultar meus veículos</a> · <a href="{{ url_for('cliente.veiculos', _anchor='novo-veiculo') }}">Cadastrar veículo</a></p>
 </section>
 {% endblock %}

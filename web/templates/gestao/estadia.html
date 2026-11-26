@@ -26,7 +26,7 @@
         <p>Utilização concluída · Sem valor fiscal.</p>
         <button class="botao secundario" type="button" data-imprimir>Imprimir comprovante</button>
       {% elif revisao %}
-        <p class="confirmado">Pagamento confirmado. Veículo na vaga {{ e.vaga }}.</p>
+        <p class="confirmado">Pagamento confirmado. Veículo na vaga {{ '%03d'|format(e.vaga) }}.</p>
         {{ adm.concluir(e,revisao,'Concluir saída paga') }}
       {% else %}
         <p>Sem pagamento confirmado.</p>

@@ -3,7 +3,7 @@
   Confirmar pagamento
 {% endblock %}
 {% block introducao %}
-  <p class="subtitulo">Estadia {{ e.estadia_id }} · {{ e.placa }} · Vaga {{ e.vaga }}</p>
+  <p class="subtitulo">Estadia {{ e.estadia_id }} · {{ e.placa }} · Vaga {{ '%03d'|format(e.vaga) }}</p>
 {% endblock %}
 {% block corpo %}
   <div class="gestao-divisao">

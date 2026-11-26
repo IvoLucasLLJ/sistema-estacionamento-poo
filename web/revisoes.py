@@ -4,6 +4,10 @@ from secrets import token_urlsafe
 from threading import Lock
 from time import monotonic
 
+from flask import abort, current_app, request
+
+from web.seguranca import csrf_token
+
 
 @dataclass(frozen=True)
 class Revisao:
@@ -48,3 +52,15 @@ class Revisoes:
             chaves = [chave for chave, revisao in self._pendentes.items() if revisao.sessao == sessao]
             for chave in chaves:
                 del self._pendentes[chave]
+
+
+def emitir(acao, dados=None):
+    return current_app.extensions['revisoes'].emitir(csrf_token(), acao, dados)
+
+
+def consumir(acao):
+    dados = current_app.extensions['revisoes'].obter(
+        request.form.get('revisao'), csrf_token(), acao, consumir=True)
+    if dados is None:
+        abort(409)
+    return dados

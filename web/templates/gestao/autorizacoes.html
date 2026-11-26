@@ -1,0 +1,16 @@
+<section class="painel"><h2>Autorizações de utilização</h2>
+<p>Conferência acadêmica para o beneficiário presente no veículo indicado. Utilize apenas situações fictícias.</p>
+{% for a in autorizacoes %}
+<div class="registro-evento"><span>Conferência #{{ a.identificador }} · {{ grupos_uso[a.grupo] }} · {{ a.placa }} · beneficiário {{ a.pessoa.numero }} ({{ a.beneficiario }}) · validade {{ a.validade }}</span>
+<form method="post" action="{{ url_for('gestao.revogar',identificador=c.identificador,numero=a.identificador) }}">{{ adm.revisao(revogacoes[a.identificador]) }}{{ ui.botao('Revogar',secundario=true) }}</form></div>
+{% endfor %}
+{% if frota %}<form method="post" action="{{ url_for('gestao.conferir',identificador=c.identificador) }}" data-submissao>
+{{ adm.revisao(conferir_revisao) }}
+<label class="entrada">Veículo do beneficiário<select name="placa" required>{% for v in frota %}<option>{{ v.placa }}</option>{% endfor %}</select></label>
+{{ adm.seletor('grupo','Direito de utilização',grupos_uso.items(),'','Selecione') }}
+<label class="entrada">Beneficiário fictício nº (neste cadastro)<input type="number" name="numero_beneficiario" min="1" max="999" value="1" required></label>
+{{ adm.seletor('beneficiario','Beneficiário presente',[('condutor','Condutor'),('passageiro','Passageiro')]) }}
+{{ adm.seletor('conferencia','Conferência simulada',[('fisica','Credencial física · PcD ou idoso'),('digital','Credencial digital · PcD ou idoso'),('administrativa','Administrativa · demais grupos')]) }}
+{{ adm.campo('validade','Validade da conferência','','date') }}
+{{ ui.botao('Registrar conferência') }}
+</form>{% endif %}</section>

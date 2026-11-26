@@ -50,7 +50,7 @@
 {% macro disponibilidade(o) -%}
 <section class="painel ocupacao" id="disponibilidade"><h2>{{ icone('circle-parking') }} Disponibilidade</h2>
 <div class="medida"><strong>{{ o.livres }}</strong> de {{ o.total }} vagas livres</div>
-<meter value="{{ o.ocupadas }}" min="0" max="{{ o.total }}" aria-label="Vagas ocupadas">{{ o.percentual }}%</meter>
-<div class="legenda"><span>{{ o.ocupadas }} ocupadas</span><span>{{ o.percentual }}% de ocupação</span></div>
+<meter value="{{ o.ocupadas }}" min="0" max="{{ o.total }}" aria-label="Vagas ocupadas">{{ o.percentual|string|replace('.', ',') }}%</meter>
+<div class="legenda"><span>{{ o.ocupadas }} ocupadas</span><span>{{ o.reservadas }} reservada{% if o.reservadas != 1 %}s{% endif %}</span><span>{{ o.percentual|string|replace('.', ',') }}% de ocupação</span><span>{{ o.percentual_indisponivel|string|replace('.', ',') }}% de indisponibilidade física ou por reserva</span></div>
 </section>
 {%- endmacro %}

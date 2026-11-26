@@ -13,6 +13,7 @@
       <p>Todas as saídas concluídas, incluindo valores legados.</p>
     </section>
   </div>
+  {% import 'components/vagas.html' as mapa with context %}{{ mapa.classificacoes(indicadores) }}
   <section class="painel">
     <h2>Saídas por período</h2>
     <form class="filtros">

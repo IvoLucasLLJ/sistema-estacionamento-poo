@@ -157,6 +157,7 @@ meter::-webkit-meter-optimum-value { background:var(--move-foco); }
 .grade-vagas li > span { display:inline-flex; align-items:center; gap:4px; padding:2px 6px; border-radius:4px; font-size:.8125rem; font-weight:600; }
 .grade-vagas .icone { width:15px; height:15px; }
 .livre span { background:var(--move-livre-fundo); color:var(--move-livre); }
+.reservada span { background:var(--move-suave); color:var(--move-atencao); }
 .ocupada span,.categoria { background:var(--move-suave); }
 .categoria { display:inline-block; margin-top:8px; padding:3px 10px; border-radius:5px; font-size:.875rem; font-weight:650; }
 .vip { background:var(--move-vip-fundo); color:var(--move-vip); }
@@ -436,3 +437,9 @@ dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
   .cadastro-portal .cartao-acesso { margin: 5rem 0 2rem; }
   .cadastro-portal form { gap: var(--move-espaco-4); margin-top: var(--move-espaco-6); }
 }
+
+.grade-vagas li, .grade-vagas a, .filtros > * { min-width:0; }
+.grade-vagas small { overflow-wrap:anywhere; }
+.filtros select, .painel select { max-width:100%; }
+.opcao-vaga { display:inline-flex; align-items:center; min-height:44px; gap:8px; cursor:pointer; }
+.opcao-vaga input { width:18px; height:18px; flex-shrink:0; }

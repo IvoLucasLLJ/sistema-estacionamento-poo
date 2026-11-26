@@ -1,3 +1,4 @@
+from model.vaga import DISTRIBUICAO
 from model.caminhao import Caminhao
 from model.carro import Carro
 from model.categorias_cliente import classe_da_categoria
@@ -6,8 +7,8 @@ from model.moto import Moto
 
 
 class Controller:
-    def __init__(self, arquivo="historico.json", repository=None):
-        self.repository = repository if repository is not None else EstacionamentoRepository(arquivo)
+    def __init__(self, arquivo="historico.json", repository=None, *, distribuicao=DISTRIBUICAO):
+        self.repository = repository if repository is not None else EstacionamentoRepository(arquivo, distribuicao=distribuicao)
         self._estacionamento = self.repository.carregar()
 
     @property
@@ -33,8 +34,8 @@ class Controller:
     def veiculos_do_cliente(self, cliente_id):
         return self.estacionamento.veiculos_do_cliente(cliente_id)
 
-    def iniciar_estadia(self, placa, vaga, cliente_id):
-        self.estacionamento.iniciar_estadia(placa, vaga, cliente_id)
+    def iniciar_estadia(self, placa, vaga, cliente_id, *, beneficiario_presente=False):
+        self.estacionamento.iniciar_estadia(placa, vaga, cliente_id, beneficiario_presente=beneficiario_presente)
 
     def consultar_cobranca(self, placa, horas):
         return self.estacionamento.consultar_cobranca(placa, horas)
@@ -49,22 +50,22 @@ class Controller:
         return self.estacionamento.concluir_saida(cobranca)
 
     @staticmethod
-    def _criar_veiculo(tipo, placa, modelo):
+    def _criar_veiculo(tipo, placa, modelo, motorizacao="desconhecida"):
         if not isinstance(tipo, str):
             raise ValueError("Tipo inválido")
         tipo = tipo.strip().lower()
         if tipo == "carro":
-            veiculo = Carro(placa, modelo)
+            veiculo = Carro(placa, modelo, motorizacao)
         elif tipo == "moto":
-            veiculo = Moto(placa, modelo)
+            veiculo = Moto(placa, modelo, motorizacao)
         elif tipo == "caminhao":
-            veiculo = Caminhao(placa, modelo)
+            veiculo = Caminhao(placa, modelo, motorizacao)
         else:
             raise ValueError("Tipo inválido")
         return veiculo
 
-    def cadastrar_veiculo(self, tipo, placa, modelo):
-        return self.estacionamento.cadastrar_veiculo(self._criar_veiculo(tipo, placa, modelo))
+    def cadastrar_veiculo(self, tipo, placa, modelo, motorizacao="desconhecida"):
+        return self.estacionamento.cadastrar_veiculo(self._criar_veiculo(tipo, placa, modelo, motorizacao))
 
     def buscar_veiculo(self, placa):
         return self.estacionamento.buscar_veiculo(placa)

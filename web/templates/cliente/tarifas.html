@@ -6,6 +6,7 @@
   <section class="painel"><h2>Seu benefício</h2>
     <span class="categoria {{ cadastro.categoria }}">{{ categorias[cadastro.categoria] }}</span>
     <p>{{ beneficios[cadastro.categoria] }}</p>
+    <p>VIP e Mensalista podem reservar uma vaga comum com destinação VIP, sem taxa adicional. A recarga depende do veículo. As vagas protegidas exigem conferência própria pela Gestão.</p>
     <a href="{{ url_for('cliente.perfil') }}">Ver meu perfil</a>
   </section>
   <section class="painel"><h2>Tarifa-base por hora</h2>
@@ -16,8 +17,18 @@
 </div>
 <section class="painel"><h2>Categorias comerciais</h2>
   <dl class="ficha">{% for categoria, regra in beneficios.items() %}
-    <div><dt>{{ categorias[categoria] }}</dt><dd>{{ regra }}</dd></div>
+    <div><dt>{{ categorias[categoria] }}</dt><dd>{{ precos[categoria]|centavos }} · {{ regra }}
+      {% if categoria == cadastro.categoria %}<strong> · Categoria atual</strong>
+      {% else %}<a href="{{ url_for('cliente.mudar_categoria', categoria=categoria) }}">Mudar para {{ categorias[categoria] }}</a>{% endif %}
+    </dd></div>
   {% endfor %}</dl>
-  <p>Em cada estadia, vale a categoria registrada na entrada.</p>
+  <p>O upgrade é simulado. Você paga apenas a diferença entre as categorias. Em cada estadia, vale a categoria registrada na entrada.</p>
 </section>
+{% if mudancas %}
+<section class="painel"><h2>Minhas mudanças de categoria</h2>
+  <dl class="ficha">{% for m in mudancas %}
+    <div><dt>{{ categorias[m.origem] }} → {{ categorias[m.categoria] }}</dt><dd>{{ m.valor_centavos|centavos }} · Simulação</dd></div>
+  {% endfor %}</dl>
+</section>
+{% endif %}
 {% endblock %}

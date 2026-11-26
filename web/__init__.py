@@ -2,6 +2,8 @@ import click
 from flask import Flask, g, render_template, request, url_for
 from werkzeug.exceptions import HTTPException
 
+from model.uso_vaga import CLASSIFICACOES, GRUPOS, MOTORES
+from model.vaga import DISTRIBUICAO
 from persistence.exclusividade import EscritorLocal
 from service.estacionamento_service import (
     ConflitoDeHistorico, ErroDeInfraestrutura, ErroDeNegocio, EstacionamentoService, ResultadoIncerto,
@@ -20,7 +22,7 @@ from web.seguranca import csrf_token, destino, preparar_requisicao
 def create_app(config=None):
     app = Flask(__name__)
     configurar(app, config)
-    servico = EstacionamentoService(app.config['HISTORICO'])
+    servico = EstacionamentoService(app.config['HISTORICO'], distribuicao=app.config.get('DISTRIBUICAO', DISTRIBUICAO))
     autenticacao = AutenticacaoService(ContaRepository(app.config['CONTAS']), servico,
                                        demonstracao=app.config['DEMONSTRACAO'])
     app.extensions.update(sessoes=SessoesAtivas(app.config['DADOS'] / 'sessoes.json'),
@@ -29,7 +31,8 @@ def create_app(config=None):
     for area in (acesso, gestao, cliente):
         app.register_blueprint(area)
     app.before_request(preparar_requisicao)
-    app.jinja_env.globals.update(csrf_token=csrf_token, destino=destino)
+    app.jinja_env.globals.update(csrf_token=csrf_token, destino=destino,
+                                 classes_vaga=CLASSIFICACOES, grupos_uso=GRUPOS, motores=MOTORES)
     app.jinja_env.filters['dinheiro'] = dinheiro
     app.jinja_env.filters['horario'] = horario
     app.jinja_env.filters['centavos'] = centavos

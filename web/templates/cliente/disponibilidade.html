@@ -1,4 +1,5 @@
 {% extends 'layouts/cliente.html' %}
+{% import 'components/vagas.html' as mapa with context %}
 {% block titulo %}Disponibilidade{% endblock %}
 {% block conteudo %}
 <div class="titulo-pagina"><div><h1>Disponibilidade do estacionamento</h1>
@@ -6,5 +7,36 @@
   <a class="botao secundario" href="{{ url_for('cliente.disponibilidade') }}">{{ ui.icone('refresh-cw') }} Atualizar</a>
 </div>
 {{ ui.disponibilidade(ocupacao) }}
-{% if ocupacao.livres == 0 %}<p class="painel">Estacionamento lotado.</p>{% endif %}
+<section class="painel">
+  <h2>Vagas livres para reserva</h2>
+  <form class="filtros" data-consulta-vagas>
+    {% if frota %}<label class="entrada">Meu veículo<select name="placa" data-atualiza-vagas>{% for v in frota %}
+      <option value="{{ v.placa }}" {% if v.placa == placa %}selected{% endif %}>{{ v.placa }} · {{ v.modelo }}</option>
+    {% endfor %}</select></label>{% endif %}
+    {{ mapa.filtros(pagina,true) }}
+    {% if cadastro.categoria in ('vip','mensalista') %}<label class="opcao-vaga"><input type="checkbox" name="vip" value="1" {% if vip %}checked{% endif %}> Solicitar destinação VIP</label>{% endif %}
+    {{ ui.botao('Consultar vagas') }}
+  </form>
+  {% if not frota %}<p>Para reservar, escolha um veículo próprio fora do estacionamento e sem reserva ativa.</p>{% endif %}
+  {% if ocupacao.ocupadas == ocupacao.total %}<p>Estacionamento lotado.</p>{% endif %}
+  {{ mapa.paginar(pagina) }}
+  {% for motivo in motivos %}<p>{{ motivo }}</p>{% endfor %}
+  <ul class="grade-vagas">{% for v in pagina.vagas %}
+    <li class="livre"><a href="{{ url_for('cliente.reservar', vaga=v.numero, placa=placa, vip=1 if vip else 0) }}">
+      <strong>Vaga {{ '%03d'|format(v.numero) }}</strong><span>Reservar</span><small>{{ classes_vaga[v.classificacao] }}</small></a></li>
+  {% endfor %}</ul>
+</section>
+{{ mapa.classificacoes(indicadores, compativeis) }}
+{% if reservas %}
+<section class="painel"><h2>Minhas reservas</h2>
+  {% for r in reservas %}
+    <div class="registro"><p><strong>Vaga {{ '%03d'|format(r.vaga) }}{% if r.vip %} · VIP{% endif %}</strong> · {{ r.placa }}</p>
+      <form method="post" action="{{ url_for('cliente.cancelar_reserva', vaga=r.vaga, reserva_id=r.id) }}" data-submissao>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {{ ui.botao('Cancelar reserva', secundario=true) }}
+      </form>
+    </div>
+  {% endfor %}
+</section>
+{% endif %}
 {% endblock %}

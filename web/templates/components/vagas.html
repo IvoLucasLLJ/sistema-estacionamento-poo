@@ -1,0 +1,32 @@
+{% import 'components/ui.html' as ui with context %}
+{% import 'components/gestao.html' as adm with context %}
+
+{% macro classificacoes(ind, compativeis=none) %}
+<section class="painel"><h2>Disponibilidade por classificação</h2>
+<dl class="ficha">{% for chave, grupo in ind.grupos.items() %}
+  <div><dt>{{ classes_vaga[chave] }}</dt><dd>{{ grupo.livres }} livres de {{ grupo.total }}{% if compativeis is not none %} · {{ compativeis[chave] }} para este veículo{% endif %}</dd></div>
+{% endfor %}</dl>
+<p>{{ ind.eletricas }} vagas livres com recarga disponível · {{ ind.falhas }} carregador(es) indisponível(is).</p>
+</section>
+{% endmacro %}
+
+{% macro filtros(pagina, pessoal=false) %}
+{{ adm.campo('numero','Número da vaga',request.args.get('numero',''),'number',false) }}
+<label class="entrada">Setor<select name="setor"><option value="">Todos</option>
+{% for n in pagina.setores %}<option value="{{ n }}" {% if request.args.get('setor') == n|string %}selected{% endif %}>Setor {{ '%02d'|format(n) }}</option>{% endfor %}
+</select></label>
+{{ adm.seletor('classificacao','Classificação',classes_vaga.items(),request.args.get('classificacao'),'Todas',false) }}
+{% if not pessoal %}
+{{ adm.seletor('estado','Estado',[('livre','Livre'),('reservada','Reservada'),('ocupada','Ocupada')],request.args.get('estado'),'Todos',false) }}
+{{ adm.seletor('equipamento','Carregador',[('disponivel','Operacional'),('indisponivel','Indisponível')],request.args.get('equipamento'),'Todos',false) }}
+{{ adm.seletor('destinacao','Destinação',[('vip','VIP temporária')],request.args.get('destinacao'),'Todas',false) }}
+{% endif %}
+{% endmacro %}
+
+{% macro paginar(p) %}
+<p role="status">{{ p.quantidade }} {{ 'resultado' if p.quantidade == 1 else 'resultados' }} · Página {{ p.pagina }} de {{ p.paginas }}</p>
+{% if p.paginas > 1 %}<nav aria-label="Páginas de vagas" class="acoes">
+{% if p.pagina > 1 %}<a class="botao secundario" href="{{ url_for(request.endpoint, **dict(request.args, pagina=p.pagina-1)) }}">Anterior</a>{% endif %}
+{% if p.pagina < p.paginas %}<a class="botao secundario" href="{{ url_for(request.endpoint, **dict(request.args, pagina=p.pagina+1)) }}">Próxima</a>{% endif %}
+</nav>{% endif %}
+{% endmacro %}

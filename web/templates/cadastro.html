@@ -12,6 +12,7 @@
   {{ ui.campo('usuario', 'Nome de usuário', valor=usuario) }}
   {{ ui.campo('senha', 'Senha', true, preenchimento='new-password', ajuda='Use de 12 a 256 caracteres.') }}
   {{ ui.campo('confirmacao', 'Confirmação de senha', true, preenchimento='new-password') }}
+  <label><input type="checkbox" name="cadastrar_veiculos" value="sim"{% if request.form.get('cadastrar_veiculos') %} checked{% endif %}> Cadastrar meus veículos logo após criar a conta</label>
   {{ ui.botao('Criar conta', 'arrow-right') }}
 </form>
 <p class="acesso-alternativa"><a href="{{ url_for('acesso.entrar') }}">Já tenho uma conta</a></p>

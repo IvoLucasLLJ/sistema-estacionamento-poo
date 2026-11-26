@@ -82,7 +82,7 @@ class EstadiasTests(unittest.TestCase):
                     self.assertEqual(self.ctrl.concluir_saida(cobranca), esperado)
         self.ctrl.salvar()
         self.assertEqual(Controller(self.arquivo).relatorio(),
-                         {'ocupadas': 0, 'livres': 10, 'faturamento': Decimal('105.00')})
+                         {'ocupadas': 0, 'livres': 200, 'faturamento': Decimal('105.00')})
 
     def test_decimais_desconto_antes_do_arredondamento(self):
         self.entrar()
@@ -124,7 +124,7 @@ class EstadiasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ctrl.retirar_veiculo(1, 2)
         self.assertEqual(self.ctrl.estacionamento.historico, original)
-        self.assertEqual(self.ctrl.relatorio(), {'ocupadas': 1, 'livres': 9, 'faturamento': 0})
+        self.assertEqual(self.ctrl.relatorio(), {'ocupadas': 1, 'livres': 199, 'faturamento': 0})
 
     def test_confirmacao_vinculada_a_estadia_e_ao_valor(self):
         self.entrar()
@@ -201,7 +201,7 @@ class EstadiasTests(unittest.TestCase):
         saida = novo.estacionamento.historico[-1]
         self.assertEqual((saida['pagamento'], saida['valor_centavos']), ('isento', 0))
         self.assertIsInstance(novo.relatorio()['faturamento'], Decimal)
-        self.assertEqual(novo.relatorio()['livres'], 10)
+        self.assertEqual(novo.relatorio()['livres'], 200)
 
     def test_falha_ao_salvar_saida_preserva_pagamento_e_permite_repetir(self):
         self.entrar()

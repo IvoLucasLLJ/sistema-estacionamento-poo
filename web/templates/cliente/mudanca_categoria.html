@@ -1,0 +1,15 @@
+{% extends 'layouts/cliente.html' %}
+{% from 'components/gestao.html' import revisao as campo_revisao with context %}
+{% block titulo %}Mudar categoria{% endblock %}
+{% block conteudo %}
+<h1>Mudar categoria</h1>
+<section class="painel">
+  <h2>{{ categorias[cadastro.categoria] }} → {{ categorias[categoria] }}</h2>
+  <dl class="ficha"><div><dt>Valor da mudança</dt><dd>{{ valor|centavos }}</dd></div></dl>
+  {% if valor %}<p>Compra simulada, sem movimentação de dinheiro. O benefício vale para as próximas entradas.</p>
+  {% else %}<p>A redução de categoria vale para as próximas entradas, sem cobrança ou reembolso.</p>{% endif %}
+  <form method="post" data-submissao>{{ campo_revisao(revisao) }}
+    {{ ui.botao('Confirmar compra simulada' if valor else 'Confirmar mudança') }}</form>
+  <p><a href="{{ url_for('cliente.tarifas') }}">Voltar sem alterar</a></p>
+</section>
+{% endblock %}

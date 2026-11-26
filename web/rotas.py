@@ -37,12 +37,17 @@ def criar_conta():
     if request.method == 'POST':
         formulario = request.form
         campos = {'nome', 'usuario', 'senha', 'confirmacao', 'csrf_token', 'revisao'}
+        continuar = 'cadastrar_veiculos' in formulario
+        if continuar:
+            campos.add('cadastrar_veiculos')
+            if formulario.get('cadastrar_veiculos') != 'sim':
+                abort(400)
         if set(formulario) != campos or any(len(formulario.getlist(c)) != 1 for c in campos):
             abort(400)
         if revisoes.obter(formulario['revisao'], csrf_token(), operacao, consumir=True) is None:
             abort(409)
         try:
-            current_app.extensions['autenticacao'].cadastrar_pessoal(
+            identidade = current_app.extensions['autenticacao'].cadastrar_pessoal(
                 formulario['nome'], formulario['usuario'], formulario['senha'], formulario['confirmacao'])
         except ValueError as exc:
             erro, status = str(exc), 422
@@ -51,6 +56,10 @@ def criar_conta():
                     'escolhidos para retomar. Se o usuário ainda não existir, volte a criar a conta.')
             status = 503
         else:
+            if continuar:
+                iniciar_sessao(identidade)
+                flash('Conta criada. Cadastre o primeiro veículo abaixo.', 'pessoal')
+                return redirect(url_for('cliente.veiculos', _anchor='novo-veiculo'), code=303)
             flash('Conta criada. Entre com seu usuário e senha.', 'cadastro')
             return redirect(url_for('acesso.entrar'), code=303)
     return render_template('cadastro.html', erro=erro, revisao=revisoes.emitir(csrf_token(), operacao),

@@ -139,3 +139,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', fecharFora);
   document.addEventListener('focusin', fecharFora);
 });
+
+// A lista é calculada pelo servidor para a placa que acabou de ser selecionada.
+document.addEventListener('change', evento => {
+  const seletor = evento.target.closest('[data-atualiza-vagas]');
+  if (!seletor) return;
+  const form = seletor.form;
+  const vaga = form.elements.namedItem('vaga');
+  if (vaga) {
+    vaga.replaceChildren();
+    vaga.disabled = true;
+  }
+  form.requestSubmit();
+});

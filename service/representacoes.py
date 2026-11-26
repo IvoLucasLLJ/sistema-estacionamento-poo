@@ -1,4 +1,7 @@
 """Projeções de leitura do MOVE. Os objetos do domínio ficam dentro da operação."""
+from datetime import date
+from model.vaga import VAGAS_POR_SETOR
+from model.uso_vaga import CLASSIFICACOES
 from decimal import Decimal, InvalidOperation
 
 
@@ -7,7 +10,8 @@ def cliente(objeto):
 
 
 def veiculo(objeto):
-    return {"placa": objeto.placa, "tipo": type(objeto).__name__.lower(), "modelo": objeto.modelo}
+    return {"placa": objeto.placa, "tipo": type(objeto).__name__.lower(), "modelo": objeto.modelo,
+            "motorizacao": objeto.motorizacao}
 
 
 def cobranca(objeto):
@@ -40,13 +44,25 @@ def conferir_expectativa(atual, expectativa):
 
 
 def vagas(ctrl):
-    return [{"numero": vaga.numero, "ocupada": vaga.ocupada,
-             "placa": vaga.veiculo.placa if vaga.ocupada else None} for vaga in ctrl.listar_vagas()]
+    resultado = []
+    for vaga in ctrl.listar_vagas():
+        dados = dict(numero=vaga.numero, ocupada=vaga.ocupada, placa=vaga.veiculo.placa if vaga.ocupada else None)
+        dados.update(**publica(vaga))
+        if vaga.reserva:
+            dados.update(placa_reservada=vaga.reserva.placa, titular_reserva=vaga.reserva.cliente_id,
+                         reserva_id=vaga.reserva.identificador)
+        resultado.append(dados)
+    return resultado
 
 
-def ocupacao(ctrl):
-    rel = ctrl.relatorio()
-    return {"ocupadas": rel["ocupadas"], "livres": rel["livres"], "total": len(ctrl.listar_vagas())}
+def ocupacao(ctrl, titular=None):
+    todas = ctrl.listar_vagas()
+    dados = {"ocupadas": sum(v.ocupada for v in todas), "livres": sum(v.livre for v in todas), "total": len(todas)}
+    if titular is not None:
+        dados['numeros_livres'] = [v.numero for v in todas if v.livre]
+        dados['minhas_reservas'] = [dict(vaga=v.numero, placa=v.reserva.placa, id=v.reserva.identificador, vip=v.vip, classificacao=v.classificacao)
+                                   for v in todas if v.reserva and v.reserva.cliente_id == titular]
+    return dados
 
 
 def faturamento(ctrl):
@@ -66,6 +82,7 @@ def historico(ctrl):
 
 def estadia_do_evento(ctrl, entrada, saida=None):
     dados = {campo: entrada[campo] for campo in ("placa", "tipo", "vaga", "horario_entrada")}
+    dados.update(classificacao=entrada.get("classificacao"), vip=entrada.get("vip", False))
     dados.update(estadia_id=None, cliente_id=None, categoria=None, situacao="ativa",
                  horario_saida=None, cobranca=None, pagamento="legado")
     if entrada["acao"] == "entrada":
@@ -101,3 +118,50 @@ def estadia(ctrl, identificador):
     saida = next((e for e in reversed(eventos) if e["acao"] == "saida_cliente"
                   and e["estadia_id"] == identificador), None)
     return estadia_do_evento(ctrl, entrada, saida)
+
+
+def publica(vaga):
+    return dict(numero=vaga.numero, setor=1 + (vaga.numero - 1) // VAGAS_POR_SETOR,
+                classificacao=vaga.classificacao, estado=vaga.estado, vip=vaga.vip,
+                carregador=vaga.carregador.disponivel if vaga.carregador else None)
+
+
+def indicadores(ctrl):
+    grupos = {tipo: dict(total=0, livres=0, reservadas=0, ocupadas=0) for tipo in CLASSIFICACOES}
+    eletricas = falhas = vip = 0
+    for v in ctrl.listar_vagas():
+        grupo = grupos[v.classificacao]
+        grupo['total'] += 1
+        grupo[{'livre': 'livres', 'reservada': 'reservadas', 'ocupada': 'ocupadas'}[v.estado]] += 1
+        if v.carregador:
+            falhas += not v.carregador.disponivel
+            eletricas += v.livre and v.carregador.disponivel
+        vip += v.vip
+    return dict(grupos=grupos, eletricas=eletricas, falhas=falhas, vip=vip)
+
+
+def opcoes(ctrl, titular, placa, vip, entrada):
+    """Projeção segura inclusive para o Cliente. Nunca transporta identidades de terceiros."""
+    veiculo = next((v for v in ctrl.veiculos_do_cliente(titular) if v.placa == placa), None)
+    if veiculo is None:
+        raise ValueError('Selecione um veículo do seu cadastro.')
+    vagas = ctrl.listar_vagas()
+    reservado = next((v for v in vagas if v.reserva and v.reserva.placa == placa), None)
+    estacionado = any(v.ocupada and v.veiculo.placa == placa for v in vagas)
+    contexto = ctrl.estacionamento.contexto(veiculo, date.today(), reservado.vip if entrada and reservado else vip,
+                                          reservado.reserva.autorizacao_id if entrada and reservado else None)
+    resultado = []
+    for v in vagas:
+        motivo = v.restricao(contexto)
+        if estacionado:
+            motivo = 'Este veículo já está estacionado.'
+        elif reservado and (not entrada or reservado is not v):
+            motivo = f'Este veículo tem reserva na vaga {reservado.numero:03d}.'
+        elif not v.livre and not (entrada and v is reservado):
+            motivo = 'Vaga indisponível.'
+        autorizacao = contexto.autorizacao(v.grupos) if hasattr(v, 'grupos') else None
+        resultado.append(dict(**publica(v), motivo=motivo,
+                              reserva_id=v.reserva.identificador if entrada and reservado is v else None,
+                              conferencia=autorizacao.identificador if autorizacao else None,
+                              beneficiario=autorizacao.beneficiario if autorizacao else None))
+    return resultado

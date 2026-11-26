@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 from uuid import uuid4
 
+from model.vaga import DISTRIBUICAO_HISTORICA
 from web import create_app
 
 
@@ -12,7 +13,7 @@ class GestaoTests(TestCase):
         tmp = TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         raiz = Path(tmp.name)
-        self.config = dict(TESTING=True, DADOS=raiz, HISTORICO=raiz/'hist.json',
+        self.config = dict(TESTING=True, DISTRIBUICAO=DISTRIBUICAO_HISTORICA, DADOS=raiz, HISTORICO=raiz/'hist.json',
                            CONTAS=raiz/'acessos.json', SECRET_KEY=None, SESSION_COOKIE_SECURE=False)
         self.app = create_app(self.config)
         self.addCleanup(self.app.extensions['escritor'].fechar)
@@ -94,7 +95,7 @@ class GestaoTests(TestCase):
         from service.estacionamento_service import EstacionamentoService
         preparar_p0(self.config['HISTORICO'])
         def estado(ocupadas, pendentes, reais):
-            leitor = EstacionamentoService(self.config['HISTORICO'])
+            leitor = EstacionamentoService(self.config['HISTORICO'], distribuicao=DISTRIBUICAO_HISTORICA)
             self.assertEqual(leitor.consultar_ocupacao(), dict(ocupadas=ocupadas, livres=10-ocupadas,total=10))
             self.assertEqual(len(leitor.listar_pagamentos_abertos()), pendentes)
             self.assertEqual(leitor.consultar_faturamento()['reais'], reais)

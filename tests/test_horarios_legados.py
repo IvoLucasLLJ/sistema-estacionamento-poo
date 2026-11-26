@@ -47,7 +47,7 @@ class HorariosLegadosTests(TestCase):
                               SECRET_KEY=None, SESSION_COOKIE_SECURE=False))
         self.addCleanup(app.extensions['escritor'].fechar)
         servico = app.extensions['estacionamento']
-        self.assertEqual(servico.consultar_ocupacao(), dict(total=10, ocupadas=2, livres=8))
+        self.assertEqual(servico.consultar_ocupacao(), dict(total=200, ocupadas=2, livres=198))
         self.assertEqual(servico.consultar_faturamento()['reais'], '50.005')
         self.assertEqual([servico.consultar_estadia(i)['placa'] for i in (22, 23)], ['AV1', 'AM2'])
         http = app.test_client()
@@ -77,7 +77,7 @@ class HorariosLegadosTests(TestCase):
                 antes = self.arquivo.read_bytes()
                 ctrl = Controller(self.arquivo)
                 self.assertEqual(ctrl.consultar_historico(), json.loads(antes))
-                self.assertEqual(ctrl.relatorio(), dict(livres=10, ocupadas=0, faturamento=0.005))
+                self.assertEqual(ctrl.relatorio(), dict(livres=200, ocupadas=0, faturamento=0.005))
                 self.assertEqual(self.arquivo.read_bytes(), antes)
 
     def test_recusa_ordem_comprovadamente_invertida_e_preserva_arquivo(self):
@@ -103,4 +103,4 @@ class HorariosLegadosTests(TestCase):
         with self.assertRaisesRegex(ValueError, 'Saída anterior à entrada'):
             ctrl.retirar_por_placa('LEG9', 1)
         self.assertEqual(ctrl.consultar_historico(), entrada)
-        self.assertEqual(ctrl.relatorio(), dict(livres=9, ocupadas=1, faturamento=0))
+        self.assertEqual(ctrl.relatorio(), dict(livres=199, ocupadas=1, faturamento=0))

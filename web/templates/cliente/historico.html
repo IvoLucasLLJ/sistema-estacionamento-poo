@@ -24,7 +24,7 @@
     {% for e in lista %}
     <article class="registro registro-pessoal">
       <h3><a href="{{ url_for('cliente.estadia', estadia_id=e.estadia_id) }}">Estadia {{ e.estadia_id }} · {{ e.placa }}</a></h3>
-      <p>{{ tipos[e.tipo] }} · {{ categorias[e.categoria] }} na entrada · {{ estados[e.estado] }}</p>
+      <p>{{ tipos[e.tipo] }} · {{ categorias[e.categoria] }} na entrada · {{ estados[e.estado] }} · Vaga {{ '%03d'|format(e.vaga) }}{% if e.classificacao %} · {{ classes_vaga[e.classificacao] }}{% endif %}{% if e.vip %} · VIP sob demanda{% endif %}</p>
       <p>Entrada {{ e.horario_entrada|horario }}{% if e.horario_saida %} · Saída {{ e.horario_saida|horario }}{% endif %}</p>
       {% if e.valor_centavos is not none %}
       <p>{{ e.horas|replace('.', ',') }} h · {{ 'Valor confirmado' if e.estado == 'aguardando' else 'Valor definitivo' }}

@@ -21,9 +21,16 @@
 <p class="cadastro-sucesso" role="status">{{ ui.icone('circle-check') }}{{ mensagem }}</p>
 {% endfor %}
 {% if erro %}{{ ui.aviso(erro) }}{% endif %}
-<form method="post" action="{{ url_for('acesso.entrar') }}" data-submissao>
+<form id="login" method="post" action="{{ url_for('acesso.entrar') }}" data-submissao>
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 {{ ui.campo('usuario','Usuário') }}{{ ui.campo('senha','Senha', true) }}
 {{ ui.botao('Entrar','arrow-right') }}</form>
 <p class="acesso-alternativa">Ainda não tem uma conta? <a href="{{ url_for('acesso.criar_conta') }}">Criar conta</a></p>
+<fieldset class="ambiente-entrada">
+  <legend>{{ 'Ambiente de demonstração' if config.DEMONSTRACAO else 'Ambiente de acesso' }}</legend>
+  {% for valor, rotulo in [('cliente', 'Cliente'), ('gestao', 'Gestão')] %}
+  <label><input form="login" type="radio" name="ambiente" value="{{ valor }}"
+    {% if request.form.get('ambiente') == valor %}checked{% endif %}>{{ rotulo }}</label>
+  {% endfor %}
+</fieldset>
 {% endblock %}

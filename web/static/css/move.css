@@ -303,6 +303,25 @@ dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
 }
 .cadastro-portal .campo small { display: block; margin-top: var(--move-espaco-1); }
 
+.ambiente-entrada {
+  margin: var(--move-espaco-4) 0 0;
+  padding: 0;
+  border: 0;
+  text-align: center;
+  color: var(--move-secundario);
+  font-size: .875rem;
+}
+.ambiente-entrada legend { margin: 0 auto var(--move-espaco-2); padding: 0; }
+.ambiente-entrada label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--move-espaco-2);
+  min-height: var(--move-controle);
+  padding-inline: var(--move-espaco-2);
+}
+.ambiente-entrada input { margin: 0; accent-color: var(--move-foco); }
+.ambiente-entrada label:has(:checked) { color: var(--move-texto); font-weight: 650; }
+
 @media screen and (min-width: 70rem) {
   .login-portal {
     display: grid;

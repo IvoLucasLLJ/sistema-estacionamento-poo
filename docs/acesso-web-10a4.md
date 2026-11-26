@@ -31,6 +31,39 @@ No Lenovo TB390FU com Android 16, o acadêmico verificou o login amplo em paisag
 
 O ensaio atualizado em `tests/navegador_cadastro.py` passou no Chrome 158 do Ubuntu em dez perfis com mouse e doze com toque emulado, nos dois temas. Login e cadastro exibiram o cartão compacto a 1119 px e a grade 58/42 a 1120 e 1121 px. O teste conferiu a largura do formulário, o carregamento local da foto e a ausência de rolagem horizontal. A regra de hover do cabeçalho afeta somente a cor do seletor. Nos portais e na impressão, as demais regras de layout usam largura ou meio de saída.
 
+## Como apresentar os dois portais na mesma aba
+
+1. No login da demonstração, preencha as credenciais provisionadas de `master.demo`. Abaixo de **Criar conta**, marque **Cliente** e acione **Entrar**. A página pessoal mostra as estadias de Lia Vale.
+2. No cabeçalho, abra **Cliente** e escolha **MOVE Gestão**. Para voltar, abra **Gestão** e escolha **MOVE Cliente**. A identificação da conta permanece visível nos dois portais.
+3. Use **Sair** no menu de perfil para encerrar o acesso aos dois ambientes.
+
+A escolha inicial é opcional. Sem escolha, o login abre o portal correspondente ao papel principal da conta. O formulário usa dois botões de opção nativos, com rótulos acionáveis de pelo menos 44 × 44 px. No teclado, Tab chega ao grupo depois de **Criar conta**, e as setas alternam as opções. A instalação operacional mostra **Ambiente de acesso**. A demonstração isolada mostra **Ambiente de demonstração**.
+
+### Responsabilidades e permissões
+
+| Camada | Como participa da seleção |
+|---|---|
+| Apresentação | O Jinja2 associa as opções ao único formulário de login. O CSS responde à largura. O menu de ambiente autenticado, `ControleTema` e `ControleSubmissao` continuam responsáveis por suas interações. A seleção e o envio funcionam também com JavaScript desativado. |
+| Autenticação e autorização | A rota `POST /entrar` autentica as credenciais. `AutenticacaoService.contexto` compõe um `ContextoAcesso` com a identidade principal e, quando concedida, a pessoal vinculada. `ContextoAcesso.identidade_para` resolve a escolha. O login e `POST /ambiente` usam a mesma validação do papel e do vínculo pessoal no servidor. |
+| Sessão | `SessoesAtivas` encapsula o registro das sessões e a troca de geração. Na alternância, a conta principal e o vencimento são preservados, o token CSRF é renovado e `Revisoes.invalidar_sessao` descarta os formulários do contexto anterior. As guardas verificam o contexto em cada acesso protegido. |
+| Domínio | As hierarquias de veículos e de clientes conservam suas responsabilidades. Em `Estadia.consultar_cobranca`, o veículo determina a tarifa por `calcular_tarifa` e o cliente aplica `calcular_cobranca`. O contexto do portal não participa desses cálculos. |
+
+A conta exclusivamente pessoal pode escolher Cliente. Se escolher Gestão, o servidor responde com acesso negado antes de iniciar a sessão. Da mesma forma, uma conta administrativa precisa de vínculo pessoal explícito para abrir o Cliente. A Master só é aceita na demonstração com o vínculo provisionado para Lia. A identidade e o UUID vêm das contas verificadas pelo servidor. O seletor envia apenas o ambiente solicitado.
+
+### Evidências da intervenção
+
+| Verificação local | Resultado |
+|---|---|
+| Suíte Python 3.14.4 no Ubuntu | 196 testes aprovados. As três novas regressões cobrem entrada pessoal direta da Master e retorno, escolha por contas de um único papel e rejeição de credenciais, CSRF ou destino inválidos. `pip check` passou. |
+| Login e cadastro | 88 combinações de tela, perfil e tema. A mesma página respondeu ao redimensionamento de um lado para o outro de 70 rem sem recarga. |
+| Portais | Os 14 modelos de Gestão e os oito de Cliente abriram em 360 × 800 e 1280 × 800 com toque emulado, nos dois temas, sem transbordamento horizontal da página. A revisão de pagamento foi aberta a partir de uma cotação real. |
+| Master Demo no Chrome | Em 390 × 844, 1024 × 768, 1280 × 800 e 1440 × 900, uma única autenticação por percurso permitiu alternar os portais até a saída e a consulta do comprovante. A reabertura do histórico temporário confirmou a cobrança de 613 centavos. |
+| Acessibilidade | O grupo recebeu foco por teclado, respondeu às setas e ao toque. O ensaio com zoom nativo de 200% verificou login, cadastro e páginas de Gestão. O axe não registrou violações nas oito amostras de login, cadastro e páginas iniciais dos portais nos dois temas. |
+
+As capturas vieram dessas instâncias Flask temporárias. A sequência mostra a mesma conta em dois contextos. [Desktop com foco de teclado](../qa/evidencias/entrada-desktop-teclado.webp) · [Tablet amplo com toque emulado](../qa/evidencias/entrada-tablet-amplo.webp) · [Celular em tema escuro](../qa/evidencias/entrada-celular-escuro.webp) · [Primeira página pessoal](../qa/evidencias/entrada-portal-cliente.webp) · [Após a troca para Gestão](../qa/evidencias/entrada-portal-gestao.webp)
+
+O registro de referência é o commit documental `f7ad22a`. A correção da largura está em `b3b27af` e o seletor no commit seguinte, `feat(demo): adicionar alternância autorizada entre cliente e gestão`. A execução desta intervenção usou navegador automatizado. A avaliação física do seletor, do teclado virtual, da rotação e da combinação de toque com mouse no aparelho cabe ao acadêmico. Para reproduzi-la, abra o login, foque a senha, role até o seletor, gire o aparelho e percorra Cliente → Gestão → Cliente até sair.
+
 ## Verificação visual original da 10A.4
 
 A matriz usa a página Flask renderizada no Chrome 158.0.8127.36 no Ubuntu. As dimensões são da **área de conteúdo em pixels CSS**, com fator de escala 1 nas capturas de referência. O zoom foi alterado no próprio navegador, em um perfil temporário. As dimensões físicas do monitor e os dispositivos móveis físicos ficaram fora deste ensaio.
@@ -87,6 +120,7 @@ Na raiz, use o Python do ambiente de execução para a suíte. Para os ensaios d
 ```sh
 python -B -m unittest discover -s tests -v
 python -B -m tests.navegador_cadastro --chrome /caminho/para/chrome --capturas /destino/fora/do/projeto
+python -B -m tests.navegador_master_demo --chrome /caminho/para/chrome --capturas /destino/fora/do/projeto
 ```
 
 A suíte de cadastro usa arquivos temporários e simula falhas antes e depois de cada uma das três escritas. Inclui autenticação após reabertura, preservação de homônimos, concorrência, CSRF, reenvio e campos de privilégio indevidos. O ensaio de navegador percorre criação, validação, primeiro login e tentativa de acesso à Gestão. Os ensaios existentes 08A, UI 10A.4.1 e Master Demo cobrem as contas anteriores e a alternância. O cenário de prévia e as capturas desta avaliação ficam fora do projeto.

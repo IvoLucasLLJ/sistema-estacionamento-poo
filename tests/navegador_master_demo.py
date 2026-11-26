@@ -51,8 +51,31 @@ def apresentar(pagina, url, senha, largura, capturas):
         assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
 
     pagina.goto(url)
+    seletor = pagina.get_by_role('group', name='Ambiente de demonstração')
+    cliente = seletor.get_by_role('radio', name='Cliente', exact=True)
+    gestor = seletor.get_by_role('radio', name='Gestão', exact=True)
+    assert not cliente.is_checked() and not gestor.is_checked()
+    for alvo in seletor.locator('label').all():
+        caixa = alvo.bounding_box()
+        assert caixa['width'] >= 44 and caixa['height'] >= 44, caixa
+    if pagina.evaluate('matchMedia("(pointer: coarse)").matches'):
+        cliente.tap()
+    else:
+        pagina.get_by_role('link', name='Criar conta').focus()
+        pagina.keyboard.press('Tab')
+        assert cliente.evaluate('el => el === document.activeElement')
+        pagina.keyboard.press('Space')
+        pagina.keyboard.press('ArrowRight')
+        assert gestor.is_checked()
+        pagina.keyboard.press('ArrowLeft')
+    assert cliente.is_checked()
+    foto('login-cliente')
     login(pagina, 'master.demo', senha)
-    pagina.wait_for_url(url + '/gestao/')
+    pagina.wait_for_url(url + '/cliente/')
+    assert 'Olá, Lia Vale' in pagina.locator('main').inner_text()
+    foto('inicio-pessoal')
+    alternar('Cliente', 'Gestão')
+    foto('inicio-gestao')
     # Os dois veículos originais de Lia já estão estacionados no cenário inicial.
     gestao('Veículos')
     pagina.get_by_label('Tipo', exact=True).select_option('carro')
@@ -115,13 +138,13 @@ def main():
     if args.capturas:
         args.capturas.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as pw, pw.chromium.launch(executable_path=args.chrome) as browser:
-        for largura, altura in [(1440, 900), (1024, 768), (390, 844)]:
+        for largura, altura in [(1440, 900), (1280, 800), (1024, 768), (390, 844)]:
             with TemporaryDirectory(prefix='move-master-') as pasta:
                 senha = token_urlsafe(24)
                 app = demo_temporaria(Path(pasta), token_urlsafe(24), senha_master=senha)
                 with make_server('127.0.0.1', 0, app) as servidor, browser.new_context(
                         viewport=dict(width=largura, height=altura), is_mobile=largura < 768,
-                        has_touch=largura <= 1024, color_scheme='dark' if largura < 768 else 'light') as ctx:
+                        has_touch=largura <= 1280, color_scheme='dark' if largura < 768 else 'light') as ctx:
                     thread = Thread(target=servidor.serve_forever)
                     thread.start()
                     try:

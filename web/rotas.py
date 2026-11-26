@@ -16,11 +16,12 @@ def entrar():
     if g.identidade is not None:
         return redirect(destino())
     if request.method == 'POST':
+        if len(request.form.getlist('ambiente')) > 1:
+            abort(400)
         identidade = current_app.extensions['autenticacao'].autenticar(
             request.form.get('usuario'), request.form.get('senha'))
         if identidade:
-            iniciar_sessao(identidade)
-            g.identidade = identidade
+            iniciar_sessao(identidade, request.form.get('ambiente'))
             return redirect(destino(), code=303)
         return render_template('login.html', erro='Usuário ou senha inválidos.'), 401
     return render_template('login.html')

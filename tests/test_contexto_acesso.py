@@ -38,14 +38,57 @@ class ContextoAcessoTests(TestCase):
         with self.http.session_transaction() as sessao:
             return dict(sessao)
 
-    def login(self, usuario, senha=None):
+    def login(self, usuario, senha=None, **campos):
         self.http.get('/entrar')
-        return self.http.post('/entrar', data=dict(usuario=usuario, senha=senha or self.senha,
-                                                   csrf_token=self.sessao()['csrf']))
+        return self.http.post('/entrar', data={'usuario': usuario, 'senha': senha or self.senha,
+                                               'csrf_token': self.sessao()['csrf'], **campos})
 
     def alternar(self, ambiente, **campos):
         return self.http.post('/ambiente', data={'csrf_token': self.sessao()['csrf'],
                                                 'ambiente': ambiente, **campos})
+
+    def test_master_escolhe_cliente_no_login_e_retorna_sem_trocar_de_conta(self):
+        outro = self.srv.cliente_do_veiculo('NM4')['identificador']
+        resposta = self.login('master.demo', self.senha_master, ambiente='cliente', cliente_id=outro)
+        self.assertEqual((resposta.status_code, resposta.location), (303, '/cliente/'))
+        conta = self.sessao()['conta']
+        self.assertNotEqual(self.sessao()['conta_pessoal_ativa'], conta)
+        pessoal = self.http.get('/cliente/').text
+        for proprio in ('master.demo', 'Olá, Lia Vale', 'AV1', 'AM2'):
+            self.assertIn(proprio, pessoal)
+        for externo in (outro, 'NM4', 'Faturamento'):
+            self.assertNotIn(externo, pessoal)
+        self.assertEqual(self.http.get('/gestao/').status_code, 403)
+        self.assertEqual(self.alternar('gestao').location, '/gestao/')
+        self.assertNotIn('conta_pessoal_ativa', self.sessao())
+        self.assertEqual(self.alternar('cliente').location, '/cliente/')
+        self.assertEqual(self.sessao()['conta'], conta)
+
+    def test_escolha_inicial_respeita_o_papel_e_so_abre_sessao_quando_autorizada(self):
+        self.app.config['VINCULOS_PORTAIS'] = {}
+        arquivos = [self.app.config[chave] for chave in ('HISTORICO', 'CONTAS')]
+        antes = [p.read_bytes() for p in arquivos]
+        for usuario, ambiente, vedado in [('cliente.demo', 'cliente', 'gestao'), ('gestao.demo', 'gestao', 'cliente')]:
+            with self.subTest(usuario=usuario):
+                self.assertEqual(self.login(usuario, ambiente=vedado).status_code, 403)
+                self.assertNotIn('conta', self.sessao())
+                self.assertEqual(self.http.get(f'/{vedado}/').location, '/entrar')
+                self.assertEqual(self.login(usuario, ambiente=ambiente).location, f'/{ambiente}/')
+                self.assertEqual(self.http.get(f'/{ambiente}/').status_code, 200)
+                self.assertNotIn('conta_pessoal_ativa', self.sessao())
+                self.http.post('/sair', data={'csrf_token': self.sessao()['csrf']})
+        self.assertEqual(antes, [p.read_bytes() for p in arquivos])
+
+    def test_escolha_inicial_exige_credenciais_csrf_e_um_unico_destino_valido(self):
+        for campos in ({'ambiente': ''}, {'ambiente': '/gestao/'}, {'ambiente': ['cliente', 'gestao']},
+                       {'ambiente': 'gestao', 'csrf_token': ''}):
+            with self.subTest(campos=campos):
+                self.assertEqual(self.login('master.demo', self.senha_master, **campos).status_code, 400)
+                self.assertNotIn('conta', self.sessao())
+        resposta = self.login('master.demo', self.senha, ambiente='cliente')
+        self.assertEqual(resposta.status_code, 401)
+        self.assertIn('Usuário ou senha inválidos.', resposta.text)
+        self.assertNotIn('conta', self.sessao())
 
     def test_duas_areas_mesma_autenticacao_prazo_e_titularidade(self):
         self.assertEqual(self.login('gestao.demo').location, '/gestao/')

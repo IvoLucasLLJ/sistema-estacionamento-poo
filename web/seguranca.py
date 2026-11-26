@@ -16,11 +16,31 @@ def csrf_token():
     return session['csrf']
 
 
-def iniciar_sessao(identidade):
+def _contexto_da_conta(conta_id):
+    return current_app.extensions['autenticacao'].contexto(
+        conta_id, current_app.config['VINCULOS_PORTAIS'], titular_demo=current_app.config.get('TITULAR_DEMO'))
+
+
+def _ativar_identidade(identidade):
+    if identidade == g.contexto.principal:
+        session.pop('conta_pessoal_ativa', None)
+    else:
+        session['conta_pessoal_ativa'] = identidade.id
+    g.identidade = identidade
+
+
+def iniciar_sessao(identidade, ambiente=None):
+    contexto = _contexto_da_conta(identidade.id)
+    if contexto is None:
+        abort(401)
+    ativa = _identidade_autorizada(contexto, identidade.papel if ambiente is None else ambiente)
     session.clear()
+    expira = int(agora()) + current_app.config['DURACAO_SESSAO']
+    current_app.extensions['sessoes'].substituir(nova=csrf_token(), expira=expira)
     session['conta'] = identidade.id
-    session['expira'] = int(agora()) + current_app.config['DURACAO_SESSAO']
-    current_app.extensions['sessoes'].substituir(nova=csrf_token(), expira=session['expira'])
+    session['expira'] = expira
+    g.contexto = contexto
+    _ativar_identidade(ativa)
 
 
 def encerrar_sessao():
@@ -51,9 +71,7 @@ def preparar_requisicao():
         if agora() >= session.get('expira', 0) or not current_app.extensions['sessoes'].ativa(session.get('csrf')):
             session.clear()
             abort(401)
-        g.contexto = current_app.extensions['autenticacao'].contexto(
-            session['conta'], current_app.config['VINCULOS_PORTAIS'],
-            titular_demo=current_app.config.get('TITULAR_DEMO'))
+        g.contexto = _contexto_da_conta(session['conta'])
         if g.contexto:
             g.identidade = g.contexto.identidade_ativa(session.get('conta_pessoal_ativa'))
         if g.identidade is None:
@@ -73,27 +91,28 @@ def cliente_vinculado(identidade):
         abort(404)
 
 
-def selecionar_ambiente(ambiente):
+def _identidade_autorizada(contexto, ambiente):
     if ambiente not in {papel.value for papel in PapelAcesso}:
         abort(400)
-    identidade = g.contexto.identidade_para(ambiente)
+    identidade = contexto.identidade_para(ambiente)
     if identidade is None:
         abort(403)
+    if identidade.papel == PapelAcesso.CLIENTE:
+        cliente_vinculado(identidade)
+    return identidade
+
+
+def selecionar_ambiente(ambiente):
+    identidade = _identidade_autorizada(g.contexto, ambiente)
     if identidade != g.identidade:
-        if identidade.papel == PapelAcesso.CLIENTE:
-            cliente_vinculado(identidade)
         anterior = session['csrf']
         novo = secrets.token_urlsafe(32)
         if not current_app.extensions['sessoes'].substituir(anterior, novo, session['expira']):
             session.clear()
             abort(401)
-        if identidade.papel == PapelAcesso.CLIENTE:
-            session['conta_pessoal_ativa'] = identidade.id
-        else:
-            session.pop('conta_pessoal_ativa', None)
         current_app.extensions['revisoes'].invalidar_sessao(anterior)
         session['csrf'] = novo
-        g.identidade = identidade
+        _ativar_identidade(identidade)
 
 
 def acesso_restrito(papel=None):

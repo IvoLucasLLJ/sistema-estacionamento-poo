@@ -66,12 +66,15 @@ def conferir_reaberturas(raiz, comando):
                         assert proc.wait(15) == 0
                 finally:
                     if proc.poll() is None:
-                        if os.name == 'nt' and comando[0].lower().endswith('.cmd'):
-                            # O CMD e o preparador aguardam o filho Flask. Encerrar só o pai deixaria o filho ativo.
+                        if os.name == 'nt':
+                            # Tanto o CMD quanto o python.exe da venv podem iniciar um processo filho.
                             subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'], check=True)
                         else:
                             proc.kill()
                     proc.wait(10)
+            escritor = app.extensions['escritor']
+            escritor.abrir()
+            escritor.fechar()
             assert [arquivo.read_bytes() for arquivo in arquivos] == antes
 
 

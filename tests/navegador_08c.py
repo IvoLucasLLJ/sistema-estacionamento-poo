@@ -43,6 +43,8 @@ def login(pagina, nome, senha):
 
 
 def destino(pagina, nome):
+    # O menu móvel recolhe os links complementares no DOMContentLoaded.
+    pagina.wait_for_load_state('domcontentloaded')
     nav = pagina.get_by_role('navigation')
     link = nav.get_by_role('link', name=nome, exact=True)
     if not link.is_visible():

@@ -276,7 +276,7 @@ dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
   [data-tema] .marca-impressao img { filter:none; }
 }
 
-/* O portal institucional pertence somente ao login com interação de desktop. */
+/* Login e cadastro compartilham o painel quando a largura comporta duas colunas. */
 .login-institucional { display: none; }
 .acesso-alternativa {
   margin-top: var(--move-espaco-4);
@@ -303,7 +303,7 @@ dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
 }
 .cadastro-portal .campo small { display: block; margin-top: var(--move-espaco-1); }
 
-@media screen and (min-width: 70rem) and (hover: hover) and (pointer: fine) and (not (any-pointer: coarse)) {
+@media screen and (min-width: 70rem) {
   .login-portal {
     display: grid;
     grid-template-columns: 58fr 42fr;

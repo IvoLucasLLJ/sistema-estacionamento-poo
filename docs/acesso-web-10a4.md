@@ -25,9 +25,13 @@ A tela institucional ocupa 58% da largura, e a região de autenticação, 42%. O
 
 **Prompt de geração.** “Crie uma única fotografia arquitetônica fotorrealista para o fundo do login desktop do MOVE. Paisagem horizontal 3:2. Vista elevada oblíqua de um estacionamento moderno de concreto, com vagas paralelas bem demarcadas, poucos carros grafite e prata, linhas amarelas de circulação e luz lateral natural. Componha a imagem com as vagas e carros mais reconhecíveis na metade superior e ao centro, deixando o primeiro plano de asfalto mais calmo. Estética editorial sóbria, nitidez e textura reais. Sem pessoas, textos, logos, marcas-d’água ou interface.”
 
-O CSS ativa o painel a partir de 70 rem com hover, ponteiro primário fino e ausência de ponteiro grosso. O enquadramento compacto atende tablets, smartphones, janelas estreitas e computadores que declaram tela sensível ao toque. Um navegador em modo desktop que declare apenas um mouse pode receber o painel mesmo em um tablet. A seleção usa as capacidades informadas pelo navegador. A fotografia só é solicitada quando o painel é exibido.
+Login e cadastro compartilham o painel institucional a partir de 70 rem de largura da viewport (1120 px CSS com fonte inicial de 16 px). A grade mantém 58% para a apresentação e 42% para o formulário. Janelas menores exibem o cartão compacto. A fotografia só é solicitada quando o painel é exibido.
 
-## Verificação visual
+No Lenovo TB390FU com Android 16, o acadêmico verificou o login amplo em paisagem após remover as condições de hover e ponteiro na cópia do Termux. No repositório, o Chrome reproduziu a diferença a 1280 × 800 antes da correção. A regra oficial agora usa somente a largura, inclusive com toque, janela dividida ou mouse conectado. O registro físico se refere ao login experimental.
+
+O ensaio atualizado em `tests/navegador_cadastro.py` passou no Chrome 158 do Ubuntu em dez perfis com mouse e doze com toque emulado, nos dois temas. Login e cadastro exibiram o cartão compacto a 1119 px e a grade 58/42 a 1120 e 1121 px. O teste conferiu a largura do formulário, o carregamento local da foto e a ausência de rolagem horizontal. A regra de hover do cabeçalho afeta somente a cor do seletor. Nos portais e na impressão, as demais regras de layout usam largura ou meio de saída.
+
+## Verificação visual original da 10A.4
 
 A matriz usa a página Flask renderizada no Chrome 158.0.8127.36 no Ubuntu. As dimensões são da **área de conteúdo em pixels CSS**, com fator de escala 1 nas capturas de referência. O zoom foi alterado no próprio navegador, em um perfil temporário. As dimensões físicas do monitor e os dispositivos móveis físicos ficaram fora deste ensaio.
 

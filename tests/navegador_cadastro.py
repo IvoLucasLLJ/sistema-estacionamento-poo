@@ -11,9 +11,11 @@ from werkzeug.serving import make_server
 from tests.test_contexto_acesso import demo_temporaria
 
 
-DESKTOP = [(1280, 720), (1366, 768), (1440, 900), (1536, 864), (1920, 1080),
+FRONTEIRA = [(1119, 800), (1120, 800), (1121, 800)]
+DESKTOP = FRONTEIRA + [(1280, 720), (1366, 768), (1440, 900), (1536, 864), (1920, 1080),
            (2560, 1440), (3440, 1440)]
-TOQUE = [(320, 568), (390, 844), (844, 390), (768, 1024), (1024, 768), (1366, 1024)]
+TOQUE = FRONTEIRA + [(320, 568), (360, 800), (390, 844), (800, 360), (844, 390),
+                     (768, 1024), (1024, 768), (1280, 800), (1366, 1024)]
 
 
 def foto(pagina, pasta, nome):
@@ -36,20 +38,22 @@ def conferir_telas(browser, url, pasta):
                         formulario = pagina.locator('main form')
                         assert formulario.count() == 1 and formulario.is_visible()
                         assert pagina.locator('html').get_attribute('data-tema') == tema
-                        assert pagina.locator('.login-institucional').is_visible() != toque
+                        amplo = largura >= 1120  # Fonte inicial de 16 px neste perfil do Chrome.
+                        assert pagina.locator('.login-institucional').is_visible() == amplo
                         assert pagina.evaluate('document.documentElement.scrollWidth <= innerWidth')
                         for campo in formulario.locator('input:not([type=hidden])').all():
                             assert campo.evaluate('e => !!e.labels.length')
-                        if not toque:
+                        if amplo:
                             caixa = formulario.bounding_box()
                             painel = pagina.locator('.login-institucional').bounding_box()
-                            assert .50 <= painel['width'] / largura <= .65
-                            assert 380 <= caixa['width'] <= 480 and painel['width'] < caixa['x']
+                            assert abs(painel['width'] - .58 * largura) < 1
+                            assert abs(caixa['width'] - min(.42 * largura - 96, 416)) < 1
+                            assert painel['width'] < caixa['x']
                             assert int(pagina.locator('button[type=submit]').bounding_box()['height']) >= 44
                         foto(pagina, pasta, f'{tela}-{largura}x{altura}-{tema}')
-                    assert any(r.endswith('/estacionamento.webp') for r in recursos) != toque
+                    assert any(r.endswith('/estacionamento.webp') for r in recursos) == amplo
                     assert all(urlsplit(r).netloc == urlsplit(url).netloc for r in recursos)
-    print('Login e cadastro: 7 viewports de desktop e 6 de toque, nos dois temas.', flush=True)
+    print(f'Login e cadastro: {len(DESKTOP)} perfis com mouse e {len(TOQUE)} com toque, nos dois temas.', flush=True)
 
 
 def percorrer(browser, url, pasta, toque=False):

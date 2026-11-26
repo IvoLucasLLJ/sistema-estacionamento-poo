@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor "Usuário autorizado" as U
+participant "Guarda e rota" as R
+participant ContextoAcesso as C
+participant EstacionamentoService as E
+participant SessoesAtivas as S
+participant Revisoes as V
+U -> R : POST /ambiente com CSRF
+R -> C : identidade_para(ambiente)
+alt troca autorizada para outro contexto
+opt destino Cliente
+R -> E : buscar_cliente(cliente_id)
+end
+R -> S : substituir(anterior, nova, expira)
+S --> R : geração substituída
+R -> R : atualizar contexto ativo
+R -> V : invalidar_sessao(anterior)
+R --> U : início do ambiente escolhido
+else permissão ausente
+R --> U : acesso recusado
+end
+@enduml

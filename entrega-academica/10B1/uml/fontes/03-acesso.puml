@@ -1,0 +1,80 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+hide circle
+hide empty members
+class ContaUsuario {
+ identidade
+ senha_hash
+ nome_pendente
+}
+class Identidade {
+ id
+ papel
+ cliente_id
+}
+class ContextoAcesso {
+ identidade_ativa(conta_pessoal_id)
+ identidade_para(ambiente)
+}
+class ContaRepository {
+ por_id(identificador)
+ adicionar(conta)
+ ativar(reserva)
+}
+class AutenticacaoService {
+ autenticar(usuario, senha)
+ contexto(conta_id, vinculos, *, titular_demo=None)
+}
+class SessoesAtivas {
+ ativa(token)
+ substituir(anterior=None, nova=None, expira=None)
+}
+class Revisoes {
+ emitir(sessao, operacao, dados=None)
+ invalidar_sessao(sessao)
+}
+class Revisao
+class ConsultasPessoais {
+ _titular
+ ativas()
+ historico()
+}
+class OcupacaoViewModel {
+ livres
+ ocupadas
+ total
+ da_consulta(dados)
+}
+class RelatorioSaidas {
+ receita
+ do_periodo(eventos, inicio=None, fim=None)
+}
+class EstacionamentoService
+AutenticacaoService --> ContaRepository
+AutenticacaoService --> EstacionamentoService
+AutenticacaoService ..> ContextoAcesso
+ContaRepository ..> ContaUsuario
+ContaUsuario --> "1" Identidade
+ContextoAcesso --> "1" Identidade : principal
+ContextoAcesso --> "0..1" Identidade : pessoal_vinculada
+Revisoes --> "0..*" Revisao : pendentes
+ConsultasPessoais --> EstacionamentoService
+AutenticacaoService -[hidden]right-> Revisoes
+ContaRepository -[hidden]right-> SessoesAtivas
+Revisao -[hidden]down-> ConsultasPessoais
+ConsultasPessoais -[hidden]down-> OcupacaoViewModel
+OcupacaoViewModel -[hidden]right-> RelatorioSaidas
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Gestão
+participant EstacionamentoService as S
+participant Controller as C
+participant Estacionamento as E
+participant Vaga as V
+participant Estadia as T
+Gestão -> S : via rota, iniciar_estadia(placa, vaga, cliente_id)
+S -> C : iniciar_estadia(placa, vaga, cliente_id)
+C -> E : iniciar_estadia(placa, vaga, cliente_id)
+E -> E : validar titular, placa e vaga
+E -> T : instanciar com id, veículo, cliente, vaga e horário
+E -> V : ocupar(veiculo, estadia=estadia)
+E -> E : guardar estadia ativa e evento entrada_cliente
+S -> C : salvar()
+S --> Gestão : dados persistidos via rota
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+participant EstacionamentoService as S
+participant "Estadia ativa" as E
+participant "veiculo : Veiculo" as V
+participant "cliente : Cliente" as C
+participant Cobranca as B
+S -> E : consultar_cobranca(horas) via Controller e agregado
+E -> V : calcular_tarifa(horas)
+V --> E : base
+E -> C : calcular_cobranca(base)
+C --> E : devido
+E -> E : desconto = base - devido
+E -> E : quantize(0.01, ROUND_HALF_UP)
+E -> B : instanciar com valores exatos e centavos
+E --> S : Cobranca
+S -> S : projetar os seis campos da consulta
+@enduml

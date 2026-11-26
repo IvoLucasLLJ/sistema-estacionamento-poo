@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+
+state "Ativa sem confirmação" as A
+state "Ativa com pagamento confirmado" as P
+state "Concluída paga" as F
+state "Concluída isenta" as I
+[*] --> A : entrada_cliente
+A --> A : consultar cobrança / sem escrita
+A --> P : pagamento_confirmado [total positivo]
+P --> P : consultar estado / vaga ocupada
+A --> I : saida_cliente [total definitivo zero]
+P --> F : saida_cliente [cobrança corresponde]
+F --> [*]
+I --> [*]
+@enduml

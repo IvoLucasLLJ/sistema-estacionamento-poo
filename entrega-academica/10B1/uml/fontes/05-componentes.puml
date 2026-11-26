@@ -1,0 +1,42 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+hide circle
+hide empty members
+[Menu de texto] as T
+[Blueprints Flask] as B
+[Templates e recursos locais] as UI
+[Autenticação e conta] as A
+[Serviço do estacionamento] as S
+[Controller] as C
+[EstacionamentoRepository] as R
+[Domínio Python] as M
+[Arquivos e bloqueios] as P
+T --> C
+B --> UI
+B --> A
+B --> S
+A --> S : vínculo e autocadastro
+A --> P
+S --> C
+C --> R
+C --> M
+R --> M : reconstrução
+R --> P
+note bottom of M
+O agregado mantém adaptadores
+legados de carregar e salvar.
+end note
+@enduml

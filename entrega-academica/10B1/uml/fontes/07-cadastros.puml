@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Gestão
+participant "Rotas Gestão" as R
+participant EstacionamentoService as S
+participant Controller as C
+participant Estacionamento as E
+participant EstacionamentoRepository as Repo
+Gestão -> R : enviar nome e categoria
+R -> S : cadastrar_cliente(categoria, nome)
+S -> C : cadastrar_cliente(categoria, nome)
+C -> E : cadastrar_cliente(classe(nome))
+S -> C : salvar()
+C -> Repo : salvar(estacionamento)
+Gestão -> R : enviar tipo, placa e modelo
+R -> S : cadastrar_veiculo(tipo, placa, modelo)
+S -> C : cadastrar_veiculo(tipo, placa, modelo)
+C -> E : cadastrar_veiculo(veiculo)
+S -> C : salvar()
+C -> Repo : salvar(estacionamento)
+@enduml

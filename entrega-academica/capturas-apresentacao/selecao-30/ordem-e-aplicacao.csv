@@ -1,0 +1,31 @@
+﻿Ordem;PNG;Conceito;Sugestão para o slide
+1;01-S01-login-desktop-1920-claro-janela.png;Composição de templates Jinja2;Abertura institucional em formato panorâmico.
+2;02-S01-login-desktop-1440-escuro-janela.png;Composição de templates Jinja2;Mesma composição com o tema escuro para comparação.
+3;03-S01C-cadastro-smartphone-claro-integral.png;Composição de serviços no autocadastro;Entrada pública e formulário responsivo.
+4;04-S01-aparencia-smartphone-escuro-recorte.png;ControleTema;Menu compacto em uso por toque.
+5;05-G01-dashboard-desktop-1920-claro-janela.png;OcupacaoViewModel;Visão da operação antes da confirmação.
+6;06-G01-dashboard-tablet-paisagem-escuro-recorte.png;OcupacaoViewModel;OcupacaoViewModel nos números exibidos.
+7;07-G02-mapa-desktop-1440-claro-recorte.png;Composição de dez vagas;Dez vagas em uma composição legível.
+8;08-G02-legada-tablet-paisagem-escuro-janela.png;Identidade e reconstrução;Diferença entre vínculo conhecido e ocupação legada.
+9;09-G03-clientes-desktop-1440-claro-janela.png;Herança na família Cliente;Categorias distintas e clientes homônimos.
+10;10-G05-veiculos-desktop-1440-escuro-janela.png;Herança na família Veiculo;Tipos concretos de veículos na mesma coleção.
+11;11-C05-tarifas-tablet-retrato-claro-janela.png;Duas hierarquias comerciais;Catálogo das duas hierarquias no portal pessoal.
+12;12-G04-cliente-tablet-paisagem-claro-integral.png;Associação e identidade;Associação da titular a mais de um veículo.
+13;13-G07-revisar-smartphone-claro-recorte.png;Associação e identidade;Revisão de uma entrada antes da persistência.
+14;14-G05-duplicada-desktop-1440-escuro-recorte.png;Encapsulamento e rejeição;Resposta observável à violação de uma invariante.
+15;15-G13-ativa-desktop-1440-claro-janela.png;Estadia, encapsulamento e transições;Passo 1. Identidade da estadia 22 antes da cobrança.
+16;16-G09-cotacao-desktop-1920-claro-recorte.png;Despacho polimórfico no cálculo;Passo 2. Base, duração e valor definitivo.
+17;17-G10-revisao-desktop-1440-escuro-janela.png;Cobranca como objeto de valor;Passo 3. Confirmação simulada separada da conclusão.
+18;18-G10-submissao-desktop-1440-claro-janela.png;ControleSubmissao;Estado do botão no evento de submissão, antes da navegação.
+19;19-G13-confirmado-tablet-paisagem-claro-janela.png;Estadia, encapsulamento e transições;Passo 4. Retorno de confirmação com persistência real.
+20;20-G02-ocupada-p1-desktop-1440-claro-recorte.png;Composição de dez vagas;Passo 5. O carro continua na vaga 2.
+21;21-G11-fila-tablet-retrato-escuro-janela.png;Estadia, encapsulamento e transições;Fila de valores confirmados aguardando saída.
+22;22-G13-saida-desktop-1440-claro-janela.png;Estadia, encapsulamento e transições;Passo 6. Encerramento da utilização.
+23;23-G02-liberada-desktop-1440-claro-recorte.png;Composição de dez vagas;Passo 7. Comparação direta entre os estados da vaga.
+24;24-G12-historico-tablet-paisagem-escuro-integral.png;Identidade e reconstrução;Passo 8. Ordem dos eventos da placa AV1.
+25;25-C07-comprovante-smartphone-claro-recorte.png;Cobranca como objeto de valor;Passo 9. Comprovante pessoal da estadia 22.
+26;26-C02-confirmadas-tablet-retrato-escuro-janela.png;ConsultasPessoais;Consulta do titular com dois estados financeiros simultâneos.
+27;27-G01-seletor-desktop-1440-escuro-recorte.png;ContextoAcesso e troca de portal;Alternância dos ambientes autorizados em uma sessão.
+28;28-G13-isenta-desktop-1440-claro-janela.png;Despacho polimórfico no cálculo;Política Mensalista em uma utilização concluída.
+29;29-G14-relatorios-desktop-1920-claro-recorte.png;RelatorioSaidas e agregação;Distribuições de saídas por veículo e categoria histórica.
+30;30-G13-recuperada-tablet-paisagem-claro-janela.png;Serviço, repositório e recuperação;Consulta de recuperação após perda simulada de resposta.

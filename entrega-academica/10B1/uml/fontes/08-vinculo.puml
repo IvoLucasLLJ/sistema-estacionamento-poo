@@ -1,0 +1,36 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Gestão
+participant "Rota" as R
+participant EstacionamentoService as S
+participant Controller as C
+participant Estacionamento as E
+Gestão -> R : selecionar placa e cliente
+R -> S : vincular_veiculo(placa, cliente_id)
+S -> C : vincular_veiculo(placa, cliente_id)
+C -> E : vincular_veiculo(placa, cliente_id)
+E -> E : buscar_veiculo(placa)
+E -> E : buscar_cliente(cliente_id)
+alt vínculo permitido
+E -> E : registrar associação e evento vinculo
+S -> C : salvar()
+R --> Gestão : redirecionar após persistência
+else vínculo existente ou veículo estacionado
+E --> S : ValueError via Controller
+S --> R : ErroDeNegocio
+end
+@enduml

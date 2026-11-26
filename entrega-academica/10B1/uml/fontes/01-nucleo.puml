@@ -1,0 +1,89 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+hide circle
+hide empty members
+abstract class Veiculo <<abstrata>> {
+ _placa
+ _modelo
+ {abstract} calcular_tarifa(horas)
+}
+class Carro {
+ {static} TARIFA_POR_HORA = 10
+ calcular_tarifa(horas)
+}
+class Moto {
+ {static} TARIFA_POR_HORA = 5
+ calcular_tarifa(horas)
+}
+class Caminhao {
+ {static} TARIFA_POR_HORA = 20
+ calcular_tarifa(horas)
+}
+abstract class Cliente <<abstrata>> {
+ _identificador
+ _nome
+ {abstract} calcular_cobranca(tarifa_base)
+}
+class ClienteComum {
+ calcular_cobranca(tarifa_base)
+}
+class ClienteVIP {
+ calcular_cobranca(tarifa_base)
+}
+class ClienteMensalista {
+ calcular_cobranca(tarifa_base)
+}
+class Estacionamento {
+ _vagas
+ _vinculos
+ _estadias
+ iniciar_estadia(placa, vaga, cliente_id)
+}
+class Vaga {
+ _numero
+ _veiculo
+ _estadia
+ ocupar(veiculo, *, estadia=None)
+ liberar(*, estadia=None)
+}
+class Estadia {
+ identificador
+ categoria
+ horario_entrada
+ consultar_cobranca(horas)
+}
+class Cobranca <<imutável>> {
+ estadia_id : int
+ placa : str
+ horas : Decimal
+ tarifa_base : Decimal
+ desconto : Decimal
+ valor_centavos : int
+ valor_devido : Decimal
+}
+Carro -up-|> Veiculo
+Moto -up-|> Veiculo
+Caminhao -up-|> Veiculo
+ClienteComum -up-|> Cliente
+ClienteVIP -up-|> Cliente
+ClienteMensalista -up-|> Cliente
+Estacionamento "1" *-- "10" Vaga
+Estadia --> "1" Cliente : cliente
+Estadia --> "1" Veiculo : veiculo
+Estadia --> "1" Vaga : vaga
+Estadia --> "0..1" Cobranca : pagamento
+Vaga --> "0..1" Veiculo : ocupação
+@enduml

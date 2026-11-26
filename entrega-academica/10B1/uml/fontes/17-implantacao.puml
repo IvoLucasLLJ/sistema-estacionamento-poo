@@ -1,0 +1,36 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+
+left to right direction
+node "Navegador local" as B
+node "Navegador na rede privada\n(demonstração opcional)" as M
+node "Linux, macOS ou Windows\nou Android 15+ com Termux" as H {
+ artifact "Servidor Flask\npython -m web" as W
+ artifact "Terminal\nmain.py" as T
+}
+folder "Armazenamento privado do hospedeiro" {
+ artifact "Histórico JSON" as J
+ artifact "Contas, gerações e chave de sessão" as C
+ artifact "Travas de arquivo" as L
+}
+B --> W : HTTP por loopback
+M ..> W : HTTP por IP privado
+W --> J
+W --> C
+W --> L
+T --> J
+T --> L
+@enduml

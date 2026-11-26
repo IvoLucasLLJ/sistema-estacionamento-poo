@@ -1,0 +1,36 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+participant EstacionamentoService as S
+participant Controller as C
+participant EstacionamentoRepository as R
+participant historico_json as J
+participant Estacionamento as E
+S -> C : instanciar Controller(arquivo)
+C -> R : carregar()
+R -> J : ler(arquivo)
+J --> R : dados e bytes da versão
+R -> E : reconstruir(dados)
+loop na ordem original
+E -> E : aplicar ação e conferir consistência
+end
+alt histórico válido
+E --> R : agregado reconstituído
+R --> C : estacionamento
+else registro incompatível
+E --> S : falha propagada até o serviço
+end
+@enduml

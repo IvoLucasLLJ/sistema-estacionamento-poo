@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Visitante as V
+participant "Rotas de acesso" as R
+participant AutenticacaoService as A
+participant ContaRepository as C
+participant EstacionamentoService as S
+V -> R : criar conta (POST com CSRF)
+R -> A : cadastrar_pessoal(nome, usuario, senha, confirmacao)
+A -> C : adicionar(reserva) [1]
+alt execução contínua
+A -> S : confirmar_cadastro_pessoal(cliente) [2]
+A -> C : ativar(reserva) [3]
+A --> R : cadastro ativo
+else interrupção após reservar ou antes de ativar
+V -> R : autenticar novamente
+R -> A : autenticar(usuario, senha)
+A -> C : por_usuario(usuario)
+A -> A : verificar hash e reconhecer pendência
+A -> S : confirmar_cadastro_pessoal(mesmo UUID)
+A -> C : ativar(reserva)
+end
+@enduml

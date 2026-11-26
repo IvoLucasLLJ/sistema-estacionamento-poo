@@ -1,0 +1,43 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+hide circle
+hide empty members
+left to right direction
+actor "Operador de Gestão" as Op
+actor Cliente as Cli
+actor "Master Demo" as Master
+actor Visitante
+rectangle MOVE {
+ usecase "Manter cadastros e vínculos" as U1
+ usecase "Registrar entrada e saída" as U2
+ usecase "Consultar cobrança e confirmar\npagamento simulado" as U3
+ usecase "Consultar veículos, utilizações\ne comprovantes próprios" as U4
+ usecase "Consultar disponibilidade\nagregada e benefícios" as U5
+ usecase "Alternar contexto autorizado" as U6
+ usecase "Criar conta pessoal Comum" as U7
+}
+Op --> U1
+Op --> U2
+Op --> U3
+Cli --> U4
+Cli --> U5
+Master --> U6
+Visitante --> U7
+note bottom of U6
+Gestão: operações do operador.
+Cliente: titular fictícia Lia Vale.
+end note
+@enduml

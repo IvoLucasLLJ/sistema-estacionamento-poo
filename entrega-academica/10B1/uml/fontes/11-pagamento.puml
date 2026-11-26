@@ -1,0 +1,32 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Gestão
+participant "Rota G10" as R
+participant Revisoes as F
+participant EstacionamentoService as S
+participant Estacionamento as E
+participant Estadia as T
+Gestão -> R : confirmar simulação (POST)
+R -> F : obter(..., consumir=True)
+R -> S : confirmar_pagamento(..., confirmado=True)
+S -> S : _conferir(ctrl, placa, horas, expectativa)
+S -> E : via Controller, confirmar_pagamento(cobranca, ...)
+E -> T : confirmar_pagamento(atual, confirmado)
+E -> E : registrar pagamento_confirmado
+S -> S : _persistir(ctrl)
+R --> Gestão : pagamento confirmado, vaga ocupada
+@enduml

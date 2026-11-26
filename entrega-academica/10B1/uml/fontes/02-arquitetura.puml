@@ -1,0 +1,54 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+hide circle
+hide empty members
+class EstacionamentoService {
+ _arquivo
+ _bloqueio
+ _executar(operacao, *, gravar=False)
+}
+class Controller {
+ repository
+ _estacionamento
+ salvar()
+}
+class EstacionamentoRepository {
+ arquivo
+ _conteudo_esperado
+ carregar()
+ salvar(estacionamento)
+}
+class Estacionamento {
+ _clientes
+ _veiculos
+ _historico
+ reconstruir(dados)
+}
+class Vaga
+class Estadia
+abstract class Cliente
+abstract class Veiculo
+class Cobranca
+EstacionamentoService ..> Controller : instancia
+Controller --> EstacionamentoRepository : repository
+Controller --> Estacionamento : _estacionamento
+EstacionamentoRepository ..> Estacionamento : reconstitui
+Estacionamento "1" *-- "10" Vaga
+Estacionamento --> "0..*" Estadia : ativas
+Estadia --> Cliente
+Estadia --> Veiculo
+Estadia --> Cobranca : confirmação opcional
+@enduml

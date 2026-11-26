@@ -1,0 +1,35 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam roundcorner 5
+skinparam monochrome false
+skinparam ArrowColor #364854
+skinparam ClassBackgroundColor #F3F6F7
+skinparam ClassBorderColor #526873
+skinparam stereotypeFontColor #324B54
+skinparam classAttributeIconSize 0
+skinparam ParticipantBackgroundColor #EEF3F3
+skinparam SequenceLifeLineBorderColor #788A92
+skinparam maxMessageSize 165
+autonumber
+actor Gestão
+participant EstacionamentoService as S
+participant Estacionamento as E
+participant Estadia as T
+participant Vaga as V
+Gestão -> S : via rota, concluir_saida(placa, horas, expectativa)
+S -> S : _conferir(ctrl, placa, horas, expectativa)
+S -> E : via Controller, concluir_saida(cobranca)
+E -> T : situacao_para_saida(atual)
+alt total zero ou pagamento correspondente
+T --> E : isento ou confirmado
+E -> E : validar horário da saída
+E -> V : liberar(estadia=estadia)
+E -> E : remover ativa e registrar saida_cliente
+S -> S : _persistir(ctrl)
+else pagamento necessário
+T --> E : ValueError
+end
+@enduml

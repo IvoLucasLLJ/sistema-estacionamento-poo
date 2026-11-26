@@ -1,6 +1,14 @@
 # MOVE — Materiais para avaliação acadêmica
 
-**Checkpoint funcional documentado:** [`fa323dca437853cdd6cd64c1f1c682298dd88ecb`](https://github.com/IvoLucasLLJ/sistema-estacionamento-poo/commit/fa323dca437853cdd6cd64c1f1c682298dd88ecb), na branch `trabalho-final`. Essa referência se aplica ao relatório, à apresentação e a todas as evidências indexadas abaixo.
+O relatório de 25 páginas, o atlas de 17 diagramas, a apresentação de 23 slides e suas capturas documentam o [checkpoint funcional original](https://github.com/IvoLucasLLJ/sistema-estacionamento-poo/commit/fa323dca437853cdd6cd64c1f1c682298dd88ecb).
+
+## Ampliações posteriores
+
+| Material | Uso na avaliação |
+|---|---|
+| [Evolução do portal Cliente em PDF](evolucao-portal-cliente/MOVE_Relatorio_Evolucao_Cliente.pdf) · [Texto editável](evolucao-portal-cliente/relatorio.md) | Cadastro de múltiplos veículos, reservas e cancelamentos, compras simuladas e preservação da categoria da estadia original. |
+| [Adendo MOVE 2.0](../docs/move-2/ADENDO.md) · [Capturas da aplicação](../docs/move-2/capturas/) | Distribuição das 200 vagas, UML do núcleo ampliado, elegibilidade, equipamentos, destinação VIP e roteiro integrado. |
+| [Manual de execução](../docs/inicializacao-10a2.md) | Instalação pelos quatro inicializadores e escolha entre a demonstração inicial e o cenário de vagas inteligentes. |
 
 ## Relatório, arquitetura e rastreabilidade
 

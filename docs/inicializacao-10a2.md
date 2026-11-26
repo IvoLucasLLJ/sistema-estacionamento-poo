@@ -13,7 +13,7 @@
 |---|---|
 | `master.demo` | Apresentação completa com um único login. Começa na Gestão e alterna para o portal pessoal de Lia Vale. |
 | `gestao.demo` | Mapa de vagas, entrada e saída, confirmação simulada, faturamento, histórico e comprovante. |
-| `cliente.demo` | Portal consultivo de Lia Vale, com os próprios veículos e estadias, histórico, perfil e disponibilidade agregada. |
+| `cliente.demo` | Portal pessoal de Lia Vale. Permite cadastrar veículos, reservar e cancelar vagas compatíveis, comprar uma mudança simulada de categoria e consultar as próprias estadias e comprovantes. |
 
 Na próxima abertura, execute o mesmo inicializador. Ele verifica a venv e as versões instaladas. Se estiverem consistentes, passa diretamente à verificação local e ao início do servidor. As mesmas contas, senhas, estadias e movimentações continuam disponíveis.
 
@@ -53,7 +53,9 @@ No Linux, use `./INICIAR_MOVE_LINUX.sh --porta 5001`. No Windows, use `.\INICIAR
 
 ## O que existe no cenário inicial
 
-São dez vagas comuns, três ocupadas e sete livres. As estatísticas a seguir descrevem a primeira criação do cenário. As próximas aberturas mostram as operações já realizadas.
+Na primeira abertura pelos quatro inicializadores, o estacionamento tem **200 vagas**, com **197 livres, zero reservadas e três ocupadas**. O mapa está organizado em dez setores de vinte vagas. Nas aberturas seguintes, os indicadores refletem as operações já realizadas.
+
+Para apresentar veículos elétricos, um carregador indisponível, autorizações fictícias e reservas já registradas, use o cenário independente do MOVE 2.0. Ele começa com **194 vagas livres, três reservadas e três ocupadas** e usa uma pasta própria. O roteiro inclui a criação das contas e a reabertura do mesmo histórico na porta 5012. [Preparar o cenário ampliado e demonstrar a jornada Gestão–Cliente](move-2/ADENDO.md#roteiro-para-o-professor)
 
 | Titular | Categoria | Estado inicial |
 |---|---|---|

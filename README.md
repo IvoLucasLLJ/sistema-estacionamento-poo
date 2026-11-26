@@ -39,7 +39,7 @@ O guia da 08A apresenta o provisionamento pessoal por UUID, os arquivos privados
 
 O guia da Gestão descreve os 14 modelos administrativos, o fluxo de pagamento e saída, a recuperação por estadia e os testes em Chromium. [Guia MOVE Gestão](docs/web-08b.md)
 
-O portal Cliente permite acompanhar estadias, consultar a frota e imprimir os próprios comprovantes. [Guia MOVE Cliente](docs/web-08c.md)
+No portal Cliente é possível cadastrar vários veículos, reservar uma vaga livre, acompanhar as estadias e imprimir os comprovantes. Em **Tarifas e benefícios**, a compra simulada cobra a diferença entre as categorias Comum (R$ 0,00), VIP (R$ 250,00) e Mensalista (R$ 500,00). A categoria da entrada determina a cobrança daquela estadia. [Guia MOVE Cliente](docs/web-08c.md) · [Relatório das novidades e roteiro para o professor](entrega-academica/evolucao-portal-cliente/MOVE_Relatorio_Evolucao_Cliente.pdf)
 
 ## Serviço de aplicação — Etapa 05
 
@@ -51,9 +51,9 @@ para carga e gravação. O menu textual mantém seu ciclo de salvamento da vers�
 | Operações do serviço | Contrato |
 |---|---|
 | `cadastrar_cliente(categoria, nome)`, `buscar_cliente(identificador)`, `listar_clientes()` | Cadastro ou consulta por UUID. Cada registro contém identificador, nome e categoria. |
-| `cadastrar_veiculo(tipo, placa, modelo)`, `buscar_veiculo(placa)`, `listar_veiculos()` | Veículos com placa normalizada, tipo e modelo. |
+| `cadastrar_veiculo(tipo, placa, modelo)`, `buscar_veiculo(placa)`, `listar_veiculos()` | Veículos com placa normalizada, tipo, modelo e motorização opcional. |
 | `vincular_veiculo(placa, cliente_id)`, `veiculos_do_cliente(cliente_id)`, `cliente_do_veiculo(placa)` | O vínculo retorna as duas chaves. A consulta do responsável retorna `None` para um veículo cadastrado sem vínculo. |
-| `consultar_vagas()`, `consultar_ocupacao()` | Dez vagas em ordem numérica, com ocupação e placa, e contagens de vagas livres, ocupadas e totais. |
+| `consultar_vagas()`, `consultar_ocupacao()` | Mapa administrativo das 200 vagas em ordem numérica. A consulta agregada informa livres, ocupadas e total. A opção detalhada inclui indicadores por classificação. |
 | `iniciar_estadia(placa, vaga, cliente_id)`, `listar_estadias_ativas()`, `consultar_estadia(estadia_id)` | Entrada identificada, ocupações atuais e detalhe de uma estadia identificada, inclusive após a saída. A ocupação legada aparece com suas chaves de cliente e estadia nulas. |
 | `consultar_cobranca(placa, horas)` | Cotação sem gravação, com identificador da estadia, placa, horas, tarifa-base, desconto e valor final em centavos. |
 | `confirmar_pagamento(placa, horas, expectativa, confirmado=True)`, `consultar_pagamento(placa)` | Confirmação simulada explícita. A consulta retorna a cobrança confirmada da estadia vinculada ativa, ou `None` enquanto aguarda confirmação. |
@@ -117,9 +117,9 @@ a autorização das interfaces pertencem a uma etapa posterior. A carga e a
 validação do histórico completo a cada chamada priorizam consistência e têm
 custo crescente com o número de eventos.
 
-## Critérios da versão 3 — Aula 09
+## Estacionamento e compatibilidade com o exercício da Aula 09
 
-- Dez vagas comuns: todas aceitam carro, moto e caminhão. Não há vagas especiais.
+- Capacidade padrão de 200 vagas. O mapa oferece dez setores de vinte vagas, com filtros de classificação, estado, equipamento e destinação VIP. [Distribuição, migração e roteiro de demonstração](docs/move-2/ADENDO.md)
 - Cadastro separado, com placa única normalizada (maiúsculas, sem espaços/hífens).
 - Retirada por placa; horas informadas pelo usuário, incluindo frações e zero.
 - Tarifas: carro R$ 10/h, moto R$ 5/h, caminhão R$ 20/h.
@@ -136,9 +136,9 @@ O aparelho hospeda a Gestão, o Cliente e o terminal na própria instalação. D
 
 1. Opção **5**: cadastrar carro, placa `abc-1234`, modelo `Onix`.
 2. Opção **6**: estacionar `ABC1234` na vaga 1.
-3. Opção **3**: uma ocupada, nove livres, faturamento zero.
+3. Opção **3**: uma ocupada, 199 livres, faturamento zero.
 4. Opção **7**: retirar `ABC1234`, informando duas horas: R$ 20.
-5. Opção **3**: zero ocupadas, dez livres, faturamento R$ 20.
+5. Opção **3**: zero ocupadas, 200 livres, faturamento R$ 20.
 6. Opção **4**: salvar e sair.
 7. Executar novamente e usar **3**: faturamento R$ 20 preservado.
 8. Usar **6** com a mesma placa: cadastro já recuperado.
@@ -151,7 +151,7 @@ cadastrada deve ter o mesmo tipo e modelo; dados divergentes são rejeitados.
 - `Veiculo` é classe-base abstrata: placa/modelo comuns e contrato de tarifa.
 - `Carro`, `Moto` e `Caminhao` herdam o construtor e implementam tarifas.
 - `Vaga` contém um veículo ou nenhum; `ocupada` deriva dessa referência.
-- `Estacionamento` cria dez vagas (composição), gerencia cadastro e eventos.
+- `Estacionamento` compõe as 200 vagas e seus equipamentos, gerencia cadastro e eventos.
 - `Controller` cria o tipo correto, encaminha operações e coordena o Repository.
 - `repository/estacionamento_repository.py` carrega/salva o agregado e controla a referência para detectar alterações externas.
 - `view/ui_texto.py` recebe entradas, trata erros e apresenta resultados.

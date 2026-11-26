@@ -1,0 +1,164 @@
+{
+  "historicos": {
+    "10": {
+      "n": 5,
+      "media_ms": 0.136,
+      "mediana_ms": 0.125,
+      "p95_ms": 0.173,
+      "max_ms": 0.173,
+      "bytes_json": 1162,
+      "pico_python_bytes": 133412
+    },
+    "100": {
+      "n": 5,
+      "media_ms": 0.736,
+      "mediana_ms": 0.723,
+      "p95_ms": 0.766,
+      "max_ms": 0.766,
+      "bytes_json": 11692,
+      "pico_python_bytes": 143831
+    },
+    "1000": {
+      "n": 5,
+      "media_ms": 7.98,
+      "mediana_ms": 7.024,
+      "p95_ms": 11.91,
+      "max_ms": 11.91,
+      "bytes_json": 117892,
+      "pico_python_bytes": 930146
+    },
+    "5000": {
+      "n": 5,
+      "media_ms": 41.009,
+      "mediana_ms": 36.5,
+      "p95_ms": 54.556,
+      "max_ms": 54.556,
+      "bytes_json": 593892,
+      "pico_python_bytes": 4585498
+    }
+  },
+  "operacoes": {
+    "fabrica_ms": 118.897,
+    "consultas_ms": {
+      "ocupacao": {
+        "n": 12,
+        "media_ms": 0.667,
+        "mediana_ms": 0.659,
+        "p95_ms": 0.764,
+        "max_ms": 0.764
+      },
+      "historico": {
+        "n": 12,
+        "media_ms": 0.734,
+        "mediana_ms": 0.712,
+        "p95_ms": 0.856,
+        "max_ms": 0.856
+      },
+      "cotacao": {
+        "n": 12,
+        "media_ms": 0.677,
+        "mediana_ms": 0.67,
+        "p95_ms": 0.724,
+        "max_ms": 0.724
+      }
+    },
+    "login_com_dashboard": {
+      "n": 8,
+      "media_ms": 123.006,
+      "mediana_ms": 114.79,
+      "p95_ms": 158.701,
+      "max_ms": 158.701
+    },
+    "carga_http": {
+      "1": {
+        "n": 6,
+        "media_ms": 7.864,
+        "mediana_ms": 6.146,
+        "p95_ms": 12.623,
+        "max_ms": 12.623,
+        "erros": 0,
+        "req_s": 126.1,
+        "cpu_s": 0.05
+      },
+      "2": {
+        "n": 12,
+        "media_ms": 10.259,
+        "mediana_ms": 9.639,
+        "p95_ms": 17.077,
+        "max_ms": 17.077,
+        "erros": 0,
+        "req_s": 180.02,
+        "cpu_s": 0.074
+      },
+      "4": {
+        "n": 24,
+        "media_ms": 21.828,
+        "mediana_ms": 21.5,
+        "p95_ms": 30.63,
+        "max_ms": 33.193,
+        "erros": 0,
+        "req_s": 170.82,
+        "cpu_s": 0.158
+      },
+      "8": {
+        "n": 48,
+        "media_ms": 46.064,
+        "mediana_ms": 45.469,
+        "p95_ms": 67.38,
+        "max_ms": 85.688,
+        "erros": 0,
+        "req_s": 166.92,
+        "cpu_s": 0.323
+      },
+      "1-recuperacao": {
+        "n": 6,
+        "media_ms": 5.446,
+        "mediana_ms": 4.941,
+        "p95_ms": 7.039,
+        "max_ms": 7.039,
+        "erros": 0,
+        "req_s": 182.24,
+        "cpu_s": 0.035
+      }
+    },
+    "resistencia": {
+      "ciclos": 40,
+      "tempos": {
+        "entrada": {
+          "n": 40,
+          "media_ms": 3.63,
+          "mediana_ms": 3.633,
+          "p95_ms": 5.805,
+          "max_ms": 6.067
+        },
+        "consulta": {
+          "n": 40,
+          "media_ms": 2.809,
+          "mediana_ms": 2.83,
+          "p95_ms": 4.639,
+          "max_ms": 4.886
+        },
+        "saida": {
+          "n": 40,
+          "media_ms": 3.707,
+          "mediana_ms": 3.679,
+          "p95_ms": 5.853,
+          "max_ms": 6.071
+        }
+      },
+      "rss_kib_por_ciclo": {
+        "10": 59240,
+        "20": 59268,
+        "30": 59380,
+        "40": 59460
+      },
+      "fd_inicio": 4,
+      "fd_fim": 4
+    },
+    "inicio_ate_login_ms": [
+      159.403,
+      152.989,
+      151.027
+    ]
+  }
+}

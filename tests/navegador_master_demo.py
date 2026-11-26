@@ -97,6 +97,10 @@ def apresentar(pagina, url, senha, largura, capturas):
         assert trecho in recibo, recibo
     assert 'Faturamento' not in recibo
     foto('comprovante')
+    pagina.locator('.perfil summary').click()
+    botao('Sair')
+    pagina.wait_for_url(url + '/entrar')
+    assert pagina.goto(url + '/cliente/').url == url + '/entrar'
     assert logins == [url + '/entrar'] and not erros, (logins, erros)
     return numero
 

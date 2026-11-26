@@ -1,0 +1,8 @@
+# Opcional, para uma venv separada de avaliação.
+-r requirements.txt
+coverage==7.17.5
+ruff==0.17.6
+bandit==1.9.4
+pip-audit==2.10.1
+playwright==1.64.1
+python-xlib==0.33 ; sys_platform == "linux"

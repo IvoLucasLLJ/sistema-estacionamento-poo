@@ -69,3 +69,6 @@ jobs:
           chrome="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
           "$python" -B -m tests.navegador_08a --chrome "$chrome" --webkit
           "$python" -B -m tests.navegador_08c --chrome "$chrome"
+          "$python" -B -m tests.navegador_master_demo --chrome "$chrome"
+          "$python" -B -m tests.navegador_cadastro --chrome "$chrome"
+          "$python" -B -m tests.navegador_ui_10a4_1 --chrome "$chrome"

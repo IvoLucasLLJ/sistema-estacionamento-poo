@@ -1,0 +1,237 @@
+{
+  "checkpoint": "1f83d0680c855fa3d1087c8404c0194b87f7bf0c",
+  "SO": "Ubuntu 26.04.1 x86_64",
+  "teste_inicial": {
+    "metodos": 185,
+    "segundos": 66.777,
+    "resultado": "OK"
+  },
+  "teste_final_3144": {
+    "metodos": 193,
+    "segundos": 57.371,
+    "resultado": "OK"
+  },
+  "teste_final_31318": {
+    "metodos": 193,
+    "segundos": 52.915,
+    "resultado": "OK"
+  },
+  "cobertura_3144": {
+    "metodos": 193,
+    "segundos": 101.381,
+    "resultado": "OK"
+  },
+  "repeticoes_criticas": {
+    "sementes": [
+      613,
+      1225,
+      22023
+    ],
+    "testes_por_rodada": 20
+  },
+  "ensaios_chrome": [
+    "08a",
+    "08b",
+    "08c",
+    "ui_10a4_1",
+    "master_demo",
+    "cadastro"
+  ],
+  "logins_por_abertura_do_inicializador": [
+    3,
+    3
+  ],
+  "interrupcoes_publicacao": {
+    "escritas": {
+      "criar": "FalhaAntesDaSubstituicao",
+      "write": "FalhaAntesDaSubstituicao",
+      "flush": "FalhaAntesDaSubstituicao",
+      "fsync": "FalhaAntesDaSubstituicao",
+      "antes_replace": "OSError",
+      "depois_replace": "OSError"
+    },
+    "arquivos_invalidos": 6,
+    "disputa": "um consumo"
+  },
+  "formularios": {
+    "semente": 1225,
+    "formularios": 117
+  },
+  "consultas_de_perfis": 230,
+  "dependencias_auditadas": [
+    {
+      "name": "blinker",
+      "version": "1.9.0",
+      "vulns": []
+    },
+    {
+      "name": "click",
+      "version": "8.5.1",
+      "vulns": []
+    },
+    {
+      "name": "flask",
+      "version": "3.1.3",
+      "vulns": []
+    },
+    {
+      "name": "itsdangerous",
+      "version": "2.2.0",
+      "vulns": []
+    },
+    {
+      "name": "jinja2",
+      "version": "3.1.6",
+      "vulns": []
+    },
+    {
+      "name": "markupsafe",
+      "version": "3.0.4",
+      "vulns": []
+    },
+    {
+      "name": "werkzeug",
+      "version": "3.1.9",
+      "vulns": []
+    },
+    {
+      "name": "pywin32",
+      "version": "311",
+      "vulns": []
+    }
+  ],
+  "ruff": [
+    {
+      "regra": "F401",
+      "arquivo": "iniciar_move.py",
+      "linha": 30
+    },
+    {
+      "regra": "F401",
+      "arquivo": "iniciar_move.py",
+      "linha": 87
+    },
+    {
+      "regra": "F401",
+      "arquivo": "iniciar_move.py",
+      "linha": 88
+    },
+    {
+      "regra": "F401",
+      "arquivo": "iniciar_move.py",
+      "linha": 90
+    },
+    {
+      "regra": "F401",
+      "arquivo": "iniciar_move.py",
+      "linha": 94
+    },
+    {
+      "regra": "B904",
+      "arquivo": "web/__main__.py",
+      "linha": 95
+    },
+    {
+      "regra": "B904",
+      "arquivo": "web/__main__.py",
+      "linha": 97
+    },
+    {
+      "regra": "F401",
+      "arquivo": "web/demonstracao.py",
+      "linha": 16
+    }
+  ],
+  "bandit": [
+    {
+      "regra": "B404",
+      "arquivo": "./iniciar_move.py",
+      "linha": 3,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 25,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 77,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 79,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 82,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 103,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 115,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "./iniciar_move.py",
+      "linha": 144,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B606",
+      "arquivo": "./iniciar_move.py",
+      "linha": 150,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B404",
+      "arquivo": "persistence/ambiente_termux.py",
+      "linha": 3,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "persistence/ambiente_termux.py",
+      "linha": 31,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B404",
+      "arquivo": "web/__main__.py",
+      "linha": 9,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "web/__main__.py",
+      "linha": 55,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B607",
+      "arquivo": "web/__main__.py",
+      "linha": 60,
+      "gravidade": "LOW"
+    },
+    {
+      "regra": "B603",
+      "arquivo": "web/__main__.py",
+      "linha": 60,
+      "gravidade": "LOW"
+    }
+  ]
+}

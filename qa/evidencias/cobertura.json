@@ -1,0 +1,277 @@
+{
+  "escopo": "Python próprio executado pela suíte regular no Linux",
+  "base_processo_principal": {
+    "covered_lines": 2132,
+    "num_statements": 2469,
+    "percent_covered": 83.6734693877551,
+    "percent_covered_display": "84",
+    "missing_lines": 337,
+    "excluded_lines": 0,
+    "percent_statements_covered": 86.35074929121102,
+    "percent_statements_covered_display": "86",
+    "num_branches": 716,
+    "num_partial_branches": 83,
+    "covered_branches": 533,
+    "missing_branches": 183,
+    "percent_branches_covered": 74.44134078212291,
+    "percent_branches_covered_display": "74"
+  },
+  "final_com_subprocessos": {
+    "covered_lines": 2195,
+    "num_statements": 2521,
+    "percent_covered": 84.38364586535506,
+    "percent_covered_display": "84",
+    "missing_lines": 326,
+    "excluded_lines": 0,
+    "percent_statements_covered": 87.06862356207854,
+    "percent_statements_covered_display": "87",
+    "num_branches": 732,
+    "num_partial_branches": 84,
+    "covered_branches": 550,
+    "missing_branches": 182,
+    "percent_branches_covered": 75.13661202185793,
+    "percent_branches_covered_display": "75"
+  },
+  "por_modulo": {
+    "controller/controller.py": {
+      "instrucoes": 70,
+      "executadas": 69,
+      "ramos": 8,
+      "ramos_executados": 7
+    },
+    "iniciar_move.py": {
+      "instrucoes": 135,
+      "executadas": 48,
+      "ramos": 64,
+      "ramos_executados": 17
+    },
+    "main.py": {
+      "instrucoes": 14,
+      "executadas": 13,
+      "ramos": 2,
+      "ramos_executados": 1
+    },
+    "model/caminhao.py": {
+      "instrucoes": 5,
+      "executadas": 5,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/carro.py": {
+      "instrucoes": 5,
+      "executadas": 5,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/categorias_cliente.py": {
+      "instrucoes": 8,
+      "executadas": 8,
+      "ramos": 2,
+      "ramos_executados": 2
+    },
+    "model/cliente.py": {
+      "instrucoes": 41,
+      "executadas": 41,
+      "ramos": 12,
+      "ramos_executados": 12
+    },
+    "model/cliente_comum.py": {
+      "instrucoes": 6,
+      "executadas": 6,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/cliente_mensalista.py": {
+      "instrucoes": 6,
+      "executadas": 6,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/cliente_vip.py": {
+      "instrucoes": 6,
+      "executadas": 6,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/estacionamento.py": {
+      "instrucoes": 295,
+      "executadas": 286,
+      "ramos": 120,
+      "ramos_executados": 108
+    },
+    "model/estadia.py": {
+      "instrucoes": 53,
+      "executadas": 53,
+      "ramos": 18,
+      "ramos_executados": 18
+    },
+    "model/moto.py": {
+      "instrucoes": 5,
+      "executadas": 5,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "model/vaga.py": {
+      "instrucoes": 33,
+      "executadas": 31,
+      "ramos": 10,
+      "ramos_executados": 8
+    },
+    "model/veiculo.py": {
+      "instrucoes": 23,
+      "executadas": 23,
+      "ramos": 6,
+      "ramos_executados": 6
+    },
+    "persistence/ambiente_termux.py": {
+      "instrucoes": 26,
+      "executadas": 22,
+      "ramos": 10,
+      "ramos_executados": 7
+    },
+    "persistence/caminhos.py": {
+      "instrucoes": 9,
+      "executadas": 9,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "persistence/exclusividade.py": {
+      "instrucoes": 59,
+      "executadas": 39,
+      "ramos": 16,
+      "ramos_executados": 5
+    },
+    "persistence/historico_json.py": {
+      "instrucoes": 52,
+      "executadas": 50,
+      "ramos": 4,
+      "ramos_executados": 4
+    },
+    "persistence/privacidade.py": {
+      "instrucoes": 110,
+      "executadas": 22,
+      "ramos": 26,
+      "ramos_executados": 4
+    },
+    "repository/__init__.py": {
+      "instrucoes": 0,
+      "executadas": 0,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "repository/estacionamento_repository.py": {
+      "instrucoes": 19,
+      "executadas": 18,
+      "ramos": 2,
+      "ramos_executados": 1
+    },
+    "service/estacionamento_service.py": {
+      "instrucoes": 144,
+      "executadas": 143,
+      "ramos": 18,
+      "ramos_executados": 17
+    },
+    "service/representacoes.py": {
+      "instrucoes": 68,
+      "executadas": 66,
+      "ramos": 26,
+      "ramos_executados": 24
+    },
+    "view/formatacao.py": {
+      "instrucoes": 8,
+      "executadas": 7,
+      "ramos": 2,
+      "ramos_executados": 1
+    },
+    "view/ui_texto.py": {
+      "instrucoes": 75,
+      "executadas": 69,
+      "ramos": 14,
+      "ramos_executados": 14
+    },
+    "web/__init__.py": {
+      "instrucoes": 79,
+      "executadas": 76,
+      "ramos": 6,
+      "ramos_executados": 5
+    },
+    "web/__main__.py": {
+      "instrucoes": 142,
+      "executadas": 99,
+      "ramos": 56,
+      "ramos_executados": 23
+    },
+    "web/apresentacao.py": {
+      "instrucoes": 21,
+      "executadas": 21,
+      "ramos": 0,
+      "ramos_executados": 0
+    },
+    "web/cliente.py": {
+      "instrucoes": 91,
+      "executadas": 89,
+      "ramos": 14,
+      "ramos_executados": 13
+    },
+    "web/config.py": {
+      "instrucoes": 41,
+      "executadas": 36,
+      "ramos": 16,
+      "ramos_executados": 9
+    },
+    "web/consultas_pessoais.py": {
+      "instrucoes": 24,
+      "executadas": 24,
+      "ramos": 10,
+      "ramos_executados": 9
+    },
+    "web/contas.py": {
+      "instrucoes": 186,
+      "executadas": 175,
+      "ramos": 76,
+      "ramos_executados": 66
+    },
+    "web/demonstracao.py": {
+      "instrucoes": 114,
+      "executadas": 102,
+      "ramos": 46,
+      "ramos_executados": 36
+    },
+    "web/eventos.py": {
+      "instrucoes": 58,
+      "executadas": 58,
+      "ramos": 30,
+      "ramos_executados": 29
+    },
+    "web/gestao.py": {
+      "instrucoes": 263,
+      "executadas": 248,
+      "ramos": 44,
+      "ramos_executados": 37
+    },
+    "web/revisoes.py": {
+      "instrucoes": 36,
+      "executadas": 35,
+      "ramos": 10,
+      "ramos_executados": 9
+    },
+    "web/rotas.py": {
+      "instrucoes": 53,
+      "executadas": 52,
+      "ramos": 14,
+      "ramos_executados": 13
+    },
+    "web/seguranca.py": {
+      "instrucoes": 98,
+      "executadas": 94,
+      "ramos": 40,
+      "ramos_executados": 37
+    },
+    "web/sessoes.py": {
+      "instrucoes": 40,
+      "executadas": 36,
+      "ramos": 10,
+      "ramos_executados": 8
+    }
+  }
+}

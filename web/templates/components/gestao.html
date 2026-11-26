@@ -33,7 +33,7 @@
   <ul class="grade-vagas" data-componente="V02">
     {% for v in vagas %}
       <li class="{{ 'ocupada' if v.ocupada else 'livre' }}" data-componente="D05">
-        <a href="{{ url_for('gestao.vagas', vaga=v.numero) }}" aria-label="Vaga {{ v.numero }} · {{ 'ocupada' if v.ocupada else 'livre' }}" {% if selecao and selecao.numero == v.numero %}aria-current="true"{% endif %}> <strong>{{ '%02d'|format(v.numero) }}</strong>
+        <a href="{{ url_for('gestao.vagas', vaga=v.numero) }}" {% if selecao and selecao.numero == v.numero %}aria-current="true"{% endif %}> <strong><span class="sr">Vaga </span>{{ '%02d'|format(v.numero) }}</strong>
         <span>
         {{ ui.icone('car' if v.ocupada else 'circle-check') }}{{ 'Ocupada' if v.ocupada else 'Livre' }}</span>
         {% if v.ocupada %}

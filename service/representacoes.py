@@ -51,9 +51,6 @@ def ocupacao(ctrl):
 
 def faturamento(ctrl):
     reais = Decimal(str(ctrl.relatorio()["faturamento"]))
-    # O relatório legado usa float e pode exceder seu intervalo ao somar saídas finitas.
-    if not reais.is_finite():
-        return {"reais": str(reais), "centavos": None}
     numerador, denominador = reais.as_integer_ratio()
     centavos, resto = divmod(numerador * 100, denominador)
     return {"reais": str(reais), "centavos": centavos if resto == 0 else None}

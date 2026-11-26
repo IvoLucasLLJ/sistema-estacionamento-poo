@@ -13,6 +13,7 @@ from web.gestao import gestao
 from web.revisoes import Revisoes
 from web.rotas import acesso
 from web.cliente import cliente
+from web.sessoes import SessoesAtivas
 from web.seguranca import csrf_token, destino, preparar_requisicao
 
 
@@ -22,7 +23,8 @@ def create_app(config=None):
     servico = EstacionamentoService(app.config['HISTORICO'])
     autenticacao = AutenticacaoService(ContaRepository(app.config['CONTAS']), servico,
                                        demonstracao=app.config['DEMONSTRACAO'])
-    app.extensions.update(revisoes=Revisoes(), estacionamento=servico, autenticacao=autenticacao,
+    app.extensions.update(sessoes=SessoesAtivas(app.config['DADOS'] / 'sessoes.json'),
+                          revisoes=Revisoes(), estacionamento=servico, autenticacao=autenticacao,
                           escritor=EscritorLocal(app.config['HISTORICO']))
     for area in (acesso, gestao, cliente):
         app.register_blueprint(area)

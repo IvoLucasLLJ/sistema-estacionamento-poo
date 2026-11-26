@@ -20,7 +20,13 @@ def iniciar_sessao(identidade):
     session.clear()
     session['conta'] = identidade.id
     session['expira'] = int(agora()) + current_app.config['DURACAO_SESSAO']
-    csrf_token()
+    current_app.extensions['sessoes'].substituir(nova=csrf_token(), expira=session['expira'])
+
+
+def encerrar_sessao():
+    current_app.extensions['sessoes'].substituir(anterior=session['csrf'])
+    current_app.extensions['revisoes'].invalidar_sessao(session['csrf'])
+    session.clear()
 
 
 def destino():
@@ -42,7 +48,7 @@ def preparar_requisicao():
     except OSError as erro:
         raise ErroDeInfraestrutura('Histórico indisponível para este processo.') from erro
     if 'conta' in session:
-        if agora() >= session.get('expira', 0):
+        if agora() >= session.get('expira', 0) or not current_app.extensions['sessoes'].ativa(session.get('csrf')):
             session.clear()
             abort(401)
         g.contexto = current_app.extensions['autenticacao'].contexto(
@@ -51,7 +57,7 @@ def preparar_requisicao():
         if g.contexto:
             g.identidade = g.contexto.identidade_ativa(session.get('conta_pessoal_ativa'))
         if g.identidade is None:
-            session.clear()
+            encerrar_sessao()
             abort(401)
     if request.method not in {'GET', 'HEAD', 'OPTIONS'}:
         recebido = request.form.get('csrf_token', '')
@@ -76,11 +82,17 @@ def selecionar_ambiente(ambiente):
     if identidade != g.identidade:
         if identidade.papel == PapelAcesso.CLIENTE:
             cliente_vinculado(identidade)
+        anterior = session['csrf']
+        novo = secrets.token_urlsafe(32)
+        if not current_app.extensions['sessoes'].substituir(anterior, novo, session['expira']):
+            session.clear()
+            abort(401)
+        if identidade.papel == PapelAcesso.CLIENTE:
             session['conta_pessoal_ativa'] = identidade.id
         else:
             session.pop('conta_pessoal_ativa', None)
-        current_app.extensions['revisoes'].invalidar_sessao(session.pop('csrf'))
-        csrf_token()
+        current_app.extensions['revisoes'].invalidar_sessao(anterior)
+        session['csrf'] = novo
         g.identidade = identidade
 
 

@@ -46,7 +46,8 @@ def configurar(app, opcoes):
     historico = caminho_local(app.config['HISTORICO'])
     chave = caminho_local(dados / 'sessao.key')
     caminhos = [historico, contas, chave, Path(str(historico) + '.lock'), Path(str(contas) + '.lock'),
-                Path(str(chave) + '.lock')]
+                Path(str(chave) + '.lock'), (dados / 'sessoes.json').resolve(),
+                (dados / 'sessoes.json.lock').resolve()]
     if len(set(caminhos)) != len(caminhos) or any(p.is_relative_to(Path(app.static_folder)) for p in caminhos):
         raise ValueError('Use arquivos privados distintos, fora da pasta estática.')
     if os.name == 'nt':

@@ -1,0 +1,46 @@
+{
+  "sequencias": {
+    "22023": {
+      "cancelar/True": 46,
+      "cotacao/False": 15,
+      "cotacao/True": 28,
+      "entrada/False": 40,
+      "entrada/True": 12,
+      "pagamento/False": 48,
+      "pagamento/True": 5,
+      "reinicio/True": 40,
+      "saida/False": 37,
+      "saida/True": 9
+    },
+    "613": {
+      "cancelar/True": 50,
+      "cotacao/False": 9,
+      "cotacao/True": 27,
+      "entrada/False": 36,
+      "entrada/True": 12,
+      "pagamento/False": 39,
+      "pagamento/True": 8,
+      "reinicio/True": 43,
+      "saida/False": 44,
+      "saida/True": 12
+    },
+    "20262": {
+      "cancelar/True": 53,
+      "cotacao/False": 11,
+      "cotacao/True": 28,
+      "entrada/False": 43,
+      "entrada/True": 11,
+      "pagamento/False": 37,
+      "pagamento/True": 6,
+      "reinicio/True": 41,
+      "saida/False": 42,
+      "saida/True": 8
+    },
+    "entradas": {
+      "recusados": 701,
+      "aceitos": 19,
+      "historicos_invalidos": 7
+    }
+  },
+  "interrupcoes": 6
+}

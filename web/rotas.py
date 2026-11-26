@@ -1,7 +1,7 @@
-from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from service.estacionamento_service import ErroDeInfraestrutura
-from web.seguranca import acesso_restrito, csrf_token, destino, iniciar_sessao, selecionar_ambiente
+from web.seguranca import acesso_restrito, csrf_token, destino, encerrar_sessao, iniciar_sessao, selecionar_ambiente
 
 acesso = Blueprint('acesso', __name__)
 
@@ -66,5 +66,5 @@ def alternar_ambiente():
 @acesso.post('/sair')
 @acesso_restrito()
 def sair():
-    session.clear()
+    encerrar_sessao()
     return redirect(url_for('acesso.entrar'), code=303)

@@ -71,7 +71,7 @@ def percorrer(browser, raiz, largura, capturas):
             assert 'R$ 40,01' in p.locator('#financeiro').inner_text()
             foto('dashboard')
             navegar('Mapa de vagas')
-            seguir('Vaga 2 · ocupada')
+            seguir('Vaga 02 Ocupada AV1')
             seguir('Ver estadia')
             seguir('Preparar saída')
             p.get_by_label('Duração em horas').fill('1,225')

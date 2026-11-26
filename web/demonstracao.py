@@ -51,7 +51,7 @@ def verificar_separacao(pasta):
     def identidade(caminho):
         return Path(unicodedata.normalize('NFC', str(caminho.resolve())).casefold())
     if _redireciona(pasta) or any(identidade(p).is_relative_to(identidade(pasta))
-                                for p in (historico_local(), dados / 'sessao.key', contas)):
+                                for p in (historico_local(), dados / 'sessao.key', dados / 'sessoes.json', dados / 'sessoes.json.lock', contas)):
         raise ValueError('A demonstração coincide com um caminho operacional. Confira as variáveis MOVE e a pasta de demonstração.')
 
 
@@ -86,9 +86,10 @@ def preparar_demonstracao():
             raise PermissionError(f'Confira o proprietário e as permissões de {pasta}.')
         if not pasta.is_dir():
             raise ValueError(f'Pasta de demonstração inválida. Confira o proprietário e as permissões de {pasta}.')
-        for nome in ('cenario.json', 'historico.json', 'contas.json', 'sessao.key', 'historico.json.lock', 'contas.json.lock', 'sessao.key.lock'):
+        for nome in ('cenario.json', 'historico.json', 'contas.json', 'sessao.key', 'historico.json.lock', 'contas.json.lock', 'sessao.key.lock',
+                     'sessoes.json', 'sessoes.json.lock'):
             arquivo = pasta / nome
-            if nome.endswith('.lock') and not os.path.lexists(arquivo):
+            if (nome.endswith('.lock') or nome == 'sessoes.json') and not os.path.lexists(arquivo):
                 continue
             modo = arquivo.lstat()
             if not stat.S_ISREG(modo.st_mode) or _redireciona(arquivo) or modo.st_nlink != 1:

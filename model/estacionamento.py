@@ -249,19 +249,23 @@ class Estacionamento:
         return tarifa
 
     def _faturamento(self):
-        total_legado = sum(e["valor"] for e in self._historico if e["acao"] == "saida")
-        valores_centavos = [e["valor_centavos"] for e in self._historico if e["acao"] == "saida_cliente"]
-        if not valores_centavos:
-            return total_legado
-        legado = Decimal(str(total_legado))
-        if not legado.is_finite():
-            return legado
-        novo = reais_de_centavos(sum(valores_centavos))
-        # Inclui as casas fracionárias do legado sem arredondá-las a centavos.
-        casas = min(legado.as_tuple().exponent, -2)
-        precisao = max(legado.adjusted(), novo.adjusted()) - casas + 2
-        with localcontext(Context(prec=precisao)):
-            return legado + novo
+        legados = [e['valor'] for e in self._historico if e['acao'] == 'saida']
+        valores = [Decimal(str(valor)) for valor in legados]
+        centavos = [e['valor_centavos'] for e in self._historico if e['acao'] == 'saida_cliente']
+        if centavos:
+            valores.append(reais_de_centavos(sum(centavos)))
+        if not valores:
+            return 0
+        # Alinha as casas de todas as saídas e reserva espaço para os transportes da soma.
+        precisao = max(v.adjusted() for v in valores) - min(v.as_tuple().exponent for v in valores)
+        with localcontext(Context(prec=max(1, precisao + len(str(len(valores))) + 1))):
+            total = sum(valores, Decimal(0))
+        if not centavos:
+            # Mantém o tipo histórico quando sua representação pública reproduz a soma.
+            legado = float(total) if any(isinstance(v, float) for v in legados) else int(total)
+            if Decimal(str(legado)) == total:
+                return legado
+        return total
 
     def relatorio(self):
         ocupadas = sum(1 for vaga in self.vagas if vaga.ocupada)

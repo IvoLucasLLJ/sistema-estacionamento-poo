@@ -1,0 +1,276 @@
+{
+  "motores": {
+    "Chrome": {
+      "versao": "158.0.8127.36",
+      "pagina_tema_viewport": 48
+    },
+    "Edge": {
+      "versao": "158.0.4370.33",
+      "pagina_tema_viewport": 48
+    },
+    "Chromium": {
+      "versao": "156.0.8078.4",
+      "pagina_tema_viewport": 48
+    },
+    "Firefox": {
+      "versao": "157.0",
+      "pagina_tema_viewport": 48
+    },
+    "WebKit": {
+      "versao": "27.2",
+      "pagina_tema_viewport": 48
+    }
+  },
+  "zoom": {
+    "zoom": "200%",
+    "paginas": [
+      [
+        "/entrar",
+        "light",
+        683
+      ],
+      [
+        "/criar-conta",
+        "light",
+        683
+      ],
+      [
+        "/entrar",
+        "dark",
+        683
+      ],
+      [
+        "/criar-conta",
+        "dark",
+        683
+      ],
+      [
+        "/gestao/",
+        "dark",
+        683
+      ],
+      [
+        "/gestao/entrada",
+        "dark",
+        683
+      ],
+      [
+        "/gestao/relatorios",
+        "dark",
+        683
+      ]
+    ],
+    "versao": "158.0.8127.36"
+  },
+  "axe_antes": [
+    {
+      "rota": "/entrar",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/entrar",
+      "cor": "dark",
+      "violacoes": []
+    },
+    {
+      "rota": "/criar-conta",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/criar-conta",
+      "cor": "dark",
+      "violacoes": []
+    },
+    {
+      "rota": "/gestao/",
+      "cor": "light",
+      "violacoes": [
+        {
+          "regra": "label-content-name-mismatch",
+          "impacto": "serious",
+          "elementos": [
+            [
+              "a[href=\"/gestao/vagas?vaga=1\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=2\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=3\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=4\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=5\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=6\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=7\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=8\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=9\"]"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "rota": "/gestao/",
+      "cor": "dark",
+      "violacoes": [
+        {
+          "regra": "label-content-name-mismatch",
+          "impacto": "serious",
+          "elementos": [
+            [
+              "a[href=\"/gestao/vagas?vaga=1\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=2\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=3\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=4\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=5\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=6\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=7\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=8\"]"
+            ],
+            [
+              "a[href=\"/gestao/vagas?vaga=9\"]"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "rota": "/cliente/",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/cliente/",
+      "cor": "dark",
+      "violacoes": []
+    }
+  ],
+  "axe_depois": [
+    {
+      "rota": "/entrar",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/entrar",
+      "cor": "dark",
+      "violacoes": []
+    },
+    {
+      "rota": "/criar-conta",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/criar-conta",
+      "cor": "dark",
+      "violacoes": []
+    },
+    {
+      "rota": "/gestao/",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/gestao/",
+      "cor": "dark",
+      "violacoes": []
+    },
+    {
+      "rota": "/cliente/",
+      "cor": "light",
+      "violacoes": []
+    },
+    {
+      "rota": "/cliente/",
+      "cor": "dark",
+      "violacoes": []
+    }
+  ],
+  "sha256_capturas_identicas": {
+    "cadastro-1024x768-claro.png": "6186e7865f8aeef39659b53c566c4612ba4fdea628320f14bb0cbc287f5d89dd",
+    "cadastro-1024x768-escuro.png": "a415e55dcb75a111bfa35dd6282a657f3532aee5d8a9b974f343e397d68252d4",
+    "cadastro-1280x720-claro.png": "467388649b581606581c04b10de79a1249490688af32c16064b6dc24d122ca82",
+    "cadastro-1280x720-escuro.png": "919975a485bb5acd0528f12a3adee6736cee7a1544f1c9bb1a39d9fe66761fc4",
+    "cadastro-1366x1024-claro.png": "1936a12775e581267e9aabbf8541db45b18006351fa28654c7a64aa8bbc22b50",
+    "cadastro-1366x1024-escuro.png": "1d8f8fd0fd042f52f53491eddaccee5660d7b4c60b23e83753892a93ce7c659a",
+    "cadastro-1366x768-claro.png": "f424a936b227ffcd8fd3cb2386185454037ade981330b15b324919db0a904a8f",
+    "cadastro-1366x768-escuro.png": "a287ea610cd9a346a83828354af675e28c3013b1a6e22cb28bccabb4fc05b7aa",
+    "cadastro-1440x900-claro.png": "51b5d6fe36c2c4029551e1f6af30c03ab2fd404ca7700ee00d416f8a22c42364",
+    "cadastro-1440x900-escuro.png": "14d5bd54bb9cc7ab3f524fd0fd4ab0b4fc82f5302c05453861d38cc1d8e9ccbe",
+    "cadastro-1536x864-claro.png": "30df2a272f433c564270815722e503dfb49a6eda5f31e5ef3ce4e6f6b1fc5387",
+    "cadastro-1536x864-escuro.png": "666ad4814634678caea58d1931a46594e5368e94c0492a6bcded962177770ca9",
+    "cadastro-1920x1080-claro.png": "e8886bb00a651351e246e5d8fe15968fe6629fd943c38cb8ccdf3be4a9297922",
+    "cadastro-1920x1080-escuro.png": "c8d60a2a7ba3e0e653c0ee1387497529f68492e938b014f5acbc466f2e7695d1",
+    "cadastro-2560x1440-claro.png": "0e1bd7bef45955aafdb9ca66956890aa1e484b1966741d9ccfe4dfff239cdaa9",
+    "cadastro-2560x1440-escuro.png": "75b9bf91d32fb5950c2b513885fbab13962bd827a0a28f036bb3fa0fd35c0969",
+    "cadastro-320x568-claro.png": "5462858a51a79ab89839308b6830ac3833737e96d1bc3c7e761b6673e0899012",
+    "cadastro-320x568-escuro.png": "c5f294d46941e9c4143a6d5994219d1bff44ffbbc971218c3a39987b6077817c",
+    "cadastro-3440x1440-claro.png": "d639c7dd4b91be3385cbb4b9c097a8bf03cf8d6936b7a2e81d556fbf88bb5169",
+    "cadastro-3440x1440-escuro.png": "aeb37ccce6d620e23d85ba2c8e53fb2b9dd7e82f3ef6e8d61dd3d4e2d3fcdf16",
+    "cadastro-390x844-claro.png": "e70af29b57304b4cceb8ac7a231a1456891ec59ab4767a707cdeee7c704a2098",
+    "cadastro-390x844-escuro.png": "65cf2ec41e1ae66f293b811dc89c809bf6e596c69c61c0fb7438b1a9759b7f8e",
+    "cadastro-768x1024-claro.png": "7916d17c380bfd6ea5751980cee9e0fc49051f80604518d530df4294f1a381d1",
+    "cadastro-768x1024-escuro.png": "0cf046174ad0dd7b61cae329316aa17bff79ec3ad7e9c5d68b6d8709e4ab868a",
+    "cadastro-844x390-claro.png": "41e59a388a48421f60b2a51287e2dabadd246f6629447b3181264228bc00f00d",
+    "cadastro-844x390-escuro.png": "16b66743f491f044708d0b87fe6fe8a83a2b75cf3ecd942ed52a7b1b3c850377",
+    "erro-autenticacao.png": "167ffd995465103a7f808843859943eb5354d9f1169248acb4e84474b50ad4d7",
+    "login-1024x768-claro.png": "6a5cdd2e4cfe060801eb67ed3e79373805a9052fd42db2549fc79041919abc00",
+    "login-1024x768-escuro.png": "b255d0947b06262cf84d967d3e69979577fc0d0bf1c463a43293c40c4f0bd08f",
+    "login-1280x720-claro.png": "a1bc1aa35b003b04cefb9aaed6574046937e3fa8039f04615e53af16ae1f3a25",
+    "login-1280x720-escuro.png": "6251e41172f0d601db096b3b23f6bfe703c2d30a70da8b388b5394e3e07d2be2",
+    "login-1366x1024-claro.png": "61b30e27cd89511a766b9fd7b22053e72ae6ab35a8c342f8f0381f0c9b21dddd",
+    "login-1366x1024-escuro.png": "694d51267d4fa4d20c7fe1b9f03fd5d72f0a5d26eab5a40f03f8c814ccae885b",
+    "login-1366x768-claro.png": "c882ca9734ae4bbcf4a1fb12ee94201be7a6384d2c2a580b1a52f49be248aba9",
+    "login-1366x768-escuro.png": "b2b19b712ec4612782d40476d76d280cadceb4bae22350a30d904ce46174eb5a",
+    "login-1440x900-claro.png": "444e8714677f21c3f786d16c269c7834ca0af4b66f5d0913c7d284f3e381de90",
+    "login-1440x900-escuro.png": "2c75dd8805a2f18c71d3d4124d7aacfbcb050fa94130c911f21ec489ed45e371",
+    "login-1536x864-claro.png": "a44c031a31deaf8cd4ea71b885268b93d19385ea4ad304f729d829f0357edae3",
+    "login-1536x864-escuro.png": "9c58984000c9ad506d89afd1d374d76a594b2a4a6151cc8a3ac6945f1b007e70",
+    "login-1920x1080-claro.png": "7c6a04ffec1bac5ce58d7dc0db31388c23f7ef8023cbc377ded2af6920ef9dcc",
+    "login-1920x1080-escuro.png": "b63253a84a15c408055e06f2e68dbce2fcfbc86cf233ab651bf2ee83c6bdfbe5",
+    "login-2560x1440-claro.png": "2654c14f25432814e6eb939049b13d026bc5fcc4579082cb397f6ce22f3deed5",
+    "login-2560x1440-escuro.png": "1e6aa15a472f593c4f5405b0ae9edd61971df9e16f427c9371520e4ee5e2ad70",
+    "login-320x568-claro.png": "2af5d12df777c19bd6b240b3a1fc5995212a2a00940900a77b8ca35680bd9b6c",
+    "login-320x568-escuro.png": "4be927680296f822d8a5a6ff88170cfd335934fa287c93b3b5b0bd5d661177de",
+    "login-3440x1440-claro.png": "c65f3ce9e3b12b2bf679c63a7b6ba867301eb1e96388a65141003c844df0797f",
+    "login-3440x1440-escuro.png": "0d3e64e34813cb6978448656fc0e4bd496bc3ecbc7abfba6b19ceccf28843b4b",
+    "login-390x844-claro.png": "24f57fbde9fa594d74fc2bc5a8546fdded675de1b61eb09fca278711c11dfef1",
+    "login-390x844-escuro.png": "96c26b49c0dbc6da2987d9a6726e9fcdaafc71934b711609ef02101b68811c22",
+    "login-768x1024-claro.png": "905b4740449a54d881e1a0d57042c51350e546290d8fa1bd82291e63b2c2ec7d",
+    "login-768x1024-escuro.png": "fca8ec3231100f2ce168e8a22b5cd8524326139e3eb15c245c959dd427f8928e",
+    "login-844x390-claro.png": "4100b66b0256c210e8f2d0aabec86555d45581ccb49970e746193d4ab4b1dfe6",
+    "login-844x390-escuro.png": "ec6737b689213bca9a416c77761a7f7028e475ad1a13126088db3508722e5e79",
+    "menu-aparencia.png": "99fbb6a7a576fd7805e18f393cd9fb28ded7bb12115fe40888acd6a3c4e80220",
+    "senha-visivel.png": "ee3182af1ba56ea2c03e24ab785e58597377b19467f0381bf656acbf8634f8d0",
+    "08b-390-dashboard.png": "154fd244db42d9f2c8179f144ef9701c29c013dc34520d2ecc03887535032b87",
+    "08b-1440-dashboard.png": "c61d240c9e15c2174dc4e757c4438c8fc03835fc5da6a7baf9f138307f69092e"
+  }
+}

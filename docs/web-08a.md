@@ -58,11 +58,11 @@ A assinatura e o monograma SVG são exportações vetoriais da marca B. O CSS us
 
 ### Segurança e limites operacionais
 
-- Flask assina o cookie de sessão. Seu conteúdo pode ser lido pelo portador. Ele contém o ID da conta, a expiração e o token CSRF. A renovação do token ocorre no login. Logout limpa o cookie do navegador atual. Uma cópia anterior de cookie válido pode funcionar até a expiração se a conta ainda existir. Uma assinatura inválida ou já descartada pelo Flask exige novo login.
+- Flask assina o cookie de sessão. Seu conteúdo pode ser lido pelo portador. Ele contém o ID da conta, a expiração e o token CSRF. A renovação do token ocorre no login. Desde a 10A.5, o servidor registra o resumo da geração ativa em `sessoes.json` na pasta privada. A alternância substitui a geração, e o logout a encerra. Sessões anteriores à atualização exigem novo login. Outras sessões da mesma conta mantêm seu próprio prazo. Uma assinatura inválida ou já descartada pelo Flask exige novo login.
 - Login e logout verificam o token de formulário em tempo constante. O cookie é HttpOnly e SameSite=Lax. As respostas usam no-store, política de conteúdo de mesma origem, bloqueio de incorporação em frames e proteção de tipo de conteúdo. O Jinja escapa os valores do cadastro. Erros públicos omitem detalhes de arquivos, hashes e exceções.
 - Conflitos e resultados incertos têm respostas próprias. Quando uma estadia pessoal já foi autorizada na requisição, o link de recuperação preserva seu ID e passa novamente pela guarda. A 08A expõe somente consultas operacionais. As futuras escritas financeiras precisarão validar a expectativa e o ID originais com o serviço.
 - Este executável destina-se ao uso acadêmico local em Ubuntu. A reserva cooperativa dos executáveis protege o histórico compartilhado. Scripts independentes que escrevam diretamente pelo serviço devem respeitar o mesmo regime. A proteção entre threads e a detecção de conflito do Repository continuam em vigor. Cada consulta do dashboard é uma leitura independente.
-- Exposição pública exigiria uma decisão de implantação, HTTPS, servidor apropriado, política de limitação de tentativas, monitoramento e gestão de sessões. O projeto atual não oferece autenticação multifator, recuperação por e-mail, revogação individual de cookies copiados ou integração de pagamento.
+- Exposição pública exigiria uma decisão de implantação, HTTPS, servidor apropriado, política de limitação de tentativas, monitoramento e gestão de sessões. O projeto atual não oferece autenticação multifator, recuperação por e-mail, encerramento remoto de outras sessões ou integração de pagamento.
 
 ### Dependências e validação
 

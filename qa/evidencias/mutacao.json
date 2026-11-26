@@ -1,0 +1,116 @@
+[
+  {
+    "arquivo": "model/carro.py",
+    "alvo": "= 10",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/moto.py",
+    "alvo": "= 5",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/caminhao.py",
+    "alvo": "= 20",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/cliente_vip.py",
+    "alvo": "/ 2",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/cliente_mensalista.py",
+    "alvo": "return 0",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/estadia.py",
+    "alvo": "rounding=ROUND_HALF_UP",
+    "teste": "qualidade_10a5.QualidadeTests.test_nove_combinacoes_com_oraculo_decimal_nas_fronteiras",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/vaga.py",
+    "alvo": "if self.ocupada:",
+    "teste": "nucleo.NucleoTests.test_duplicidade_ocupacao_e_reentrada",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/estacionamento.py",
+    "alvo": "is not cliente:",
+    "teste": "estadias.EstadiasTests.test_rejeita_vinculos_invalidos_e_conflitantes",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/estacionamento.py",
+    "alvo": "sum(centavos)",
+    "teste": "service.ServiceTests.test_cada_escrita_recuperavel_e_consultas_sem_gravar",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "model/estadia.py",
+    "alvo": "self.pagamento = cobranca",
+    "teste": "service.ServiceTests.test_cada_escrita_recuperavel_e_consultas_sem_gravar",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "service/representacoes.py",
+    "alvo": "if recebido != esperado:",
+    "teste": "service.ServiceTests.test_cada_escrita_recuperavel_e_consultas_sem_gravar",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/contas.py",
+    "alvo": "self._demonstracao and papel",
+    "teste": "contexto_acesso.ContextoAcessoTests.test_master_inicia_na_gestao_alterna_para_lia_e_encerra_os_dois_portais",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/seguranca.py",
+    "alvo": "if papel is not None and g.identidade.papel != papel:",
+    "teste": "contexto_acesso.ContextoAcessoTests.test_master_inicia_na_gestao_alterna_para_lia_e_encerra_os_dois_portais",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/seguranca.py",
+    "alvo": "or dados['cliente_id'] != g.identidade.cliente_id:",
+    "teste": "web.WebTests.test_recurso_pessoal_autoriza_pelo_evento_da_entrada",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/seguranca.py",
+    "alvo": "if not esperado or not hmac.compare_digest",
+    "teste": "web.WebTests.test_csrf_login_logout_e_rotacao",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/revisoes.py",
+    "alvo": "if consumir:",
+    "teste": "gestao.GestaoTests.test_revisao_pertence_a_sessao_e_a_operacao_e_expira",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/seguranca.py",
+    "alvo": "int(agora()) + current_app",
+    "teste": "contexto_acesso.ContextoAcessoTests.test_master_inicia_na_gestao_alterna_para_lia_e_encerra_os_dois_portais",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "web/contas.py",
+    "alvo": "self.contas.ativar(reserva)",
+    "teste": "cadastro_pessoal.CadastroPessoalTests.test_cadastro_login_categoria_e_titularidade_do_homonimo",
+    "resultado": "detectado"
+  },
+  {
+    "arquivo": "persistence/exclusividade.py",
+    "alvo": "if self._reserva is None:",
+    "teste": "multiplataforma.MultiplataformaTests.test_bloqueio_persiste_ao_substituir_json_e_libera_apos_saida_ou_morte",
+    "resultado": "detectado"
+  }
+]

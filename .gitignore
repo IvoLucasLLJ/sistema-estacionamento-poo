@@ -15,3 +15,5 @@ sessao.key
 *.log
 .move-demonstracao/
 .move-cenario-*/
+
+sessoes.json
